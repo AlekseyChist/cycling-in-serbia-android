@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    kotlin("kapt")
 }
 
 val localProperties = Properties().apply {
@@ -89,9 +90,11 @@ dependencies {
     // Navigation
     implementation(libs.androidx.navigation.compose)
 
-    // Hilt
+    // Hilt — kapt is stable on Kotlin 2.1.0 (Hilt's KSP support is unstable
+    // for Kotlin 2.x). Hilt is pinned at 2.51.1 (pre-LazyClassKey) to avoid
+    // the Windows META-INF\\proguard\\... path bug from 2.52+.
     implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
     // Coroutines + serialization
