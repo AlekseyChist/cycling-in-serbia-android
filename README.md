@@ -9,13 +9,19 @@ The Vite/React web project (`Uaecyclinghubappdesign`) is **not** abandoned — w
 
 ## 1. First open in Android Studio
 
-1. **Studio version**: Android Studio Ladybug (2024.2.x) or newer.
-2. `File → Open` → выбрать папку `C:\Users\prost\CyclingInSerbia`.
-3. Studio → "Trust project" → подождать первый Gradle Sync (5–10 минут, качается AGP 8.7, Kotlin 2.1, Compose, Supabase, osmdroid).
-4. Если предложит установить Android SDK Platform 35 / Build-Tools — соглашаемся.
-5. Если предложит JDK 17 — соглашаемся (Android Studio обычно ставит свой Embedded JDK).
-6. Создаём AVD: `Tools → Device Manager → Create Device` → Pixel 7, system image API 35.
-7. `Run ▶` (Shift+F10).
+0. **Клонировать репозиторий** (если ещё нет локально):
+   ```powershell
+   git clone https://github.com/AlekseyChist/cycling-in-serbia-android.git
+   cd cycling-in-serbia-android
+   ```
+1. **Создать `local.properties`** в корне проекта с кредами Supabase — см. §2 (после `clone` этого файла нет, он в `.gitignore`).
+2. **Studio version**: Android Studio Ladybug (2024.2.x) or newer.
+3. `File → Open` → выбрать папку проекта.
+4. Studio → "Trust project" → подождать первый Gradle Sync (5–10 минут, качается AGP 8.7, Kotlin 2.1, Compose, Supabase, osmdroid).
+5. Если предложит установить Android SDK Platform 35 / Build-Tools — соглашаемся.
+6. Если предложит JDK 17 — соглашаемся (Android Studio обычно ставит свой Embedded JDK).
+7. Создаём AVD: `Tools → Device Manager → Create Device` → Pixel 7, system image API 35.
+8. `Run ▶` (Shift+F10).
 
 При первом запуске должен открыться Onboarding-экран → Get Started → список реальных треков из Supabase → клик по треку → детальный экран с картой OSM и polyline маршрута.
 
@@ -24,12 +30,18 @@ The Vite/React web project (`Uaecyclinghubappdesign`) is **not** abandoned — w
 ## 2. Конфигурация
 
 ### Supabase
-Креды лежат в `local.properties` (НЕ в git). Используется тот же проект, что и в вебе:
-```
-SUPABASE_URL=https://umaeqrhjnfawmqdtovjt.supabase.co
+Креды лежат в `local.properties` — он в `.gitignore` и в репозиторий **не коммитится**. После `git clone` его НЕТ — нужно создать вручную в корне проекта по шаблону:
+
+```properties
+# путь к Android SDK (свой)
+sdk.dir=C\:\\Users\\<you>\\AppData\\Local\\Android\\Sdk
+
+# Supabase — тот же проект, что у веб-версии
+SUPABASE_URL=https\://umaeqrhjnfawmqdtovjt.supabase.co
 SUPABASE_ANON_KEY=sb_publishable_...
 ```
-Они прокидываются в код через `BuildConfig` (см. `app/build.gradle.kts`).
+
+Anon key — публичный, безопасно держать в клиентском коде (RLS на стороне Supabase). Значения прокидываются в Kotlin через `BuildConfig` (см. `app/build.gradle.kts`).
 
 ### Карты
 osmdroid использует raster-тайлы OpenStreetMap — те же, что и Leaflet в вебе. API key не нужен.
@@ -110,6 +122,8 @@ app/src/main/java/com/cyclinginserbia/app/
 
 ## 7. Команды (из терминала)
 
+### 7.1 Gradle
+
 ```powershell
 # сборка
 .\gradlew :app:assembleDebug
@@ -121,8 +135,79 @@ app/src/main/java/com/cyclinginserbia/app/
 .\gradlew clean
 ```
 
+### 7.2 Git workflow
+
+```powershell
+# 1. начать новую фичу: всегда от dev
+git checkout dev
+git pull
+git checkout -b feat/<short-name>
+
+# 2. в процессе — обычные коммиты (один логический блок = один коммит)
+git add <files>
+git commit -m "feat: <message>"
+
+# 3. когда готово — пуш и PR в dev (НЕ в main!)
+git push -u origin feat/<short-name>
+gh pr create --base dev --fill
+
+# 4. после мержа PR на GitHub — забираем себе и удаляем локальную ветку
+git checkout dev
+git pull
+git branch -d feat/<short-name>
+```
+
+Префиксы веток: `feat/...` — новая функциональность, `fix/...` — багфикс, `chore/...` — рутина (доки, конфиги, рефакторинг без видимых изменений).
+
 ---
 
-## 8. Git
+## 8. Git и ветвление
 
-Репозиторий ещё не инициализирован. Когда будем готовы — `git init` + первый коммит, потом создадим отдельный GitHub-репозиторий `cycling-in-serbia-android` и запушим.
+**Репозиторий:** https://github.com/AlekseyChist/cycling-in-serbia-android (public).
+
+### 8.1 Схема веток (gitflow-lite)
+
+```
+main   ●──────  только стабильные / проверенные снапшоты (релизы)
+        │
+dev    ●──────  ежедневная интеграция: сюда сливаются все фичи
+        │
+feat/* ──────  короткоживущие ветки от dev (одна фича = одна ветка)
+```
+
+- **`main`** — то, что считается «работающим». Сюда попадает только через PR из `dev`, когда состояние явно зафиксировано как стабильное.
+- **`dev`** — рабочая ветка. Все feature-ветки нарезаются от неё и сливаются обратно в неё через PR.
+- **`feat/*` / `fix/*` / `chore/*`** — одна ветка = одна логическая правка. После мержа ветка не реюзается, для следующей задачи нарезается новая.
+
+### 8.2 Branch protection на `main`
+
+На ветке `main` включена защита (см. *Settings → Branches* на GitHub):
+
+| Правило | Значение |
+|---|---|
+| Прямой `git push` в `main` | ❌ запрещён, только через PR |
+| `git push --force` | ❌ запрещён |
+| Удаление ветки `main` | ❌ запрещено |
+| `enforce_admins` | ✅ правила распространяются и на админа репо |
+
+Если случайно попробуешь пушнуть напрямую — GitHub откажет с `GH006: Protected branch update failed`.
+
+### 8.3 Default branch и PR
+
+Default branch на GitHub — `main`, поэтому при создании PR из feature-ветки **обязательно** указывать базу:
+
+```powershell
+gh pr create --base dev --fill
+```
+
+Без `--base dev` PR пойдёт в `main`, и protection (правильно) его не пропустит.
+
+### 8.4 Релиз (`dev → main`)
+
+Когда `dev` стабилен и хочется зафиксировать релиз:
+
+```powershell
+gh pr create --base main --head dev --title "release: <version>" --body "<changelog>"
+```
+
+После проверки — мерж кнопкой `Merge pull request` на GitHub (или `gh pr merge --merge` без squash, чтобы сохранить историю фич в `main`).
