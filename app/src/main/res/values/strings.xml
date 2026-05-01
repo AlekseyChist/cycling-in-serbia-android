@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cycling in Serbia</string>
+
+    <string name="nav_tracks">Tracks</string>
+    <string name="nav_events">Events</string>
+    <string name="nav_shops">Shops</string>
+    <string name="nav_regulations">Rules</string>
+
+    <string name="track_detail_title">Track</string>
+    <string name="event_detail_title">Event</string>
+
+    <string name="loading">Loading…</string>
+    <string name="error_generic">Something went wrong</string>
+    <string name="retry">Retry</string>
+</resources>
