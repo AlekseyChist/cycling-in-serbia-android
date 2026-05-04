@@ -98,7 +98,7 @@ class ShopRepository @Inject constructor() {
                 description = "Premium road/gravel bicycles with carbon frames & wheels fitted to your body geometry.",
                 location = "Belgrade",
                 link = "https://dropba.rs/rent",
-                linkLabel = "dropba.rs/rent",
+                linkLabel = "dropba.rs",
                 logoRes = R.drawable.dbb_logo,
                 tabs = listOf(ShopTab.SHOPS, ShopTab.SERVICES),
             ),
