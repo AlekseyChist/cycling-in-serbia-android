@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 sealed interface TrackDetailUiState {
     data object Loading : TrackDetailUiState
-    data class Ready(val track: Track) : TrackDetailUiState
+    data class Ready(val track: Track, val gpxUrl: String?) : TrackDetailUiState
     data class Error(val message: String) : TrackDetailUiState
 }
 
@@ -37,8 +37,12 @@ class TrackDetailViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { repository.getTrackByLegacyId(trackId) }
                 .onSuccess { track ->
-                    _state.value = if (track != null) TrackDetailUiState.Ready(track)
-                    else TrackDetailUiState.Error("Track not found")
+                    _state.value = if (track != null) {
+                        val gpxUrl = track.gpxFileName?.let { repository.gpxPublicUrl(it) }
+                        TrackDetailUiState.Ready(track = track, gpxUrl = gpxUrl)
+                    } else {
+                        TrackDetailUiState.Error("Track not found")
+                    }
                 }
                 .onFailure { _state.value = TrackDetailUiState.Error(it.message ?: "Unknown error") }
         }
