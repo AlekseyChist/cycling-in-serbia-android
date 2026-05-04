@@ -238,7 +238,7 @@ class ShopRepository @Inject constructor() {
                 description = "Park your bike safely at a dedicated spot organised by DBB. A 10% discount for DBB app users.",
                 location = "Belgrade",
                 link = "https://chopchop.one/belgrade",
-                linkLabel = "chopchop.one/belgrade",
+                linkLabel = "chopchop.one",
                 logoRes = R.drawable.chop_chop_logo,
                 tabs = listOf(ShopTab.FRIENDS),
             ),
