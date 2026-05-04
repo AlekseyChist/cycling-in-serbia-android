@@ -18,6 +18,15 @@ object AppColors {
     val Ring                = Color(0xFFFC5200) // focus ring = primary
 
     // ──────────────────────────────────────────────
+    // Brand surfaces (warm tints — hero/banner/tip backgrounds)
+    // ──────────────────────────────────────────────
+    val Cream50         = Color(0xFFFFF5F0) // onboarding gradient top, event date badge bg, DBB tip card bg
+    val Cream100        = Color(0xFFFFE8DC) // onboarding gradient bottom
+    val OrangeTint      = Color(0xFFFEF3EC) // 44dp icon container in onboarding feature list
+    val PeachOnBrand    = Color(0xFFFFD6C0) // muted text on solid Primary hero
+    val StravaChipBg    = Color(0xFFFFF0EB) // Strava chip background
+
+    // ──────────────────────────────────────────────
     // Surfaces / text (semantic, from theme.css)
     // ──────────────────────────────────────────────
     val Background          = Color(0xFFFFFFFF)
