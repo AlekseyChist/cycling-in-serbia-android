@@ -39,7 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cyclinginserbia.app.data.model.ShopTab
 import com.cyclinginserbia.app.ui.components.EmptyState
 import com.cyclinginserbia.app.ui.components.SearchField
-import com.cyclinginserbia.app.ui.theme.AppPalette
+import com.cyclinginserbia.app.ui.theme.AppColors
 
 @Composable
 fun ShopsScreen(
@@ -52,7 +52,7 @@ fun ShopsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppPalette.White),
+            .background(AppColors.Background),
     ) {
         StickyHeader(
             tab = tab,
@@ -91,7 +91,7 @@ private fun StickyHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(AppPalette.White)
+            .background(AppColors.Background)
             .padding(16.dp),
     ) {
         SegmentedTabs(selected = tab, onSelect = onTabChange)
@@ -106,7 +106,7 @@ private fun StickyHeader(
         modifier = Modifier
             .fillMaxWidth()
             .height(1.dp)
-            .background(AppPalette.Gray200),
+            .background(AppColors.Gray200),
     )
 }
 
@@ -119,7 +119,7 @@ private fun SegmentedTabs(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(AppPalette.Gray100)
+            .background(AppColors.Gray100)
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(0.dp),
     ) {
@@ -142,12 +142,12 @@ private fun SegmentedTab(
     modifier: Modifier = Modifier,
 ) {
     val background by animateColorAsState(
-        targetValue = if (isSelected) AppPalette.White else Color.Transparent,
+        targetValue = if (isSelected) AppColors.Background else Color.Transparent,
         animationSpec = tween(150),
         label = "tab-bg",
     )
     val textColor by animateColorAsState(
-        targetValue = if (isSelected) AppPalette.Gray900 else AppPalette.Gray600,
+        targetValue = if (isSelected) AppColors.Gray900 else AppColors.Gray600,
         animationSpec = tween(150),
         label = "tab-text",
     )

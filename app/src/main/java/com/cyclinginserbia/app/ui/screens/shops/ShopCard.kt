@@ -44,7 +44,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cyclinginserbia.app.data.model.Shop
-import com.cyclinginserbia.app.ui.theme.AppPalette
+import com.cyclinginserbia.app.ui.theme.AppColors
 import com.cyclinginserbia.app.ui.util.scaleOnPress
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -59,8 +59,8 @@ fun ShopCard(
     Surface(
         onClick = { handleShopClick(context, shop.link) },
         shape = RoundedCornerShape(16.dp),
-        color = AppPalette.White,
-        border = BorderStroke(1.dp, AppPalette.Gray200),
+        color = AppColors.Card,
+        border = BorderStroke(1.dp, AppColors.Gray200),
         interactionSource = interactionSource,
         modifier = modifier
             .fillMaxWidth()
@@ -76,7 +76,7 @@ fun ShopCard(
                 Text(
                     text = shop.name,
                     style = TextStyle(
-                        color = AppPalette.Gray900,
+                        color = AppColors.Gray900,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
                     ),
@@ -84,7 +84,7 @@ fun ShopCard(
                 Text(
                     text = shop.category,
                     style = TextStyle(
-                        color = AppPalette.Gray500,
+                        color = AppColors.Gray500,
                         fontSize = 12.sp,
                     ),
                 )
@@ -92,7 +92,7 @@ fun ShopCard(
                 Text(
                     text = shop.description,
                     style = TextStyle(
-                        color = AppPalette.Gray600,
+                        color = AppColors.Gray600,
                         fontSize = 14.sp,
                     ),
                     maxLines = 3,
@@ -112,7 +112,7 @@ private fun ShopLogo(shop: Shop) {
         modifier = Modifier
             .size(64.dp)
             .clip(shape)
-            .background(AppPalette.Gray50),
+            .background(AppColors.Gray50),
         contentAlignment = Alignment.Center,
     ) {
         if (shop.logoRes != null) {
@@ -128,7 +128,7 @@ private fun ShopLogo(shop: Shop) {
             Icon(
                 imageVector = Icons.Outlined.Storefront,
                 contentDescription = null,
-                tint = AppPalette.Gray400,
+                tint = AppColors.Gray400,
                 modifier = Modifier.size(32.dp),
             )
         }
@@ -147,7 +147,7 @@ private fun ShopFooter(shop: Shop) {
             Text(
                 text = "${shop.location} ·",
                 style = TextStyle(
-                    color = AppPalette.Gray400,
+                    color = AppColors.Gray400,
                     fontSize = 12.sp,
                 ),
                 softWrap = false,
@@ -161,13 +161,13 @@ private fun ShopFooter(shop: Shop) {
                 imageVector = if (isPhone) Icons.Outlined.Phone
                 else Icons.AutoMirrored.Outlined.OpenInNew,
                 contentDescription = null,
-                tint = AppPalette.Gray400,
+                tint = AppColors.Gray400,
                 modifier = Modifier.size(12.dp),
             )
             Text(
                 text = shop.linkLabel,
                 style = TextStyle(
-                    color = AppPalette.Gray400,
+                    color = AppColors.Gray400,
                     fontSize = 12.sp,
                 ),
                 softWrap = false,

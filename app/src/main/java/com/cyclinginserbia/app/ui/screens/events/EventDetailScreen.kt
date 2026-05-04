@@ -50,10 +50,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cyclinginserbia.app.data.model.Event
 import com.cyclinginserbia.app.data.model.EventStatus
 import com.cyclinginserbia.app.data.model.EventType
+import com.cyclinginserbia.app.ui.theme.AppColors
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-
-private val StravaOrangeDark = Color(0xFFE34402)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,7 +110,7 @@ private fun Detail(event: Event) {
 @Composable
 private fun HeroBanner(event: Event) {
     val (top, bottom) = if (event.isFromStrava) {
-        StravaOrange to StravaOrangeDark
+        AppColors.Primary to AppColors.PrimaryDark
     } else {
         MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.tertiary
     }
@@ -231,7 +230,7 @@ private fun OrganizerCard(organizer: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = StravaOrange.copy(alpha = 0.08f)),
+        colors = CardDefaults.cardColors(containerColor = AppColors.Primary.copy(alpha = 0.08f)),
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -241,13 +240,13 @@ private fun OrganizerCard(organizer: String) {
                 modifier = Modifier
                     .size(40.dp)
                     .clip(RoundedCornerShape(50))
-                    .background(StravaOrange.copy(alpha = 0.15f)),
+                    .background(AppColors.Primary.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Person,
                     contentDescription = null,
-                    tint = StravaOrange,
+                    tint = AppColors.Primary,
                     modifier = Modifier.size(20.dp),
                 )
             }
@@ -302,7 +301,7 @@ private fun ActionButtons(event: Event) {
             modifier = Modifier.fillMaxWidth().height(52.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = StravaOrange,
+                containerColor = AppColors.Primary,
                 contentColor = Color.White,
             ),
         ) {

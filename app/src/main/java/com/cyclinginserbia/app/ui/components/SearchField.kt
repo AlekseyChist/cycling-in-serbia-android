@@ -34,7 +34,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.gestures.detectTapGestures
-import com.cyclinginserbia.app.ui.theme.AppPalette
+import com.cyclinginserbia.app.ui.theme.AppColors
 
 @Composable
 fun SearchField(
@@ -47,13 +47,13 @@ fun SearchField(
     val focused by interactionSource.collectIsFocusedAsState()
 
     val borderColor by animateColorAsState(
-        targetValue = if (focused) AppPalette.Primary else AppPalette.Gray200,
+        targetValue = if (focused) AppColors.Primary else AppColors.Gray200,
         animationSpec = tween(durationMillis = 150),
         label = "search-border-color",
     )
     val ringColor by animateColorAsState(
-        targetValue = if (focused) AppPalette.Primary.copy(alpha = 0.2f)
-        else AppPalette.Primary.copy(alpha = 0f),
+        targetValue = if (focused) AppColors.Primary.copy(alpha = 0.2f)
+        else AppColors.Primary.copy(alpha = 0f),
         animationSpec = tween(durationMillis = 150),
         label = "search-ring-color",
     )
@@ -64,7 +64,7 @@ fun SearchField(
             .border(2.dp, ringColor, RoundedCornerShape(18.dp))
             .padding(2.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(AppPalette.Gray50)
+            .background(AppColors.Gray50)
             .border(1.dp, borderColor, RoundedCornerShape(16.dp))
             .height(44.dp),
         contentAlignment = Alignment.CenterStart,
@@ -78,7 +78,7 @@ fun SearchField(
             Icon(
                 imageVector = Icons.Outlined.Search,
                 contentDescription = null,
-                tint = AppPalette.Gray400,
+                tint = AppColors.Gray400,
                 modifier = Modifier.size(20.dp),
             )
             Box(
@@ -91,7 +91,7 @@ fun SearchField(
                     Text(
                         text = placeholder,
                         style = TextStyle(
-                            color = AppPalette.Gray400,
+                            color = AppColors.Gray400,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Normal,
                         ),
@@ -103,10 +103,10 @@ fun SearchField(
                     interactionSource = interactionSource,
                     singleLine = true,
                     textStyle = LocalTextStyle.current.copy(
-                        color = AppPalette.Gray900,
+                        color = AppColors.Gray900,
                         fontSize = 14.sp,
                     ),
-                    cursorBrush = androidx.compose.ui.graphics.SolidColor(AppPalette.Primary),
+                    cursorBrush = androidx.compose.ui.graphics.SolidColor(AppColors.Primary),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -115,7 +115,7 @@ fun SearchField(
                 Icon(
                     imageVector = Icons.Outlined.Close,
                     contentDescription = "Clear search",
-                    tint = AppPalette.Gray400,
+                    tint = AppColors.Gray400,
                     modifier = Modifier
                         .size(20.dp)
                         .pointerInput(Unit) {
