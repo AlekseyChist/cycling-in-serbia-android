@@ -38,11 +38,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cyclinginserbia.app.data.model.Event
 import com.cyclinginserbia.app.data.model.EventType
+import com.cyclinginserbia.app.ui.theme.AppColors
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
-
-internal val StravaOrange = Color(0xFFFC4C02)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -114,7 +113,7 @@ private fun MonthHeader(text: String) {
 
 @Composable
 private fun EventCard(event: Event, onClick: () -> Unit) {
-    val accent = if (event.isFromStrava) StravaOrange else MaterialTheme.colorScheme.primary
+    val accent = if (event.isFromStrava) AppColors.Primary else MaterialTheme.colorScheme.primary
 
     Card(
         modifier = Modifier

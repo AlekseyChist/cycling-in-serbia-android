@@ -38,9 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cyclinginserbia.app.data.model.Difficulty
 import com.cyclinginserbia.app.data.model.Track
-import com.cyclinginserbia.app.ui.theme.DifficultyEasy
-import com.cyclinginserbia.app.ui.theme.DifficultyHard
-import com.cyclinginserbia.app.ui.theme.DifficultyMedium
+import com.cyclinginserbia.app.ui.theme.DifficultyColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -147,7 +145,7 @@ private fun ErrorView(message: String, onRetry: () -> Unit) {
 }
 
 internal fun difficultyColor(d: Difficulty): Color = when (d) {
-    Difficulty.easy -> DifficultyEasy
-    Difficulty.medium -> DifficultyMedium
-    Difficulty.hard -> DifficultyHard
+    Difficulty.easy -> DifficultyColors.Easy
+    Difficulty.medium -> DifficultyColors.Medium
+    Difficulty.hard -> DifficultyColors.Hard
 }

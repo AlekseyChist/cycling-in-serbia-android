@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.cyclinginserbia.app.ui.theme.AppPalette
+import com.cyclinginserbia.app.ui.theme.AppColors
 
 @Composable
 fun EmptyState(
@@ -37,13 +37,13 @@ fun EmptyState(
         Box(
             modifier = Modifier
                 .size(64.dp)
-                .background(AppPalette.Gray50, CircleShape),
+                .background(AppColors.Gray50, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = AppPalette.Gray400,
+                tint = AppColors.Gray400,
                 modifier = Modifier.size(32.dp),
             )
         }
@@ -51,14 +51,14 @@ fun EmptyState(
         Text(
             text = title,
             fontSize = 16.sp,
-            color = AppPalette.Gray900,
+            color = AppColors.Gray900,
         )
         if (description != null) {
             Spacer(Modifier.height(4.dp))
             Text(
                 text = description,
                 fontSize = 14.sp,
-                color = AppPalette.Gray500,
+                color = AppColors.Gray500,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.widthIn(max = 320.dp),
             )
