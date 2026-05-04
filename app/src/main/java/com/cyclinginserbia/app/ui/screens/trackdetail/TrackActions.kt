@@ -41,15 +41,40 @@ internal fun navigateToStart(context: Context, track: Track) {
         Toast.makeText(context, "No start coordinates", Toast.LENGTH_SHORT).show()
         return
     }
+    val lat = target.lat
+    val lng = target.lng
     val label = Uri.encode(track.name)
-    val uri = Uri.parse("geo:${target.lat},${target.lng}?q=${target.lat},${target.lng}($label)")
-    val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-    runCatching { context.startActivity(intent) }
-        .onFailure {
-            Toast.makeText(context, "No maps app installed", Toast.LENGTH_SHORT).show()
+
+    // Try in order of strongest navigation experience to weakest fallback.
+    val attempts = listOf(
+        // 1. Google Maps — direct turn-by-turn navigation in cycling mode
+        Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("google.navigation:q=$lat,$lng&mode=b"),
+        ).setPackage("com.google.android.apps.maps"),
+        // 2. Universal Google Maps directions URL — opens Maps app via intent
+        // filter, or any browser as last resort. travelmode=bicycling.
+        Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=bicycling"),
+        ),
+        // 3. Generic geo: — any map app shows the point (no auto-routing)
+        Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("geo:$lat,$lng?q=$lat,$lng($label)"),
+        ),
+    )
+
+    for (intent in attempts) {
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        try {
+            context.startActivity(intent)
+            return
+        } catch (_: Exception) {
+            // try next fallback
         }
+    }
+    Toast.makeText(context, "No maps app installed", Toast.LENGTH_LONG).show()
 }
 
 internal fun shareTrack(context: Context, track: Track, gpxUrl: String?) {
