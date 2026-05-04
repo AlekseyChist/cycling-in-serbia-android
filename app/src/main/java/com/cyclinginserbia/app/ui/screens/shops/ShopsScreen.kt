@@ -1,12 +1,10 @@
 package com.cyclinginserbia.app.ui.screens.shops
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,216 +15,170 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Build
-import androidx.compose.material.icons.outlined.Handshake
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.outlined.Storefront
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.cyclinginserbia.app.data.model.Shop
-import com.cyclinginserbia.app.data.model.ShopCategory
+import com.cyclinginserbia.app.data.model.ShopTab
+import com.cyclinginserbia.app.ui.components.EmptyState
+import com.cyclinginserbia.app.ui.components.SearchField
+import com.cyclinginserbia.app.ui.theme.AppPalette
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShopsScreen(
     viewModel: ShopsViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val query by viewModel.query.collectAsStateWithLifecycle()
+    val tab by viewModel.tab.collectAsStateWithLifecycle()
+    val shops by viewModel.filtered.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("Shops") }) },
-    ) { padding ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppPalette.White),
+    ) {
+        StickyHeader(
+            tab = tab,
+            onTabChange = viewModel::onTabChange,
+            query = query,
+            onQueryChange = viewModel::onQueryChange,
+        )
+
+        if (shops.isEmpty()) {
+            EmptyState(
+                icon = Icons.Outlined.Storefront,
+                title = "No results found",
+                description = "Try adjusting your search or filter",
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                items(items = shops, key = { it.id }) { shop ->
+                    ShopCard(shop = shop)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StickyHeader(
+    tab: ShopTab,
+    onTabChange: (ShopTab) -> Unit,
+    query: String,
+    onQueryChange: (String) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(AppPalette.White)
+            .padding(16.dp),
+    ) {
+        SegmentedTabs(selected = tab, onSelect = onTabChange)
+        Spacer(Modifier.height(16.dp))
+        SearchField(
+            value = query,
+            onValueChange = onQueryChange,
+            placeholder = "Search shops and services",
+        )
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(AppPalette.Gray200),
+    )
+}
+
+@Composable
+private fun SegmentedTabs(
+    selected: ShopTab,
+    onSelect: (ShopTab) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(AppPalette.Gray100)
+            .padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(0.dp),
+    ) {
+        ShopTab.entries.forEach { entry ->
+            SegmentedTab(
+                tab = entry,
+                isSelected = entry == selected,
+                onClick = { onSelect(entry) },
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SegmentedTab(
+    tab: ShopTab,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val background by animateColorAsState(
+        targetValue = if (isSelected) AppPalette.White else Color.Transparent,
+        animationSpec = tween(150),
+        label = "tab-bg",
+    )
+    val textColor by animateColorAsState(
+        targetValue = if (isSelected) AppPalette.Gray900 else AppPalette.Gray600,
+        animationSpec = tween(150),
+        label = "tab-text",
+    )
+    val elevation = if (isSelected) 1.dp else 0.dp
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Surface(
+        modifier = modifier.height(32.dp),
+        shape = RoundedCornerShape(12.dp),
+        color = background,
+        shadowElevation = elevation,
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = onClick,
+                ),
             contentAlignment = Alignment.Center,
         ) {
-            when (val s = state) {
-                is ShopsUiState.Loading -> CircularProgressIndicator()
-                is ShopsUiState.Error -> ErrorView(s.message, onRetry = viewModel::load)
-                is ShopsUiState.Ready -> ShopsList(shops = s.shops)
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun ShopsList(shops: List<Shop>) {
-    val context = LocalContext.current
-    val grouped = shops.groupBy { it.category }
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        ShopCategory.entries.forEach { category ->
-            val itemsInCategory = grouped[category].orEmpty()
-            if (itemsInCategory.isEmpty()) return@forEach
-            stickyHeader(key = "header-${category.name}") {
-                CategoryHeader(category.title)
-            }
-            items(items = itemsInCategory, key = { it.id }) { shop ->
-                ShopCard(shop = shop, onClick = { openLink(context, shop.link) })
-            }
-        }
-    }
-}
-
-@Composable
-private fun CategoryHeader(text: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(vertical = 8.dp),
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-        )
-    }
-}
-
-@Composable
-private fun ShopCard(shop: Shop, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-    ) {
-        Row(modifier = Modifier.padding(12.dp)) {
-            ShopLogo(shop)
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = shop.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    text = shop.type,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = shop.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(8.dp))
-                LocationChip(shop.location)
-            }
-        }
-    }
-}
-
-@Composable
-private fun ShopLogo(shop: Shop) {
-    Box(
-        modifier = Modifier
-            .size(64.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (shop.logoResId != null) {
-            Image(
-                painter = painterResource(id = shop.logoResId),
-                contentDescription = "${shop.name} logo",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(6.dp),
-            )
-        } else {
-            Icon(
-                imageVector = categoryIcon(shop.category),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(28.dp),
+            Text(
+                text = tab.label,
+                style = TextStyle(
+                    color = textColor,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                ),
+                textAlign = TextAlign.Center,
             )
         }
     }
-}
-
-@Composable
-private fun LocationChip(location: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            imageVector = Icons.Outlined.LocationOn,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(14.dp),
-        )
-        Spacer(Modifier.width(4.dp))
-        Text(
-            text = location,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-@Composable
-private fun ErrorView(message: String, onRetry: () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Couldn't load shops", style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(4.dp))
-        Text(
-            message,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(16.dp))
-        Button(onClick = onRetry) { Text("Retry") }
-    }
-}
-
-private fun categoryIcon(category: ShopCategory): ImageVector = when (category) {
-    ShopCategory.sellingPlatform -> Icons.Outlined.ShoppingCart
-    ShopCategory.shop -> Icons.Outlined.Storefront
-    ShopCategory.service -> Icons.Outlined.Build
-    ShopCategory.friend -> Icons.Outlined.Handshake
-}
-
-private fun openLink(context: Context, link: String) {
-    val tel = link.startsWith("tel:") || link.startsWith("+")
-    val uri = if (link.startsWith("+")) Uri.parse("tel:$link") else Uri.parse(link)
-    val action = if (tel) Intent.ACTION_DIAL else Intent.ACTION_VIEW
-    context.startActivity(Intent(action, uri))
 }
