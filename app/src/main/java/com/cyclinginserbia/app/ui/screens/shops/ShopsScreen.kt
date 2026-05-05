@@ -20,8 +20,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Storefront
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -41,6 +44,7 @@ import com.cyclinginserbia.app.ui.components.EmptyState
 import com.cyclinginserbia.app.ui.components.SearchField
 import com.cyclinginserbia.app.ui.theme.AppColors
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShopsScreen(
     viewModel: ShopsViewModel = hiltViewModel(),
@@ -49,32 +53,37 @@ fun ShopsScreen(
     val tab by viewModel.tab.collectAsStateWithLifecycle()
     val shops by viewModel.filtered.collectAsStateWithLifecycle()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(AppColors.Background),
-    ) {
-        StickyHeader(
-            tab = tab,
-            onTabChange = viewModel::onTabChange,
-            query = query,
-            onQueryChange = viewModel::onQueryChange,
-        )
-
-        if (shops.isEmpty()) {
-            EmptyState(
-                icon = Icons.Outlined.Storefront,
-                title = "No results found",
-                description = "Try adjusting your search or filter",
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("Shops") }) },
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .background(AppColors.Background),
+        ) {
+            StickyHeader(
+                tab = tab,
+                onTabChange = viewModel::onTabChange,
+                query = query,
+                onQueryChange = viewModel::onQueryChange,
             )
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(items = shops, key = { it.id }) { shop ->
-                    ShopCard(shop = shop)
+
+            if (shops.isEmpty()) {
+                EmptyState(
+                    icon = Icons.Outlined.Storefront,
+                    title = "No results found",
+                    description = "Try adjusting your search or filter",
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    items(items = shops, key = { it.id }) { shop ->
+                        ShopCard(shop = shop)
+                    }
                 }
             }
         }
