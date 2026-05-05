@@ -18,8 +18,15 @@ sealed interface TracksUiState {
         val all: List<Track>,
         val visible: List<Track>,
         val query: String,
+        val difficulty: DifficultyFilter,
+        val surface: SurfaceFilter,
         val selectedId: String?,
-    ) : TracksUiState
+    ) : TracksUiState {
+        val hasActiveFilters: Boolean
+            get() = query.isNotBlank() ||
+                difficulty != DifficultyFilter.ALL ||
+                surface != SurfaceFilter.ALL
+    }
     data class Error(val message: String) : TracksUiState
 }
 
@@ -42,6 +49,8 @@ class TracksViewModel @Inject constructor(
                         all = tracks,
                         visible = tracks,
                         query = "",
+                        difficulty = DifficultyFilter.ALL,
+                        surface = SurfaceFilter.ALL,
                         selectedId = null,
                     )
                 }
@@ -53,21 +62,28 @@ class TracksViewModel @Inject constructor(
 
     fun onQueryChange(query: String) = updateReady { it.copy(query = query) }
 
+    fun onDifficultyChange(difficulty: DifficultyFilter) =
+        updateReady { it.copy(difficulty = difficulty) }
+
+    fun onSurfaceChange(surface: SurfaceFilter) = updateReady { it.copy(surface = surface) }
+
     fun onTrackSelect(id: String?) = updateReady { it.copy(selectedId = id) }
+
+    fun clearFilters() = updateReady {
+        it.copy(
+            query = "",
+            difficulty = DifficultyFilter.ALL,
+            surface = SurfaceFilter.ALL,
+        )
+    }
 
     private inline fun updateReady(crossinline transform: (TracksUiState.Ready) -> TracksUiState.Ready) {
         _state.update { current ->
             if (current !is TracksUiState.Ready) return@update current
             val next = transform(current)
-            next.copy(visible = filterTracks(next.all, next.query))
-        }
-    }
-
-    private fun filterTracks(all: List<Track>, query: String): List<Track> {
-        val q = query.trim()
-        if (q.isEmpty()) return all
-        return all.filter {
-            it.name.contains(q, ignoreCase = true) || it.region.contains(q, ignoreCase = true)
+            next.copy(
+                visible = next.all.applyTrackFilters(next.query, next.difficulty, next.surface),
+            )
         }
     }
 }

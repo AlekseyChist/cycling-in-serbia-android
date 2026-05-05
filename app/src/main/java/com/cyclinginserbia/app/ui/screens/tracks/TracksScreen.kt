@@ -1,7 +1,10 @@
 package com.cyclinginserbia.app.ui.screens.tracks
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,20 +30,26 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cyclinginserbia.app.data.model.Difficulty
@@ -71,6 +81,7 @@ fun TracksScreen(
                 is TracksUiState.Ready -> SheetTracksList(
                     state = s,
                     onTrackClick = onTrackClick,
+                    onClearFilters = viewModel::clearFilters,
                 )
                 else -> Box(
                     modifier = Modifier
@@ -114,9 +125,13 @@ fun TracksScreen(
                         modifier = Modifier.fillMaxSize(),
                     )
 
-                    FloatingSearch(
+                    FloatingHeader(
                         query = s.query,
+                        difficulty = s.difficulty,
+                        surface = s.surface,
                         onQueryChange = viewModel::onQueryChange,
+                        onDifficultyChange = viewModel::onDifficultyChange,
+                        onSurfaceChange = viewModel::onSurfaceChange,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -128,23 +143,113 @@ fun TracksScreen(
 }
 
 @Composable
-private fun FloatingSearch(
+private fun FloatingHeader(
     query: String,
+    difficulty: DifficultyFilter,
+    surface: SurfaceFilter,
     onQueryChange: (String) -> Unit,
+    onDifficultyChange: (DifficultyFilter) -> Unit,
+    onSurfaceChange: (SurfaceFilter) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .shadow(elevation = 6.dp, shape = RoundedCornerShape(16.dp))
-            .clip(RoundedCornerShape(16.dp))
-            .background(AppColors.Background),
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        SearchField(
-            value = query,
-            onValueChange = onQueryChange,
-            placeholder = "Search tracks",
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(elevation = 6.dp, shape = RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(16.dp))
+                .background(AppColors.Background),
+        ) {
+            SearchField(
+                value = query,
+                onValueChange = onQueryChange,
+                placeholder = "Search tracks",
+            )
+        }
+        FilterChipRow(
+            entries = DifficultyFilter.entries,
+            selected = difficulty,
+            label = { it.label },
+            onSelect = onDifficultyChange,
         )
+        FilterChipRow(
+            entries = SurfaceFilter.entries,
+            selected = surface,
+            label = { it.label },
+            onSelect = onSurfaceChange,
+        )
+    }
+}
+
+@Composable
+private fun <T> FilterChipRow(
+    entries: List<T>,
+    selected: T,
+    label: (T) -> String,
+    onSelect: (T) -> Unit,
+) {
+    LazyRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(entries) { entry ->
+            PillChip(
+                text = label(entry),
+                isSelected = entry == selected,
+                onClick = { onSelect(entry) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun PillChip(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    val background by animateColorAsState(
+        targetValue = if (isSelected) AppColors.Primary else AppColors.Background,
+        animationSpec = tween(150),
+        label = "pill-bg",
+    )
+    val textColor by animateColorAsState(
+        targetValue = if (isSelected) AppColors.Background else AppColors.Gray700,
+        animationSpec = tween(150),
+        label = "pill-text",
+    )
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Surface(
+        modifier = Modifier
+            .height(34.dp)
+            .shadow(elevation = 3.dp, shape = RoundedCornerShape(50)),
+        shape = RoundedCornerShape(50),
+        color = background,
+    ) {
+        Box(
+            modifier = Modifier
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = onClick,
+                )
+                .padding(horizontal = 14.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = text,
+                style = TextStyle(
+                    color = textColor,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                ),
+                textAlign = TextAlign.Center,
+            )
+        }
     }
 }
 
@@ -152,6 +257,7 @@ private fun FloatingSearch(
 private fun SheetTracksList(
     state: TracksUiState.Ready,
     onTrackClick: (String) -> Unit,
+    onClearFilters: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         SheetHeader(visibleCount = state.visible.size, totalCount = state.all.size)
@@ -164,16 +270,28 @@ private fun SheetTracksList(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = "No tracks match your search",
+                    text = "No tracks match your filters",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = "Try a different track name or region.",
+                    text = "Try a different difficulty, surface, or search term.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = AppColors.Gray600,
+                    textAlign = TextAlign.Center,
                 )
+                if (state.hasActiveFilters) {
+                    Spacer(Modifier.height(8.dp))
+                    TextButton(onClick = onClearFilters) {
+                        Text(
+                            "Clear filters",
+                            color = AppColors.Primary,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                }
             }
         } else {
             LazyColumn(
