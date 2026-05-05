@@ -75,8 +75,8 @@ fun TracksScreen(
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
-    fun selectAndReveal(uuid: String) {
-        viewModel.onTrackSelect(uuid)
+    fun focusAndReveal(ids: Set<String>) {
+        viewModel.onFocusTracks(ids)
         scope.launch { sheetState.expand() }
     }
 
@@ -92,6 +92,7 @@ fun TracksScreen(
                     listState = listState,
                     onTrackClick = onTrackClick,
                     onClearFilters = viewModel::clearFilters,
+                    onClearFocus = viewModel::clearFocus,
                 )
                 else -> Box(
                     modifier = Modifier
@@ -123,16 +124,14 @@ fun TracksScreen(
                 is TracksUiState.Ready -> {
                     TracksMapView(
                         tracks = s.visible,
-                        selectedId = s.selectedId,
+                        focusedIds = s.focusedIds,
                         onClusterClick = { cluster ->
-                            if (cluster.tracks.size == 1) {
-                                selectAndReveal(cluster.tracks.first().uuid)
-                            } else {
-                                viewModel.onTrackSelect(null)
-                                scope.launch { sheetState.expand() }
-                            }
+                            focusAndReveal(cluster.tracks.map { it.uuid }.toSet())
                         },
-                        onPolylineClick = { track -> selectAndReveal(track.uuid) },
+                        onPolylineClick = { track ->
+                            focusAndReveal(setOf(track.uuid))
+                        },
+                        onMapClear = viewModel::clearFocus,
                         modifier = Modifier.fillMaxSize(),
                     )
 
@@ -271,19 +270,25 @@ private fun SheetTracksList(
     listState: LazyListState,
     onTrackClick: (String) -> Unit,
     onClearFilters: () -> Unit,
+    onClearFocus: () -> Unit,
 ) {
-    LaunchedEffect(state.selectedId, state.visible) {
-        val id = state.selectedId ?: return@LaunchedEffect
-        val index = state.visible.indexOfFirst { it.uuid == id }
-        if (index >= 0) {
-            listState.animateScrollToItem(index)
+    val sheetTracks = state.sheetTracks
+
+    LaunchedEffect(state.focusedIds, sheetTracks) {
+        if (state.focusedIds.isNotEmpty()) {
+            listState.animateScrollToItem(0)
         }
     }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        SheetHeader(visibleCount = state.visible.size, totalCount = state.all.size)
+        SheetHeader(
+            sheetCount = sheetTracks.size,
+            totalCount = state.all.size,
+            isFocused = state.isFocused,
+            onClearFocus = onClearFocus,
+        )
 
-        if (state.visible.isEmpty()) {
+        if (sheetTracks.isEmpty()) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -321,10 +326,10 @@ private fun SheetTracksList(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                items(state.visible, key = { it.uuid }) { track ->
+                items(sheetTracks, key = { it.uuid }) { track ->
                     TrackCard(
                         track = track,
-                        isSelected = track.uuid == state.selectedId,
+                        isSelected = state.isFocused,
                         onClick = { onTrackClick(track.legacyId) },
                     )
                 }
@@ -334,7 +339,12 @@ private fun SheetTracksList(
 }
 
 @Composable
-private fun SheetHeader(visibleCount: Int, totalCount: Int) {
+private fun SheetHeader(
+    sheetCount: Int,
+    totalCount: Int,
+    isFocused: Boolean,
+    onClearFocus: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -342,14 +352,25 @@ private fun SheetHeader(visibleCount: Int, totalCount: Int) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = if (visibleCount == totalCount) {
-                "$totalCount tracks"
-            } else {
-                "$visibleCount of $totalCount tracks"
+            text = when {
+                isFocused && sheetCount == 1 -> "1 selected route"
+                isFocused -> "$sheetCount of $totalCount focused"
+                sheetCount == totalCount -> "$totalCount tracks"
+                else -> "$sheetCount of $totalCount tracks"
             },
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.weight(1f),
         )
+        if (isFocused) {
+            TextButton(onClick = onClearFocus) {
+                Text(
+                    text = "Show all",
+                    color = AppColors.Primary,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+        }
     }
 }
 

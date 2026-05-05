@@ -20,8 +20,16 @@ sealed interface TracksUiState {
         val query: String,
         val difficulty: DifficultyFilter,
         val surface: SurfaceFilter,
-        val selectedId: String?,
+        val focusedIds: Set<String>,
     ) : TracksUiState {
+
+        val isFocused: Boolean get() = focusedIds.isNotEmpty()
+
+        /** Tracks shown inside the bottom sheet — focus subset if set, otherwise the full visible list. */
+        val sheetTracks: List<Track>
+            get() = if (focusedIds.isEmpty()) visible
+            else visible.filter { it.uuid in focusedIds }
+
         val hasActiveFilters: Boolean
             get() = query.isNotBlank() ||
                 difficulty != DifficultyFilter.ALL ||
@@ -51,7 +59,7 @@ class TracksViewModel @Inject constructor(
                         query = "",
                         difficulty = DifficultyFilter.ALL,
                         surface = SurfaceFilter.ALL,
-                        selectedId = null,
+                        focusedIds = emptySet(),
                     )
                 }
                 .onFailure {
@@ -60,20 +68,27 @@ class TracksViewModel @Inject constructor(
         }
     }
 
-    fun onQueryChange(query: String) = updateReady { it.copy(query = query) }
+    fun onQueryChange(query: String) =
+        updateReady { it.copy(query = query, focusedIds = emptySet()) }
 
     fun onDifficultyChange(difficulty: DifficultyFilter) =
-        updateReady { it.copy(difficulty = difficulty) }
+        updateReady { it.copy(difficulty = difficulty, focusedIds = emptySet()) }
 
-    fun onSurfaceChange(surface: SurfaceFilter) = updateReady { it.copy(surface = surface) }
+    fun onSurfaceChange(surface: SurfaceFilter) =
+        updateReady { it.copy(surface = surface, focusedIds = emptySet()) }
 
-    fun onTrackSelect(id: String?) = updateReady { it.copy(selectedId = id) }
+    fun onFocusTracks(ids: Set<String>) = updateReady { it.copy(focusedIds = ids) }
+
+    fun clearFocus() = updateReady {
+        if (it.focusedIds.isEmpty()) it else it.copy(focusedIds = emptySet())
+    }
 
     fun clearFilters() = updateReady {
         it.copy(
             query = "",
             difficulty = DifficultyFilter.ALL,
             surface = SurfaceFilter.ALL,
+            focusedIds = emptySet(),
         )
     }
 
