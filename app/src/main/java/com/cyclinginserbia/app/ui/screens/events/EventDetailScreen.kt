@@ -1,7 +1,5 @@
 package com.cyclinginserbia.app.ui.screens.events
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,8 +19,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -32,6 +32,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -42,14 +43,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.BorderStroke
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cyclinginserbia.app.data.model.Event
 import com.cyclinginserbia.app.data.model.EventStatus
 import com.cyclinginserbia.app.data.model.EventType
+import com.cyclinginserbia.app.data.model.TimelineItem
 import com.cyclinginserbia.app.ui.theme.AppColors
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -101,6 +106,8 @@ private fun Detail(event: Event) {
             KeyInfoCard(event)
             event.organizer?.takeIf { event.isFromStrava }?.let { OrganizerCard(it) }
             DescriptionSection(event)
+            if (event.toBring.isNotEmpty()) WhatToBringSection(event.toBring)
+            if (event.timeline.isNotEmpty()) TimelineSection(event.timeline)
             ActionButtons(event)
             StatusFooter(event.status)
         }
@@ -287,17 +294,119 @@ private fun DescriptionSection(event: Event) {
 }
 
 @Composable
+private fun WhatToBringSection(items: List<String>) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = AppColors.Cream100),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = "What to bring",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            items.forEach { line ->
+                Row(verticalAlignment = Alignment.Top) {
+                    Icon(
+                        imageVector = Icons.Outlined.CheckCircle,
+                        contentDescription = null,
+                        tint = AppColors.Emerald600,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Text(
+                        text = line,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TimelineSection(items: List<TimelineItem>) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Outlined.Schedule,
+                    contentDescription = null,
+                    tint = AppColors.Primary,
+                    modifier = Modifier.size(20.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Event Timeline",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            items.forEachIndexed { index, item ->
+                TimelineRow(item = item, isLast = index == items.lastIndex)
+            }
+        }
+    }
+}
+
+@Composable
+private fun TimelineRow(item: TimelineItem, isLast: Boolean) {
+    Row(verticalAlignment = Alignment.Top) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.width(20.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(AppColors.Primary),
+            )
+            if (!isLast) {
+                Spacer(
+                    modifier = Modifier
+                        .width(2.dp)
+                        .height(28.dp)
+                        .background(AppColors.Primary.copy(alpha = 0.25f)),
+                )
+            }
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.padding(top = 0.dp)) {
+            Text(
+                text = item.time,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = AppColors.Primary,
+                fontFamily = FontFamily.Monospace,
+            )
+            Text(
+                text = item.label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+    }
+}
+
+@Composable
 private fun ActionButtons(event: Event) {
     val context = LocalContext.current
-    if (event.isFromStrava) {
-        val url = if (event.stravaEventId != null)
-            "https://www.strava.com/clubs/dbb-/group_events/${event.stravaEventId}"
-        else
-            "https://www.strava.com/clubs/dbb-"
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Button(
-            onClick = {
-                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-            },
+            onClick = { EventActions.addToCalendar(context, event) },
             modifier = Modifier.fillMaxWidth().height(52.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
@@ -305,9 +414,22 @@ private fun ActionButtons(event: Event) {
                 contentColor = Color.White,
             ),
         ) {
-            Icon(Icons.AutoMirrored.Outlined.OpenInNew, contentDescription = null, modifier = Modifier.size(18.dp))
+            Icon(Icons.Outlined.CalendarMonth, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            Text("Open in Strava", fontWeight = FontWeight.SemiBold)
+            Text("Add to Calendar", fontWeight = FontWeight.SemiBold)
+        }
+        if (event.isFromStrava) {
+            OutlinedButton(
+                onClick = { EventActions.openStrava(context, event) },
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.5.dp, SolidColor(AppColors.Primary)),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.Primary),
+            ) {
+                Icon(Icons.AutoMirrored.Outlined.OpenInNew, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Open in Strava", fontWeight = FontWeight.SemiBold)
+            }
         }
     }
 }
