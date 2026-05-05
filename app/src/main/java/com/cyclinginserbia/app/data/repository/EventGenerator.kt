@@ -1,6 +1,7 @@
 package com.cyclinginserbia.app.data.repository
 
 import com.cyclinginserbia.app.data.model.Event
+import com.cyclinginserbia.app.data.model.EventCategory
 import com.cyclinginserbia.app.data.model.EventStatus
 import com.cyclinginserbia.app.data.model.EventType
 import com.cyclinginserbia.app.data.model.TimelineItem
@@ -132,6 +133,7 @@ internal object EventGenerator {
                         isFromStrava = true,
                         toBring = tpl.toBring,
                         timeline = tpl.timeline,
+                        category = EventCategory.DBB,
                     )
                 }
             }

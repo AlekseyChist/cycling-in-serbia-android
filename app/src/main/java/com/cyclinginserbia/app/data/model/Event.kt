@@ -5,6 +5,7 @@ import java.time.LocalTime
 
 enum class EventType { race, granfondo, groupRide }
 enum class EventStatus { upcoming, soldOut, canceled }
+enum class EventCategory { DBB, COMMUNITY }
 
 data class TimelineItem(val time: String, val label: String)
 
@@ -23,4 +24,5 @@ data class Event(
     val distanceOptions: List<String> = emptyList(),
     val toBring: List<String> = emptyList(),
     val timeline: List<TimelineItem> = emptyList(),
+    val category: EventCategory = EventCategory.DBB,
 )
