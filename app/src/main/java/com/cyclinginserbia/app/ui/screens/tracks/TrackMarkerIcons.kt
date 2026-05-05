@@ -12,7 +12,7 @@ import android.util.TypedValue
 import androidx.compose.ui.graphics.toArgb
 import com.cyclinginserbia.app.data.model.Difficulty
 import com.cyclinginserbia.app.ui.theme.AppColors
-import com.cyclinginserbia.app.ui.theme.DifficultyColors
+import com.cyclinginserbia.app.ui.theme.DifficultyMapColors
 
 internal fun buildClusterMarker(
     context: Context,
@@ -82,9 +82,9 @@ internal fun buildClusterMarker(
 }
 
 private fun colorForDifficulty(d: Difficulty): Int = when (d) {
-    Difficulty.easy -> DifficultyColors.Easy.toArgb()
-    Difficulty.medium -> DifficultyColors.Medium.toArgb()
-    Difficulty.hard -> DifficultyColors.Hard.toArgb()
+    Difficulty.easy -> DifficultyMapColors.Easy.toArgb()
+    Difficulty.medium -> DifficultyMapColors.Medium.toArgb()
+    Difficulty.hard -> DifficultyMapColors.Hard.toArgb()
 }
 
 private fun Float.toPx(context: Context): Float =

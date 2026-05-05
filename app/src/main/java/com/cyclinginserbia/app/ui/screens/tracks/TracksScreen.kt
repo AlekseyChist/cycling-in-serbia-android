@@ -3,6 +3,7 @@ package com.cyclinginserbia.app.ui.screens.tracks
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -15,12 +16,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
@@ -33,7 +33,6 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
@@ -53,10 +52,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cyclinginserbia.app.data.model.Difficulty
+import com.cyclinginserbia.app.data.model.Surface as SurfaceType
 import com.cyclinginserbia.app.data.model.Track
 import com.cyclinginserbia.app.ui.components.SearchField
 import com.cyclinginserbia.app.ui.theme.AppColors
-import com.cyclinginserbia.app.ui.theme.DifficultyColors
+import com.cyclinginserbia.app.ui.theme.ChipColors
+import com.cyclinginserbia.app.ui.theme.ChipPalette
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,7 +73,6 @@ fun TracksScreen(
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
-        topBar = { TopAppBar(title = { Text("Tracks") }) },
         sheetPeekHeight = 96.dp,
         sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
         sheetContainerColor = AppColors.Background,
@@ -134,7 +134,8 @@ fun TracksScreen(
                         onSurfaceChange = viewModel::onSurfaceChange,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                            .statusBarsPadding()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
                     )
                 }
             }
@@ -350,33 +351,30 @@ private fun TrackCard(track: Track, isSelected: Boolean, onClick: () -> Unit) {
                 .padding(16.dp)
                 .background(Color.Transparent),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(12.dp)
-                        .clip(CircleShape)
-                        .background(difficultyColor(track.difficulty)),
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = track.region,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                DifficultyChip(track.difficulty)
+                SurfaceChip(track.surface)
             }
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(8.dp))
             Text(
                 text = track.name,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = track.region,
+                style = MaterialTheme.typography.bodyMedium,
+                color = AppColors.Gray600,
+            )
+            Spacer(Modifier.height(10.dp))
             Row {
                 Stat("Distance", "${track.distanceKm} km")
                 Spacer(Modifier.width(24.dp))
                 Stat("Elevation", "${track.elevationM} m")
-                Spacer(Modifier.width(24.dp))
-                Stat("Surface", track.surface.name)
             }
         }
         Box(
@@ -389,9 +387,59 @@ private fun TrackCard(track: Track, isSelected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
+private fun DifficultyChip(difficulty: Difficulty) {
+    val palette = when (difficulty) {
+        Difficulty.easy -> ChipColors.Easy
+        Difficulty.medium -> ChipColors.Medium
+        Difficulty.hard -> ChipColors.Hard
+    }
+    val label = when (difficulty) {
+        Difficulty.easy -> "Easy"
+        Difficulty.medium -> "Medium"
+        Difficulty.hard -> "Hard"
+    }
+    SoftChip(label = label, palette = palette)
+}
+
+@Composable
+private fun SurfaceChip(surface: SurfaceType) {
+    val palette = when (surface) {
+        SurfaceType.road -> ChipColors.Road
+        SurfaceType.gravel -> ChipColors.Gravel
+        SurfaceType.mixed -> ChipColors.Mixed
+    }
+    val label = when (surface) {
+        SurfaceType.road -> "Road"
+        SurfaceType.gravel -> "Gravel"
+        SurfaceType.mixed -> "Mixed"
+    }
+    SoftChip(label = label, palette = palette)
+}
+
+@Composable
+private fun SoftChip(label: String, palette: ChipPalette) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(palette.background)
+            .border(1.dp, palette.border, RoundedCornerShape(50))
+            .padding(horizontal = 10.dp, vertical = 4.dp),
+    ) {
+        Text(
+            text = label,
+            style = TextStyle(
+                color = palette.text,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+            ),
+        )
+    }
+}
+
+@Composable
 private fun Stat(label: String, value: String) {
     Column {
-        Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(label, style = MaterialTheme.typography.labelLarge, color = AppColors.Gray600)
         Text(value, style = MaterialTheme.typography.titleMedium)
     }
 }
@@ -401,14 +449,8 @@ private fun ErrorView(message: String, onRetry: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Couldn't load tracks", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(4.dp))
-        Text(message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(message, style = MaterialTheme.typography.bodyMedium, color = AppColors.Gray600)
         Spacer(Modifier.height(16.dp))
         Button(onClick = onRetry) { Text("Retry") }
     }
-}
-
-internal fun difficultyColor(d: Difficulty): Color = when (d) {
-    Difficulty.easy -> DifficultyColors.Easy
-    Difficulty.medium -> DifficultyColors.Medium
-    Difficulty.hard -> DifficultyColors.Hard
 }

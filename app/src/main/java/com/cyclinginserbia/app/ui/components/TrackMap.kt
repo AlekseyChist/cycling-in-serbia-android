@@ -9,7 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.cyclinginserbia.app.data.model.Difficulty
 import com.cyclinginserbia.app.data.model.Track
-import com.cyclinginserbia.app.ui.theme.DifficultyColors
+import com.cyclinginserbia.app.ui.theme.DifficultyMapColors
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -75,7 +75,7 @@ fun TrackMap(track: Track, modifier: Modifier = Modifier) {
 }
 
 private fun colorForDifficulty(d: Difficulty): Int = when (d) {
-    Difficulty.easy -> DifficultyColors.Easy.toArgb()
-    Difficulty.medium -> DifficultyColors.Medium.toArgb()
-    Difficulty.hard -> DifficultyColors.Hard.toArgb()
+    Difficulty.easy -> DifficultyMapColors.Easy.toArgb()
+    Difficulty.medium -> DifficultyMapColors.Medium.toArgb()
+    Difficulty.hard -> DifficultyMapColors.Hard.toArgb()
 }
