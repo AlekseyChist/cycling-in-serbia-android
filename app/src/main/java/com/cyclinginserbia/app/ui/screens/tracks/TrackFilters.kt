@@ -18,10 +18,37 @@ enum class SurfaceFilter(val label: String) {
     MIXED("Mixed"),
 }
 
+enum class RideType { COFFEE, DARK, SUN, PLUS, MISC }
+
+enum class RideTypeFilter(val label: String) {
+    ALL("All Rides"),
+    COFFEE("Coffee"),
+    DARK("Dark"),
+    SUN("Sun"),
+    PLUS("DBB+"),
+    MISC("Misc"),
+}
+
+/**
+ * Derives a track's ride type from its name. Mirrors the web app's
+ * `getRideType` heuristic in `src/app/screens/TracksScreen.tsx`.
+ */
+internal fun rideTypeOf(name: String): RideType {
+    val upper = name.uppercase()
+    return when {
+        "DBB CR" in name || "COFFEE" in upper -> RideType.COFFEE
+        "DBB DOD" in name || "DBB DOR" in name || "DARK" in upper -> RideType.DARK
+        "DBB SUN" in upper -> RideType.SUN
+        "DBB+" in name -> RideType.PLUS
+        else -> RideType.MISC
+    }
+}
+
 internal fun List<Track>.applyTrackFilters(
     query: String,
     difficulty: DifficultyFilter,
     surface: SurfaceFilter,
+    rideType: RideTypeFilter,
 ): List<Track> {
     val q = query.trim()
     return asSequence()
@@ -39,6 +66,16 @@ internal fun List<Track>.applyTrackFilters(
                 SurfaceFilter.ROAD -> track.surface == Surface.road
                 SurfaceFilter.GRAVEL -> track.surface == Surface.gravel
                 SurfaceFilter.MIXED -> track.surface == Surface.mixed
+            }
+        }
+        .filter { track ->
+            when (rideType) {
+                RideTypeFilter.ALL -> true
+                RideTypeFilter.COFFEE -> rideTypeOf(track.name) == RideType.COFFEE
+                RideTypeFilter.DARK -> rideTypeOf(track.name) == RideType.DARK
+                RideTypeFilter.SUN -> rideTypeOf(track.name) == RideType.SUN
+                RideTypeFilter.PLUS -> rideTypeOf(track.name) == RideType.PLUS
+                RideTypeFilter.MISC -> rideTypeOf(track.name) == RideType.MISC
             }
         }
         .filter { track ->

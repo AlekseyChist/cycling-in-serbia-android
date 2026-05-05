@@ -143,9 +143,11 @@ fun TracksScreen(
                         query = s.query,
                         difficulty = s.difficulty,
                         surface = s.surface,
+                        rideType = s.rideType,
                         onQueryChange = viewModel::onQueryChange,
                         onDifficultyChange = viewModel::onDifficultyChange,
                         onSurfaceChange = viewModel::onSurfaceChange,
+                        onRideTypeChange = viewModel::onRideTypeChange,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .statusBarsPadding()
@@ -162,9 +164,11 @@ private fun FloatingHeader(
     query: String,
     difficulty: DifficultyFilter,
     surface: SurfaceFilter,
+    rideType: RideTypeFilter,
     onQueryChange: (String) -> Unit,
     onDifficultyChange: (DifficultyFilter) -> Unit,
     onSurfaceChange: (SurfaceFilter) -> Unit,
+    onRideTypeChange: (RideTypeFilter) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -195,6 +199,12 @@ private fun FloatingHeader(
             selected = surface,
             label = { it.label },
             onSelect = onSurfaceChange,
+        )
+        FilterChipRow(
+            entries = RideTypeFilter.entries,
+            selected = rideType,
+            label = { it.label },
+            onSelect = onRideTypeChange,
         )
     }
 }

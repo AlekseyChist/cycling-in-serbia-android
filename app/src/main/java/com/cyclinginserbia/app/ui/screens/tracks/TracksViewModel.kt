@@ -20,6 +20,7 @@ sealed interface TracksUiState {
         val query: String,
         val difficulty: DifficultyFilter,
         val surface: SurfaceFilter,
+        val rideType: RideTypeFilter,
         val focusedIds: Set<String>,
     ) : TracksUiState {
 
@@ -33,7 +34,8 @@ sealed interface TracksUiState {
         val hasActiveFilters: Boolean
             get() = query.isNotBlank() ||
                 difficulty != DifficultyFilter.ALL ||
-                surface != SurfaceFilter.ALL
+                surface != SurfaceFilter.ALL ||
+                rideType != RideTypeFilter.ALL
     }
     data class Error(val message: String) : TracksUiState
 }
@@ -59,6 +61,7 @@ class TracksViewModel @Inject constructor(
                         query = "",
                         difficulty = DifficultyFilter.ALL,
                         surface = SurfaceFilter.ALL,
+                        rideType = RideTypeFilter.ALL,
                         focusedIds = emptySet(),
                     )
                 }
@@ -77,6 +80,9 @@ class TracksViewModel @Inject constructor(
     fun onSurfaceChange(surface: SurfaceFilter) =
         updateReady { it.copy(surface = surface, focusedIds = emptySet()) }
 
+    fun onRideTypeChange(rideType: RideTypeFilter) =
+        updateReady { it.copy(rideType = rideType, focusedIds = emptySet()) }
+
     fun onFocusTracks(ids: Set<String>) = updateReady { it.copy(focusedIds = ids) }
 
     fun clearFocus() = updateReady {
@@ -88,6 +94,7 @@ class TracksViewModel @Inject constructor(
             query = "",
             difficulty = DifficultyFilter.ALL,
             surface = SurfaceFilter.ALL,
+            rideType = RideTypeFilter.ALL,
             focusedIds = emptySet(),
         )
     }
@@ -97,7 +104,12 @@ class TracksViewModel @Inject constructor(
             if (current !is TracksUiState.Ready) return@update current
             val next = transform(current)
             next.copy(
-                visible = next.all.applyTrackFilters(next.query, next.difficulty, next.surface),
+                visible = next.all.applyTrackFilters(
+                    query = next.query,
+                    difficulty = next.difficulty,
+                    surface = next.surface,
+                    rideType = next.rideType,
+                ),
             )
         }
     }
