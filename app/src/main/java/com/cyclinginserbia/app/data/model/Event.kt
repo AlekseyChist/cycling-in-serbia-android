@@ -6,6 +6,8 @@ import java.time.LocalTime
 enum class EventType { race, granfondo, groupRide }
 enum class EventStatus { upcoming, soldOut, canceled }
 
+data class TimelineItem(val time: String, val label: String)
+
 data class Event(
     val id: String,
     val name: String,
@@ -19,4 +21,6 @@ data class Event(
     val isFromStrava: Boolean,
     val stravaEventId: String? = null,
     val distanceOptions: List<String> = emptyList(),
+    val toBring: List<String> = emptyList(),
+    val timeline: List<TimelineItem> = emptyList(),
 )
