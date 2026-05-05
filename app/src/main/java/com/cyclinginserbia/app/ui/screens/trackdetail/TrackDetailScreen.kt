@@ -51,13 +51,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
+import androidx.compose.foundation.Image
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.painterResource
 import com.cyclinginserbia.app.data.model.Difficulty
 import com.cyclinginserbia.app.data.model.Surface
 import com.cyclinginserbia.app.data.model.Track
 import com.cyclinginserbia.app.ui.components.TrackMap
+import com.cyclinginserbia.app.ui.screens.tracks.trackHeroRes
 import com.cyclinginserbia.app.ui.theme.AppColors
 import com.cyclinginserbia.app.ui.theme.ChipColors
 import com.cyclinginserbia.app.ui.theme.ChipPalette
@@ -144,14 +146,12 @@ private fun HeroPhoto(track: Track) {
             .height(280.dp)
             .background(AppColors.Gray100),
     ) {
-        if (track.thumbnailUrl.isNotBlank()) {
-            AsyncImage(
-                model = track.thumbnailUrl,
-                contentDescription = track.name,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
+        Image(
+            painter = painterResource(trackHeroRes(track)),
+            contentDescription = track.name,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }
 

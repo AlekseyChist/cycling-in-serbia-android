@@ -145,6 +145,17 @@ object DifficultyColors {
     val Hard   = AppColors.Red500       // #EF4444
 }
 
+/**
+ * Difficulty colours used on the map (polylines + cluster pin fill + selected dot).
+ * Web spec keeps Medium **blue** on the map (visibility on OSM tiles) but **amber** in
+ * card chips (soft tint). See `ChipColors.Medium` for the chip variant.
+ */
+object DifficultyMapColors {
+    val Easy   = AppColors.Emerald500   // #10B981
+    val Medium = AppColors.Blue500      // #3B82F6  ← differs from chip
+    val Hard   = AppColors.Red500       // #EF4444
+}
+
 object SurfaceTypeColors {
     val Road   = AppColors.Blue500      // #3B82F6
     val Gravel = AppColors.Violet500    // #8B5CF6
