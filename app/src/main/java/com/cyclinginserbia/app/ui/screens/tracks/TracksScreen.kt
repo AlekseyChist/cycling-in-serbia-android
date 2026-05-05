@@ -19,8 +19,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
@@ -36,6 +38,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -70,6 +73,12 @@ fun TracksScreen(
     val sheetState = rememberStandardBottomSheetState(initialValue = SheetValue.PartiallyExpanded)
     val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
     val scope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
+
+    fun selectAndReveal(uuid: String) {
+        viewModel.onTrackSelect(uuid)
+        scope.launch { sheetState.expand() }
+    }
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
@@ -80,6 +89,7 @@ fun TracksScreen(
             when (val s = state) {
                 is TracksUiState.Ready -> SheetTracksList(
                     state = s,
+                    listState = listState,
                     onTrackClick = onTrackClick,
                     onClearFilters = viewModel::clearFilters,
                 )
@@ -116,12 +126,13 @@ fun TracksScreen(
                         selectedId = s.selectedId,
                         onClusterClick = { cluster ->
                             if (cluster.tracks.size == 1) {
-                                viewModel.onTrackSelect(cluster.tracks.first().uuid)
+                                selectAndReveal(cluster.tracks.first().uuid)
                             } else {
                                 viewModel.onTrackSelect(null)
                                 scope.launch { sheetState.expand() }
                             }
                         },
+                        onPolylineClick = { track -> selectAndReveal(track.uuid) },
                         modifier = Modifier.fillMaxSize(),
                     )
 
@@ -257,9 +268,18 @@ private fun PillChip(
 @Composable
 private fun SheetTracksList(
     state: TracksUiState.Ready,
+    listState: LazyListState,
     onTrackClick: (String) -> Unit,
     onClearFilters: () -> Unit,
 ) {
+    LaunchedEffect(state.selectedId, state.visible) {
+        val id = state.selectedId ?: return@LaunchedEffect
+        val index = state.visible.indexOfFirst { it.uuid == id }
+        if (index >= 0) {
+            listState.animateScrollToItem(index)
+        }
+    }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         SheetHeader(visibleCount = state.visible.size, totalCount = state.all.size)
 
@@ -297,6 +317,7 @@ private fun SheetTracksList(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
+                state = listState,
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {

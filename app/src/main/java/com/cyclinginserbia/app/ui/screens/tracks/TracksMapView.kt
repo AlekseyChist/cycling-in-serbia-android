@@ -20,11 +20,18 @@ import org.osmdroid.views.overlay.Polyline
 private val SERBIA_CENTER = GeoPoint(44.0165, 21.0059)
 private const val DEFAULT_ZOOM = 7.0
 
+/** Cap for how close fit-to-bounds is allowed to zoom in on tight loops. */
+private const val SELECTED_MAX_ZOOM = 14.0
+
+/** Bottom padding added to fit-to-bounds so the route isn't covered by the bottom sheet peek. */
+private const val SELECTED_PADDING_PX = 96
+
 @Composable
 fun TracksMapView(
     tracks: List<Track>,
     selectedId: String?,
     onClusterClick: (TrackCluster) -> Unit,
+    onPolylineClick: (Track) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -40,18 +47,34 @@ fun TracksMapView(
         }
     }
 
-    DisposableEffect(tracks) {
+    DisposableEffect(tracks, selectedId) {
         mapView.overlays.clear()
 
         for (track in tracks) {
             if (track.route.isEmpty()) continue
             val points = track.route.map { GeoPoint(it.lat, it.lng) }
             val isSelected = track.uuid == selectedId
+            val color = colorForDifficulty(track.difficulty)
+
+            // Wide invisible click target — gives fingers a fair chance to hit a thin polyline.
+            val hitTarget = Polyline().apply {
+                setPoints(points)
+                outlinePaint.color = color
+                outlinePaint.strokeWidth = 22f
+                outlinePaint.alpha = 0
+                setOnClickListener { _, _, _ ->
+                    onPolylineClick(track)
+                    true
+                }
+            }
+            mapView.overlays.add(hitTarget)
+
+            // Visible polyline on top — no listener, falls through to the hit target on tap.
             val poly = Polyline().apply {
                 setPoints(points)
-                outlinePaint.color = colorForDifficulty(track.difficulty)
-                outlinePaint.strokeWidth = if (isSelected) 8f else 5f
-                outlinePaint.alpha = if (isSelected) 255 else 190
+                outlinePaint.color = color
+                outlinePaint.strokeWidth = if (isSelected) 9f else 6f
+                outlinePaint.alpha = if (isSelected) 255 else 200
             }
             mapView.overlays.add(poly)
         }
@@ -89,7 +112,13 @@ fun TracksMapView(
             if (points.isNotEmpty()) {
                 mapView.post {
                     val bounds = BoundingBox.fromGeoPointsSafe(points)
-                    mapView.zoomToBoundingBox(bounds, true, 96)
+                    mapView.zoomToBoundingBox(
+                        bounds,
+                        true,
+                        SELECTED_PADDING_PX,
+                        SELECTED_MAX_ZOOM,
+                        650L,
+                    )
                 }
             }
         } else {
