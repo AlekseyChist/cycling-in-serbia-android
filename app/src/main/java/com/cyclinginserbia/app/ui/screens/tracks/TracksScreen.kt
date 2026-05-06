@@ -27,12 +27,17 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
@@ -42,6 +47,7 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -112,6 +118,7 @@ fun TracksScreen(
                     state = state,
                     listState = listState,
                     onTrackClick = onTrackClick,
+                    onToggleFavorite = viewModel::onToggleFavorite,
                     onClearFilters = viewModel::clearFilters,
                     onClearFocus = viewModel::clearFocus,
                 )
@@ -149,16 +156,24 @@ fun TracksScreen(
                         modifier = Modifier.fillMaxSize(),
                     )
 
+                    val regions by remember(state.tracks) {
+                        derivedStateOf { state.tracks.map { it.region }.distinct().sorted() }
+                    }
                     FloatingHeader(
                         query = state.query,
                         difficulty = state.difficulty,
                         surface = state.surface,
                         rideType = state.rideType,
+                        region = state.region,
+                        regions = regions,
+                        favoritesOnly = state.favoritesOnly,
                         showSyncError = state.syncError != null && !state.isSyncing,
                         onQueryChange = viewModel::onQueryChange,
                         onDifficultyChange = viewModel::onDifficultyChange,
                         onSurfaceChange = viewModel::onSurfaceChange,
                         onRideTypeChange = viewModel::onRideTypeChange,
+                        onRegionChange = viewModel::onRegionChange,
+                        onToggleFavoritesOnly = viewModel::onToggleFavoritesOnly,
                         onRetrySync = viewModel::sync,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
@@ -177,11 +192,16 @@ private fun FloatingHeader(
     difficulty: DifficultyFilter,
     surface: SurfaceFilter,
     rideType: RideTypeFilter,
+    region: String?,
+    regions: List<String>,
+    favoritesOnly: Boolean,
     showSyncError: Boolean,
     onQueryChange: (String) -> Unit,
     onDifficultyChange: (DifficultyFilter) -> Unit,
     onSurfaceChange: (SurfaceFilter) -> Unit,
     onRideTypeChange: (RideTypeFilter) -> Unit,
+    onRegionChange: (String?) -> Unit,
+    onToggleFavoritesOnly: () -> Unit,
     onRetrySync: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -220,6 +240,21 @@ private fun FloatingHeader(
             label = { it.label },
             onSelect = onRideTypeChange,
         )
+        if (regions.isNotEmpty()) {
+            FilterChipRow(
+                entries = listOf<String?>(null) + regions,
+                selected = region,
+                label = { it ?: "All Regions" },
+                onSelect = onRegionChange,
+            )
+        }
+        Row(modifier = Modifier.fillMaxWidth()) {
+            PillChip(
+                text = "★ Favorites",
+                isSelected = favoritesOnly,
+                onClick = onToggleFavoritesOnly,
+            )
+        }
         if (showSyncError) {
             SyncErrorBanner(onRetry = onRetrySync)
         }
@@ -339,6 +374,7 @@ private fun SheetTracksList(
     state: TracksUiState,
     listState: LazyListState,
     onTrackClick: (String) -> Unit,
+    onToggleFavorite: (String) -> Unit,
     onClearFilters: () -> Unit,
     onClearFocus: () -> Unit,
 ) {
@@ -400,7 +436,9 @@ private fun SheetTracksList(
                     TrackCard(
                         track = track,
                         isSelected = state.isFocused,
+                        isFavorite = track.uuid in state.favoriteIds,
                         onClick = { onTrackClick(track.legacyId) },
+                        onToggleFavorite = { onToggleFavorite(track.uuid) },
                     )
                 }
             }
@@ -445,7 +483,13 @@ private fun SheetHeader(
 }
 
 @Composable
-private fun TrackCard(track: Track, isSelected: Boolean, onClick: () -> Unit) {
+private fun TrackCard(
+    track: Track,
+    isSelected: Boolean,
+    isFavorite: Boolean,
+    onClick: () -> Unit,
+    onToggleFavorite: () -> Unit,
+) {
     val borderColor = if (isSelected) AppColors.Primary else Color.Transparent
     Card(
         modifier = Modifier
@@ -457,49 +501,63 @@ private fun TrackCard(track: Track, isSelected: Boolean, onClick: () -> Unit) {
             containerColor = if (isSelected) AppColors.OrangeTint else AppColors.Background,
         ),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.Top,
-        ) {
-            Image(
-                painter = painterResource(trackThumbnailRes(track)),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Row(
                 modifier = Modifier
-                    .size(72.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(AppColors.Gray100),
-            )
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    DifficultyChip(track.difficulty)
-                    SurfaceChip(track.surface)
-                }
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = track.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 2,
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.Top,
+            ) {
+                Image(
+                    painter = painterResource(trackThumbnailRes(track)),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(AppColors.Gray100),
                 )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = track.region,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = AppColors.Gray600,
-                )
-                Spacer(Modifier.height(8.dp))
-                Row {
-                    Stat("Distance", "${track.distanceKm} km")
-                    Spacer(Modifier.width(20.dp))
-                    Stat("Elevation", "${track.elevationM} m")
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f).padding(end = 36.dp)) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        DifficultyChip(track.difficulty)
+                        SurfaceChip(track.surface)
+                    }
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = track.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        text = track.region,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AppColors.Gray600,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Row {
+                        Stat("Distance", "${track.distanceKm} km")
+                        Spacer(Modifier.width(20.dp))
+                        Stat("Elevation", "${track.elevationM} m")
+                    }
                 }
+            }
+            IconButton(
+                onClick = onToggleFavorite,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp),
+            ) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                    tint = if (isFavorite) AppColors.Primary else AppColors.Gray500,
+                )
             }
         }
         Box(
