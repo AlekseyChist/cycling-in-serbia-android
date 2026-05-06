@@ -12,32 +12,36 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed interface TracksUiState {
-    data object Loading : TracksUiState
-    data class Ready(
-        val all: List<Track>,
-        val visible: List<Track>,
-        val query: String,
-        val difficulty: DifficultyFilter,
-        val surface: SurfaceFilter,
-        val rideType: RideTypeFilter,
-        val focusedIds: Set<String>,
-    ) : TracksUiState {
+data class TracksUiState(
+    val tracks: List<Track> = emptyList(),
+    val isInitialLoading: Boolean = true,
+    val isSyncing: Boolean = false,
+    val syncError: Throwable? = null,
+    val query: String = "",
+    val difficulty: DifficultyFilter = DifficultyFilter.ALL,
+    val surface: SurfaceFilter = SurfaceFilter.ALL,
+    val rideType: RideTypeFilter = RideTypeFilter.ALL,
+    val focusedIds: Set<String> = emptySet(),
+) {
+    val visible: List<Track>
+        get() = tracks.applyTrackFilters(
+            query = query,
+            difficulty = difficulty,
+            surface = surface,
+            rideType = rideType,
+        )
 
-        val isFocused: Boolean get() = focusedIds.isNotEmpty()
+    val sheetTracks: List<Track>
+        get() = if (focusedIds.isEmpty()) visible
+        else visible.filter { it.uuid in focusedIds }
 
-        /** Tracks shown inside the bottom sheet — focus subset if set, otherwise the full visible list. */
-        val sheetTracks: List<Track>
-            get() = if (focusedIds.isEmpty()) visible
-            else visible.filter { it.uuid in focusedIds }
+    val isFocused: Boolean get() = focusedIds.isNotEmpty()
 
-        val hasActiveFilters: Boolean
-            get() = query.isNotBlank() ||
-                difficulty != DifficultyFilter.ALL ||
-                surface != SurfaceFilter.ALL ||
-                rideType != RideTypeFilter.ALL
-    }
-    data class Error(val message: String) : TracksUiState
+    val hasActiveFilters: Boolean
+        get() = query.isNotBlank() ||
+            difficulty != DifficultyFilter.ALL ||
+            surface != SurfaceFilter.ALL ||
+            rideType != RideTypeFilter.ALL
 }
 
 @HiltViewModel
@@ -45,51 +49,63 @@ class TracksViewModel @Inject constructor(
     private val repository: TrackRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<TracksUiState>(TracksUiState.Loading)
+    private val _state = MutableStateFlow(TracksUiState())
     val state: StateFlow<TracksUiState> = _state.asStateFlow()
 
-    init { load() }
+    init {
+        observeTracks()
+        sync()
+    }
 
-    fun load() {
-        _state.value = TracksUiState.Loading
+    private fun observeTracks() {
         viewModelScope.launch {
-            runCatching { repository.getPublishedTracks() }
-                .onSuccess { tracks ->
-                    _state.value = TracksUiState.Ready(
-                        all = tracks,
-                        visible = tracks,
-                        query = "",
-                        difficulty = DifficultyFilter.ALL,
-                        surface = SurfaceFilter.ALL,
-                        rideType = RideTypeFilter.ALL,
-                        focusedIds = emptySet(),
+            repository.observePublishedTracks().collect { tracks ->
+                _state.update {
+                    it.copy(
+                        tracks = tracks,
+                        isInitialLoading = it.isInitialLoading && tracks.isEmpty(),
                     )
                 }
-                .onFailure {
-                    _state.value = TracksUiState.Error(it.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun sync() {
+        viewModelScope.launch {
+            _state.update { it.copy(isSyncing = true, syncError = null) }
+            runCatching { repository.refreshIfStale() }
+                .onSuccess {
+                    _state.update {
+                        it.copy(isSyncing = false, isInitialLoading = false, syncError = null)
+                    }
+                }
+                .onFailure { error ->
+                    _state.update {
+                        it.copy(isSyncing = false, isInitialLoading = false, syncError = error)
+                    }
                 }
         }
     }
 
     fun onQueryChange(query: String) =
-        updateReady { it.copy(query = query, focusedIds = emptySet()) }
+        _state.update { it.copy(query = query, focusedIds = emptySet()) }
 
     fun onDifficultyChange(difficulty: DifficultyFilter) =
-        updateReady { it.copy(difficulty = difficulty, focusedIds = emptySet()) }
+        _state.update { it.copy(difficulty = difficulty, focusedIds = emptySet()) }
 
     fun onSurfaceChange(surface: SurfaceFilter) =
-        updateReady { it.copy(surface = surface, focusedIds = emptySet()) }
+        _state.update { it.copy(surface = surface, focusedIds = emptySet()) }
 
     fun onRideTypeChange(rideType: RideTypeFilter) =
-        updateReady { it.copy(rideType = rideType, focusedIds = emptySet()) }
+        _state.update { it.copy(rideType = rideType, focusedIds = emptySet()) }
 
-    fun onFocusTracks(ids: Set<String>) = updateReady { it.copy(focusedIds = ids) }
+    fun onFocusTracks(ids: Set<String>) = _state.update { it.copy(focusedIds = ids) }
 
-    fun clearFocus() = updateReady {
+    fun clearFocus() = _state.update {
         if (it.focusedIds.isEmpty()) it else it.copy(focusedIds = emptySet())
     }
 
-    fun clearFilters() = updateReady {
+    fun clearFilters() = _state.update {
         it.copy(
             query = "",
             difficulty = DifficultyFilter.ALL,
@@ -97,20 +113,5 @@ class TracksViewModel @Inject constructor(
             rideType = RideTypeFilter.ALL,
             focusedIds = emptySet(),
         )
-    }
-
-    private inline fun updateReady(crossinline transform: (TracksUiState.Ready) -> TracksUiState.Ready) {
-        _state.update { current ->
-            if (current !is TracksUiState.Ready) return@update current
-            val next = transform(current)
-            next.copy(
-                visible = next.all.applyTrackFilters(
-                    query = next.query,
-                    difficulty = next.difficulty,
-                    surface = next.surface,
-                    rideType = next.rideType,
-                ),
-            )
-        }
     }
 }

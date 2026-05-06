@@ -84,51 +84,60 @@ fun TracksScreen(
         scope.launch { sheetState.expand() }
     }
 
+    val showInitialLoading = state.isInitialLoading && state.tracks.isEmpty()
+    val showError = state.tracks.isEmpty() && !state.isInitialLoading && state.syncError != null
+
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetPeekHeight = 96.dp,
         sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
         sheetContainerColor = AppColors.Background,
         sheetContent = {
-            when (val s = state) {
-                is TracksUiState.Ready -> SheetTracksList(
-                    state = s,
-                    listState = listState,
-                    onTrackClick = onTrackClick,
-                    onClearFilters = viewModel::clearFilters,
-                    onClearFocus = viewModel::clearFocus,
-                )
-                else -> Box(
+            if (showInitialLoading || showError) {
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(120.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "Loading…",
+                        text = if (showError) "Couldn't load tracks" else "Loading…",
                         style = MaterialTheme.typography.bodyMedium,
                         color = AppColors.Gray600,
                     )
                 }
+            } else {
+                SheetTracksList(
+                    state = state,
+                    listState = listState,
+                    onTrackClick = onTrackClick,
+                    onClearFilters = viewModel::clearFilters,
+                    onClearFocus = viewModel::clearFocus,
+                )
             }
         },
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            when (val s = state) {
-                is TracksUiState.Loading -> Box(
+            when {
+                showInitialLoading -> Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) { CircularProgressIndicator() }
 
-                is TracksUiState.Error -> Box(
+                showError -> Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
-                ) { ErrorView(s.message, onRetry = viewModel::load) }
+                ) {
+                    ErrorView(
+                        message = state.syncError?.message ?: "Unknown error",
+                        onRetry = viewModel::sync,
+                    )
+                }
 
-                is TracksUiState.Ready -> {
+                else -> {
                     TracksMapView(
-                        tracks = s.visible,
-                        focusedIds = s.focusedIds,
+                        tracks = state.visible,
+                        focusedIds = state.focusedIds,
                         onClusterClick = { cluster ->
                             focusAndReveal(cluster.tracks.map { it.uuid }.toSet())
                         },
@@ -140,10 +149,10 @@ fun TracksScreen(
                     )
 
                     FloatingHeader(
-                        query = s.query,
-                        difficulty = s.difficulty,
-                        surface = s.surface,
-                        rideType = s.rideType,
+                        query = state.query,
+                        difficulty = state.difficulty,
+                        surface = state.surface,
+                        rideType = state.rideType,
                         onQueryChange = viewModel::onQueryChange,
                         onDifficultyChange = viewModel::onDifficultyChange,
                         onSurfaceChange = viewModel::onSurfaceChange,
@@ -280,7 +289,7 @@ private fun PillChip(
 
 @Composable
 private fun SheetTracksList(
-    state: TracksUiState.Ready,
+    state: TracksUiState,
     listState: LazyListState,
     onTrackClick: (String) -> Unit,
     onClearFilters: () -> Unit,
@@ -297,7 +306,7 @@ private fun SheetTracksList(
     Column(modifier = Modifier.fillMaxWidth()) {
         SheetHeader(
             sheetCount = sheetTracks.size,
-            totalCount = state.all.size,
+            totalCount = state.tracks.size,
             isFocused = state.isFocused,
             onClearFocus = onClearFocus,
         )
