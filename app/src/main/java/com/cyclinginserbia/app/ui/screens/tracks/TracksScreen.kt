@@ -2,6 +2,7 @@ package com.cyclinginserbia.app.ui.screens.tracks
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -153,10 +154,12 @@ fun TracksScreen(
                         difficulty = state.difficulty,
                         surface = state.surface,
                         rideType = state.rideType,
+                        showSyncError = state.syncError != null && !state.isSyncing,
                         onQueryChange = viewModel::onQueryChange,
                         onDifficultyChange = viewModel::onDifficultyChange,
                         onSurfaceChange = viewModel::onSurfaceChange,
                         onRideTypeChange = viewModel::onRideTypeChange,
+                        onRetrySync = viewModel::sync,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .statusBarsPadding()
@@ -174,10 +177,12 @@ private fun FloatingHeader(
     difficulty: DifficultyFilter,
     surface: SurfaceFilter,
     rideType: RideTypeFilter,
+    showSyncError: Boolean,
     onQueryChange: (String) -> Unit,
     onDifficultyChange: (DifficultyFilter) -> Unit,
     onSurfaceChange: (SurfaceFilter) -> Unit,
     onRideTypeChange: (RideTypeFilter) -> Unit,
+    onRetrySync: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -215,6 +220,48 @@ private fun FloatingHeader(
             label = { it.label },
             onSelect = onRideTypeChange,
         )
+        if (showSyncError) {
+            SyncErrorBanner(onRetry = onRetrySync)
+        }
+    }
+}
+
+@Composable
+private fun SyncErrorBanner(onRetry: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(elevation = 3.dp, shape = RoundedCornerShape(12.dp)),
+        shape = RoundedCornerShape(12.dp),
+        color = AppColors.Amber50,
+        border = BorderStroke(1.dp, AppColors.Amber200),
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 14.dp, end = 4.dp, top = 6.dp, bottom = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Couldn't refresh — showing cached tracks",
+                style = TextStyle(
+                    color = AppColors.Amber800,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                ),
+                modifier = Modifier.weight(1f),
+            )
+            Spacer(Modifier.width(8.dp))
+            TextButton(
+                onClick = onRetry,
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+            ) {
+                Text(
+                    text = "Retry",
+                    color = AppColors.Primary,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 13.sp,
+                )
+            }
+        }
     }
 }
 
