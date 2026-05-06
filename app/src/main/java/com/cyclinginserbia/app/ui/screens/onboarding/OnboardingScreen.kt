@@ -38,10 +38,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.cyclinginserbia.app.ui.theme.AppColors
 
 @Composable
-fun OnboardingScreen(onFinished: () -> Unit) {
+fun OnboardingScreen(
+    onFinished: () -> Unit,
+    @Suppress("UNUSED_PARAMETER") viewModel: OnboardingViewModel = hiltViewModel(),
+) {
     val gradient = Brush.linearGradient(
         colors = listOf(AppColors.Cream50, AppColors.Cream100),
     )
