@@ -13,6 +13,7 @@ coroutines = "1.9.0"
 coil = "2.7.0"
 room = "2.7.0"
 datastore = "1.1.1"
+coreSplashscreen = "1.0.1"
 supabase = "3.0.3"
 ktor = "3.0.1"
 osmdroid = "6.1.20"
@@ -57,6 +58,9 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 
 # DataStore
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+
+# SplashScreen
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 
 # Supabase (Kotlin)
 supabase-bom = { group = "io.github.jan-tennert.supabase", name = "bom", version.ref = "supabase" }

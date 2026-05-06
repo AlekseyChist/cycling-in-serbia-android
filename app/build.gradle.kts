@@ -116,6 +116,9 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
 
+    // SplashScreen
+    implementation(libs.androidx.core.splashscreen)
+
     // Supabase
     implementation(platform(libs.supabase.bom))
     implementation(libs.supabase.postgrest)
