@@ -2,6 +2,7 @@ package com.cyclinginserbia.app.ui.screens.events
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,16 +23,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -53,7 +48,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventsScreen(
     onEventClick: (String) -> Unit,
@@ -61,36 +55,32 @@ fun EventsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("Events") }) },
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-        ) {
-            when (val s = state) {
-                is EventsUiState.Loading -> CenterBox { CircularProgressIndicator() }
-                is EventsUiState.Error -> CenterBox {
-                    ErrorView(message = s.message, onRetry = viewModel::load)
-                }
-                is EventsUiState.Ready -> {
-                    FilterHeader(
-                        query = s.query,
-                        category = s.category,
-                        type = s.type,
-                        onQueryChange = viewModel::onQueryChange,
-                        onCategoryChange = viewModel::onCategoryChange,
-                        onTypeChange = viewModel::onTypeChange,
-                    )
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        when {
-                            s.visible.isEmpty() -> EmptyState(
-                                state = s,
-                                onClearFilters = viewModel::clearFilters,
-                            )
-                            else -> EventsList(events = s.visible, onEventClick = onEventClick)
-                        }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppColors.Background),
+    ) {
+        when (val s = state) {
+            is EventsUiState.Loading -> CenterBox { CircularProgressIndicator() }
+            is EventsUiState.Error -> CenterBox {
+                ErrorView(message = s.message, onRetry = viewModel::load)
+            }
+            is EventsUiState.Ready -> {
+                FilterHeader(
+                    query = s.query,
+                    category = s.category,
+                    type = s.type,
+                    onQueryChange = viewModel::onQueryChange,
+                    onCategoryChange = viewModel::onCategoryChange,
+                    onTypeChange = viewModel::onTypeChange,
+                )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    when {
+                        s.visible.isEmpty() -> EmptyState(
+                            state = s,
+                            onClearFilters = viewModel::clearFilters,
+                        )
+                        else -> EventsList(events = s.visible, onEventClick = onEventClick)
                     }
                 }
             }
@@ -116,8 +106,8 @@ private fun FilterHeader(
         modifier = Modifier
             .fillMaxWidth()
             .background(AppColors.Background)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         SearchField(
             value = query,
@@ -155,7 +145,6 @@ private fun <T> FilterChipRow(
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(horizontal = 0.dp),
     ) {
         items(entries) { entry ->
             PillChip(
@@ -186,7 +175,7 @@ private fun PillChip(
     val interactionSource = remember { MutableInteractionSource() }
 
     Surface(
-        modifier = Modifier.height(36.dp),
+        modifier = Modifier.height(34.dp),
         shape = RoundedCornerShape(50),
         color = background,
     ) {
@@ -197,7 +186,7 @@ private fun PillChip(
                     indication = null,
                     onClick = onClick,
                 )
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 14.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -220,7 +209,7 @@ private fun EventsList(events: List<Event>, onEventClick: (String) -> Unit) {
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+        contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         grouped.forEach { (monthYear, monthEvents) ->
@@ -239,34 +228,35 @@ private fun MonthHeader(text: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
+            .background(AppColors.Background)
             .padding(vertical = 8.dp),
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = TextStyle(
+                color = AppColors.Gray500,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+            ),
         )
     }
 }
 
 @Composable
 private fun EventCard(event: Event, onClick: () -> Unit) {
-    val accent = if (event.isFromStrava) AppColors.Primary else MaterialTheme.colorScheme.primary
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+    Surface(
+        onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        color = AppColors.Card,
+        border = BorderStroke(1.dp, AppColors.Gray200),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(
                 modifier = Modifier
                     .width(6.dp)
                     .height(120.dp)
-                    .background(accent),
+                    .background(AppColors.Primary),
             )
             Column(
                 modifier = Modifier
@@ -275,21 +265,28 @@ private fun EventCard(event: Event, onClick: () -> Unit) {
             ) {
                 Text(
                     text = formatCardDate(event),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = accent,
-                    fontWeight = FontWeight.SemiBold,
+                    style = TextStyle(
+                        color = AppColors.Primary,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    ),
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
                     text = event.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    style = TextStyle(
+                        color = AppColors.Gray900,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    ),
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
                     text = event.location,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = TextStyle(
+                        color = AppColors.Gray500,
+                        fontSize = 14.sp,
+                    ),
                 )
                 Spacer(Modifier.height(8.dp))
                 TypeChip(event.type)
@@ -308,13 +305,16 @@ private fun TypeChip(type: EventType) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .background(AppColors.Gray100)
             .padding(horizontal = 10.dp, vertical = 4.dp),
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = TextStyle(
+                color = AppColors.Gray700,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+            ),
         )
     }
 }
@@ -345,15 +345,20 @@ private fun EmptyState(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
+            style = TextStyle(
+                color = AppColors.Gray900,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+            ),
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = subtitle,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = TextStyle(
+                color = AppColors.Gray500,
+                fontSize = 14.sp,
+            ),
             textAlign = TextAlign.Center,
         )
         if (state.hasActiveFilters && state.category != EventCategoryFilter.COMMUNITY) {
@@ -368,12 +373,18 @@ private fun EmptyState(
 @Composable
 private fun ErrorView(message: String, onRetry: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Couldn't load events", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = "Couldn't load events",
+            style = TextStyle(
+                color = AppColors.Gray900,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+            ),
+        )
         Spacer(Modifier.height(4.dp))
         Text(
-            message,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            text = message,
+            style = TextStyle(color = AppColors.Gray500, fontSize = 14.sp),
         )
         Spacer(Modifier.height(16.dp))
         Button(onClick = onRetry) { Text("Retry") }

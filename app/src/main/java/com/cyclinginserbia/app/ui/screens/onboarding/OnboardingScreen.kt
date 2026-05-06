@@ -30,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
@@ -46,14 +45,10 @@ fun OnboardingScreen(
     onFinished: () -> Unit,
     @Suppress("UNUSED_PARAMETER") viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
-    val gradient = Brush.linearGradient(
-        colors = listOf(AppColors.Cream50, AppColors.Cream100),
-    )
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(gradient)
+            .background(AppColors.Background)
             .windowInsetsPadding(WindowInsets.systemBars)
             .padding(horizontal = 24.dp),
     ) {
