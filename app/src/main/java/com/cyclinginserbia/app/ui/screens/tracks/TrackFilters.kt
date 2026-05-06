@@ -49,6 +49,9 @@ internal fun List<Track>.applyTrackFilters(
     difficulty: DifficultyFilter,
     surface: SurfaceFilter,
     rideType: RideTypeFilter,
+    region: String?,
+    favoritesOnly: Boolean,
+    favoriteIds: Set<String>,
 ): List<Track> {
     val q = query.trim()
     return asSequence()
@@ -78,6 +81,8 @@ internal fun List<Track>.applyTrackFilters(
                 RideTypeFilter.MISC -> rideTypeOf(track.name) == RideType.MISC
             }
         }
+        .filter { track -> region == null || track.region == region }
+        .filter { track -> !favoritesOnly || track.uuid in favoriteIds }
         .filter { track ->
             q.isEmpty() ||
                 track.name.contains(q, ignoreCase = true) ||
