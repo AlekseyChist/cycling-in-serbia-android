@@ -24,12 +24,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -51,7 +48,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventsScreen(
     onEventClick: (String) -> Unit,
@@ -59,37 +55,32 @@ fun EventsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("Events") }) },
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .background(AppColors.Background),
-        ) {
-            when (val s = state) {
-                is EventsUiState.Loading -> CenterBox { CircularProgressIndicator() }
-                is EventsUiState.Error -> CenterBox {
-                    ErrorView(message = s.message, onRetry = viewModel::load)
-                }
-                is EventsUiState.Ready -> {
-                    FilterHeader(
-                        query = s.query,
-                        category = s.category,
-                        type = s.type,
-                        onQueryChange = viewModel::onQueryChange,
-                        onCategoryChange = viewModel::onCategoryChange,
-                        onTypeChange = viewModel::onTypeChange,
-                    )
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        when {
-                            s.visible.isEmpty() -> EmptyState(
-                                state = s,
-                                onClearFilters = viewModel::clearFilters,
-                            )
-                            else -> EventsList(events = s.visible, onEventClick = onEventClick)
-                        }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppColors.Background),
+    ) {
+        when (val s = state) {
+            is EventsUiState.Loading -> CenterBox { CircularProgressIndicator() }
+            is EventsUiState.Error -> CenterBox {
+                ErrorView(message = s.message, onRetry = viewModel::load)
+            }
+            is EventsUiState.Ready -> {
+                FilterHeader(
+                    query = s.query,
+                    category = s.category,
+                    type = s.type,
+                    onQueryChange = viewModel::onQueryChange,
+                    onCategoryChange = viewModel::onCategoryChange,
+                    onTypeChange = viewModel::onTypeChange,
+                )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    when {
+                        s.visible.isEmpty() -> EmptyState(
+                            state = s,
+                            onClearFilters = viewModel::clearFilters,
+                        )
+                        else -> EventsList(events = s.visible, onEventClick = onEventClick)
                     }
                 }
             }
@@ -115,8 +106,8 @@ private fun FilterHeader(
         modifier = Modifier
             .fillMaxWidth()
             .background(AppColors.Background)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         SearchField(
             value = query,

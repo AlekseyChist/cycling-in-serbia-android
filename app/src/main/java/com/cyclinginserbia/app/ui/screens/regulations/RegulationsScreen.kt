@@ -28,13 +28,10 @@ import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -58,32 +55,26 @@ import com.cyclinginserbia.app.data.model.RegulationCategory
 import com.cyclinginserbia.app.ui.components.SearchField
 import com.cyclinginserbia.app.ui.theme.AppColors
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegulationsScreen(
     viewModel: RegulationsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("Rules") }) },
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .background(AppColors.Background),
-            contentAlignment = Alignment.Center,
-        ) {
-            when (val s = state) {
-                is RegulationsUiState.Loading -> CircularProgressIndicator()
-                is RegulationsUiState.Error -> ErrorView(s.message, onRetry = viewModel::load)
-                is RegulationsUiState.Ready -> RegulationsContent(
-                    state = s,
-                    onToggleExpand = viewModel::toggleExpanded,
-                    onToggleBookmark = viewModel::toggleBookmark,
-                )
-            }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppColors.Background),
+        contentAlignment = Alignment.Center,
+    ) {
+        when (val s = state) {
+            is RegulationsUiState.Loading -> CircularProgressIndicator()
+            is RegulationsUiState.Error -> ErrorView(s.message, onRetry = viewModel::load)
+            is RegulationsUiState.Ready -> RegulationsContent(
+                state = s,
+                onToggleExpand = viewModel::toggleExpanded,
+                onToggleBookmark = viewModel::toggleBookmark,
+            )
         }
     }
 }
@@ -138,7 +129,7 @@ private fun SearchHeader(query: String, onQueryChange: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .background(AppColors.Background)
-            .padding(16.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         SearchField(
             value = query,
