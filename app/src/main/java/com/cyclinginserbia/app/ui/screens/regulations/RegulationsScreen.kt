@@ -2,6 +2,7 @@ package com.cyclinginserbia.app.ui.screens.regulations
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,19 +23,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -49,15 +45,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cyclinginserbia.app.data.model.Regulation
 import com.cyclinginserbia.app.data.model.RegulationCategory
+import com.cyclinginserbia.app.ui.components.SearchField
+import com.cyclinginserbia.app.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,7 +71,8 @@ fun RegulationsScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                .background(AppColors.Background),
             contentAlignment = Alignment.Center,
         ) {
             when (val s = state) {
@@ -102,14 +102,14 @@ private fun RegulationsContent(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        SearchBar(query = query, onQueryChange = { query = it })
+        SearchHeader(query = query, onQueryChange = { query = it })
 
         if (filtered.isEmpty()) {
             EmptyResults()
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+                contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 filtered.forEach { category ->
@@ -133,29 +133,25 @@ private fun RegulationsContent(
 }
 
 @Composable
-private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 1.dp,
+private fun SearchHeader(query: String, onQueryChange: (String) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(AppColors.Background)
+            .padding(16.dp),
     ) {
-        OutlinedTextField(
+        SearchField(
             value = query,
             onValueChange = onQueryChange,
-            placeholder = { Text("Search rules") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = null,
-                )
-            },
-            singleLine = true,
-            shape = RoundedCornerShape(28.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+            placeholder = "Search rules",
         )
     }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(AppColors.Gray200),
+    )
 }
 
 @Composable
@@ -163,13 +159,16 @@ private fun CategoryHeader(text: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
+            .background(AppColors.Background)
             .padding(vertical = 8.dp),
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
+            style = TextStyle(
+                color = AppColors.Gray900,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+            ),
         )
     }
 }
@@ -187,19 +186,22 @@ private fun RegulationCard(
         label = "chevron-rotation",
     )
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onToggleExpand),
+    Surface(
+        onClick = onToggleExpand,
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        color = AppColors.Card,
+        border = BorderStroke(1.dp, AppColors.Gray200),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = regulation.title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium,
+                    style = TextStyle(
+                        color = AppColors.Gray900,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                    ),
                     modifier = Modifier.weight(1f),
                 )
                 IconButton(onClick = onToggleBookmark) {
@@ -207,14 +209,13 @@ private fun RegulationCard(
                         imageVector = if (isBookmarked) Icons.Filled.Bookmark
                         else Icons.Outlined.BookmarkBorder,
                         contentDescription = if (isBookmarked) "Remove bookmark" else "Bookmark",
-                        tint = if (isBookmarked) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = if (isBookmarked) AppColors.Primary else AppColors.Gray500,
                     )
                 }
                 Icon(
                     imageVector = Icons.Rounded.KeyboardArrowDown,
                     contentDescription = if (isExpanded) "Collapse" else "Expand",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = AppColors.Gray500,
                     modifier = Modifier.rotate(rotation),
                 )
             }
@@ -232,8 +233,11 @@ private fun ExpandedRegulationBody(regulation: Regulation) {
         regulation.content.split("\n\n").forEach { paragraph ->
             Text(
                 text = rememberRegulationParagraph(paragraph),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = TextStyle(
+                    color = AppColors.Gray500,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                ),
                 modifier = Modifier.padding(bottom = 8.dp),
             )
         }
@@ -258,14 +262,17 @@ private fun DisclaimerFooter() {
             .fillMaxWidth()
             .padding(top = 12.dp),
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        color = AppColors.Cream50,
     ) {
         Text(
             text = "Disclaimer: We organise the weekly rides for free. This is done “as is”, " +
                 "so neither DBB nor any associated persons including the ride leaders and other " +
                 "riders shall bear any responsibility regarding event organisation.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = TextStyle(
+                color = AppColors.Gray500,
+                fontSize = 12.sp,
+                lineHeight = 18.sp,
+            ),
             modifier = Modifier.padding(16.dp),
         )
     }
@@ -283,16 +290,22 @@ private fun EmptyResults() {
         Icon(
             imageVector = Icons.AutoMirrored.Outlined.MenuBook,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = AppColors.Gray400,
             modifier = Modifier.size(48.dp),
         )
         Spacer(Modifier.height(12.dp))
-        Text("No results found", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = "No results found",
+            style = TextStyle(
+                color = AppColors.Gray900,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+            ),
+        )
         Spacer(Modifier.height(4.dp))
         Text(
-            "Try adjusting your search query",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            text = "Try adjusting your search query",
+            style = TextStyle(color = AppColors.Gray500, fontSize = 14.sp),
         )
     }
 }
@@ -300,12 +313,18 @@ private fun EmptyResults() {
 @Composable
 private fun ErrorView(message: String, onRetry: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Couldn't load rules", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = "Couldn't load rules",
+            style = TextStyle(
+                color = AppColors.Gray900,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+            ),
+        )
         Spacer(Modifier.height(4.dp))
         Text(
-            message,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            text = message,
+            style = TextStyle(color = AppColors.Gray500, fontSize = 14.sp),
         )
         Spacer(Modifier.height(16.dp))
         Button(onClick = onRetry) { Text("Retry") }
