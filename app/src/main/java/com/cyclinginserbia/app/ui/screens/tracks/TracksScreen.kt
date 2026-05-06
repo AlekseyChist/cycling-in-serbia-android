@@ -27,24 +27,40 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -112,6 +128,7 @@ fun TracksScreen(
                     state = state,
                     listState = listState,
                     onTrackClick = onTrackClick,
+                    onToggleFavorite = viewModel::onToggleFavorite,
                     onClearFilters = viewModel::clearFilters,
                     onClearFocus = viewModel::clearFocus,
                 )
@@ -149,39 +166,65 @@ fun TracksScreen(
                         modifier = Modifier.fillMaxSize(),
                     )
 
+                    val regions by remember(state.tracks) {
+                        derivedStateOf { state.tracks.map { it.region }.distinct().sorted() }
+                    }
+                    val activeFilterCount = activeFilterCount(state)
+                    var showFilters by remember { mutableStateOf(false) }
+
                     FloatingHeader(
                         query = state.query,
-                        difficulty = state.difficulty,
-                        surface = state.surface,
-                        rideType = state.rideType,
+                        activeFilterCount = activeFilterCount,
                         showSyncError = state.syncError != null && !state.isSyncing,
                         onQueryChange = viewModel::onQueryChange,
-                        onDifficultyChange = viewModel::onDifficultyChange,
-                        onSurfaceChange = viewModel::onSurfaceChange,
-                        onRideTypeChange = viewModel::onRideTypeChange,
+                        onOpenFilters = { showFilters = true },
                         onRetrySync = viewModel::sync,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .statusBarsPadding()
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                     )
+
+                    if (showFilters) {
+                        FiltersModalSheet(
+                            difficulty = state.difficulty,
+                            surface = state.surface,
+                            rideType = state.rideType,
+                            region = state.region,
+                            regions = regions,
+                            favoritesOnly = state.favoritesOnly,
+                            onDifficultyChange = viewModel::onDifficultyChange,
+                            onSurfaceChange = viewModel::onSurfaceChange,
+                            onRideTypeChange = viewModel::onRideTypeChange,
+                            onRegionChange = viewModel::onRegionChange,
+                            onToggleFavoritesOnly = viewModel::onToggleFavoritesOnly,
+                            onReset = viewModel::clearFilters,
+                            onDismiss = { showFilters = false },
+                        )
+                    }
                 }
             }
         }
     }
 }
 
+private fun activeFilterCount(state: TracksUiState): Int {
+    var n = 0
+    if (state.difficulty != DifficultyFilter.ALL) n++
+    if (state.surface != SurfaceFilter.ALL) n++
+    if (state.rideType != RideTypeFilter.ALL) n++
+    if (state.region != null) n++
+    if (state.favoritesOnly) n++
+    return n
+}
+
 @Composable
 private fun FloatingHeader(
     query: String,
-    difficulty: DifficultyFilter,
-    surface: SurfaceFilter,
-    rideType: RideTypeFilter,
+    activeFilterCount: Int,
     showSyncError: Boolean,
     onQueryChange: (String) -> Unit,
-    onDifficultyChange: (DifficultyFilter) -> Unit,
-    onSurfaceChange: (SurfaceFilter) -> Unit,
-    onRideTypeChange: (RideTypeFilter) -> Unit,
+    onOpenFilters: () -> Unit,
     onRetrySync: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -189,40 +232,209 @@ private fun FloatingHeader(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .shadow(elevation = 6.dp, shape = RoundedCornerShape(16.dp))
-                .clip(RoundedCornerShape(16.dp))
-                .background(AppColors.Background),
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            SearchField(
-                value = query,
-                onValueChange = onQueryChange,
-                placeholder = "Search tracks",
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .shadow(elevation = 6.dp, shape = RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(AppColors.Background),
+            ) {
+                SearchField(
+                    value = query,
+                    onValueChange = onQueryChange,
+                    placeholder = "Search tracks",
+                )
+            }
+            FilterButton(
+                activeCount = activeFilterCount,
+                onClick = onOpenFilters,
             )
         }
-        FilterChipRow(
-            entries = DifficultyFilter.entries,
-            selected = difficulty,
-            label = { it.label },
-            onSelect = onDifficultyChange,
-        )
-        FilterChipRow(
-            entries = SurfaceFilter.entries,
-            selected = surface,
-            label = { it.label },
-            onSelect = onSurfaceChange,
-        )
-        FilterChipRow(
-            entries = RideTypeFilter.entries,
-            selected = rideType,
-            label = { it.label },
-            onSelect = onRideTypeChange,
-        )
         if (showSyncError) {
             SyncErrorBanner(onRetry = onRetrySync)
         }
+    }
+}
+
+@Composable
+private fun FilterButton(activeCount: Int, onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .size(48.dp)
+            .shadow(elevation = 6.dp, shape = CircleShape),
+        shape = CircleShape,
+        color = AppColors.Background,
+        onClick = onClick,
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            BadgedBox(
+                badge = {
+                    if (activeCount > 0) {
+                        Badge(
+                            containerColor = AppColors.Primary,
+                            contentColor = AppColors.PrimaryForeground,
+                        ) {
+                            Text(
+                                text = activeCount.toString(),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+                    }
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Tune,
+                    contentDescription = "Filters",
+                    tint = AppColors.Gray700,
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FiltersModalSheet(
+    difficulty: DifficultyFilter,
+    surface: SurfaceFilter,
+    rideType: RideTypeFilter,
+    region: String?,
+    regions: List<String>,
+    favoritesOnly: Boolean,
+    onDifficultyChange: (DifficultyFilter) -> Unit,
+    onSurfaceChange: (SurfaceFilter) -> Unit,
+    onRideTypeChange: (RideTypeFilter) -> Unit,
+    onRegionChange: (String?) -> Unit,
+    onToggleFavoritesOnly: () -> Unit,
+    onReset: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = AppColors.Background,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text(
+                text = "Filters",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+            )
+
+            FilterSection(title = "Difficulty") {
+                FilterChipRow(
+                    entries = DifficultyFilter.entries,
+                    selected = difficulty,
+                    label = { it.label },
+                    onSelect = onDifficultyChange,
+                )
+            }
+            FilterSection(title = "Surface") {
+                FilterChipRow(
+                    entries = SurfaceFilter.entries,
+                    selected = surface,
+                    label = { it.label },
+                    onSelect = onSurfaceChange,
+                )
+            }
+            FilterSection(title = "Ride Type") {
+                FilterChipRow(
+                    entries = RideTypeFilter.entries,
+                    selected = rideType,
+                    label = { it.label },
+                    onSelect = onRideTypeChange,
+                )
+            }
+            if (regions.isNotEmpty()) {
+                FilterSection(title = "Region") {
+                    FilterChipRow(
+                        entries = listOf<String?>(null) + regions,
+                        selected = region,
+                        label = { it ?: "All Regions" },
+                        onSelect = onRegionChange,
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "Favorites only",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f),
+                )
+                Switch(
+                    checked = favoritesOnly,
+                    onCheckedChange = { onToggleFavoritesOnly() },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = AppColors.PrimaryForeground,
+                        checkedTrackColor = AppColors.Primary,
+                        uncheckedThumbColor = AppColors.Background,
+                        uncheckedTrackColor = AppColors.Gray300,
+                        uncheckedBorderColor = AppColors.Gray300,
+                    ),
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                TextButton(
+                    onClick = onReset,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(
+                        text = "Reset",
+                        color = AppColors.Gray700,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f),
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = AppColors.Primary,
+                        contentColor = AppColors.PrimaryForeground,
+                    ),
+                ) {
+                    Text(text = "Apply", fontWeight = FontWeight.SemiBold)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FilterSection(title: String, content: @Composable () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelLarge,
+            color = AppColors.Gray600,
+            fontWeight = FontWeight.SemiBold,
+        )
+        content()
     }
 }
 
@@ -339,6 +551,7 @@ private fun SheetTracksList(
     state: TracksUiState,
     listState: LazyListState,
     onTrackClick: (String) -> Unit,
+    onToggleFavorite: (String) -> Unit,
     onClearFilters: () -> Unit,
     onClearFocus: () -> Unit,
 ) {
@@ -400,7 +613,9 @@ private fun SheetTracksList(
                     TrackCard(
                         track = track,
                         isSelected = state.isFocused,
+                        isFavorite = track.uuid in state.favoriteIds,
                         onClick = { onTrackClick(track.legacyId) },
+                        onToggleFavorite = { onToggleFavorite(track.uuid) },
                     )
                 }
             }
@@ -445,7 +660,13 @@ private fun SheetHeader(
 }
 
 @Composable
-private fun TrackCard(track: Track, isSelected: Boolean, onClick: () -> Unit) {
+private fun TrackCard(
+    track: Track,
+    isSelected: Boolean,
+    isFavorite: Boolean,
+    onClick: () -> Unit,
+    onToggleFavorite: () -> Unit,
+) {
     val borderColor = if (isSelected) AppColors.Primary else Color.Transparent
     Card(
         modifier = Modifier
@@ -457,49 +678,63 @@ private fun TrackCard(track: Track, isSelected: Boolean, onClick: () -> Unit) {
             containerColor = if (isSelected) AppColors.OrangeTint else AppColors.Background,
         ),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.Top,
-        ) {
-            Image(
-                painter = painterResource(trackThumbnailRes(track)),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Row(
                 modifier = Modifier
-                    .size(72.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(AppColors.Gray100),
-            )
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    DifficultyChip(track.difficulty)
-                    SurfaceChip(track.surface)
-                }
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = track.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 2,
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.Top,
+            ) {
+                Image(
+                    painter = painterResource(trackThumbnailRes(track)),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(AppColors.Gray100),
                 )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = track.region,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = AppColors.Gray600,
-                )
-                Spacer(Modifier.height(8.dp))
-                Row {
-                    Stat("Distance", "${track.distanceKm} km")
-                    Spacer(Modifier.width(20.dp))
-                    Stat("Elevation", "${track.elevationM} m")
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f).padding(end = 36.dp)) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        DifficultyChip(track.difficulty)
+                        SurfaceChip(track.surface)
+                    }
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = track.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        text = track.region,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AppColors.Gray600,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Row {
+                        Stat("Distance", "${track.distanceKm} km")
+                        Spacer(Modifier.width(20.dp))
+                        Stat("Elevation", "${track.elevationM} m")
+                    }
                 }
+            }
+            IconButton(
+                onClick = onToggleFavorite,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp),
+            ) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                    tint = if (isFavorite) AppColors.Primary else AppColors.Gray500,
+                )
             }
         }
         Box(

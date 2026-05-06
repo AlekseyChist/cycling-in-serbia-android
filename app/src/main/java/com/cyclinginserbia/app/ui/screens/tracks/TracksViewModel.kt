@@ -2,6 +2,7 @@ package com.cyclinginserbia.app.ui.screens.tracks
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cyclinginserbia.app.data.local.preferences.SyncPreferences
 import com.cyclinginserbia.app.data.model.Track
 import com.cyclinginserbia.app.data.repository.TrackRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,6 +22,9 @@ data class TracksUiState(
     val difficulty: DifficultyFilter = DifficultyFilter.ALL,
     val surface: SurfaceFilter = SurfaceFilter.ALL,
     val rideType: RideTypeFilter = RideTypeFilter.ALL,
+    val region: String? = null,
+    val favoritesOnly: Boolean = false,
+    val favoriteIds: Set<String> = emptySet(),
     val focusedIds: Set<String> = emptySet(),
 ) {
     val visible: List<Track>
@@ -29,6 +33,9 @@ data class TracksUiState(
             difficulty = difficulty,
             surface = surface,
             rideType = rideType,
+            region = region,
+            favoritesOnly = favoritesOnly,
+            favoriteIds = favoriteIds,
         )
 
     val sheetTracks: List<Track>
@@ -41,12 +48,15 @@ data class TracksUiState(
         get() = query.isNotBlank() ||
             difficulty != DifficultyFilter.ALL ||
             surface != SurfaceFilter.ALL ||
-            rideType != RideTypeFilter.ALL
+            rideType != RideTypeFilter.ALL ||
+            region != null ||
+            favoritesOnly
 }
 
 @HiltViewModel
 class TracksViewModel @Inject constructor(
     private val repository: TrackRepository,
+    private val preferences: SyncPreferences,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TracksUiState())
@@ -54,7 +64,16 @@ class TracksViewModel @Inject constructor(
 
     init {
         observeTracks()
+        observeFavorites()
         sync()
+    }
+
+    private fun observeFavorites() {
+        viewModelScope.launch {
+            preferences.favoriteTrackIds.collect { ids ->
+                _state.update { it.copy(favoriteIds = ids) }
+            }
+        }
     }
 
     private fun observeTracks() {
@@ -99,6 +118,16 @@ class TracksViewModel @Inject constructor(
     fun onRideTypeChange(rideType: RideTypeFilter) =
         _state.update { it.copy(rideType = rideType, focusedIds = emptySet()) }
 
+    fun onRegionChange(region: String?) =
+        _state.update { it.copy(region = region, focusedIds = emptySet()) }
+
+    fun onToggleFavoritesOnly() =
+        _state.update { it.copy(favoritesOnly = !it.favoritesOnly, focusedIds = emptySet()) }
+
+    fun onToggleFavorite(uuid: String) {
+        viewModelScope.launch { preferences.toggleFavoriteTrack(uuid) }
+    }
+
     fun onFocusTracks(ids: Set<String>) = _state.update { it.copy(focusedIds = ids) }
 
     fun clearFocus() = _state.update {
@@ -111,6 +140,8 @@ class TracksViewModel @Inject constructor(
             difficulty = DifficultyFilter.ALL,
             surface = SurfaceFilter.ALL,
             rideType = RideTypeFilter.ALL,
+            region = null,
+            favoritesOnly = false,
             focusedIds = emptySet(),
         )
     }
