@@ -6,4 +6,10 @@
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
         <item name="android:windowBackground">@android:color/white</item>
     </style>
+
+    <style name="Theme.CyclingInSerbia.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@android:color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/dbb_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.CyclingInSerbia</item>
+    </style>
 </resources>
