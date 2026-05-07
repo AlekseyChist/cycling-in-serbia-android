@@ -683,9 +683,8 @@ private fun TrackCard(
 ) {
     val borderColor = if (isSelected) AppColors.Primary else Color.Transparent
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 2.dp),
         colors = CardDefaults.cardColors(
