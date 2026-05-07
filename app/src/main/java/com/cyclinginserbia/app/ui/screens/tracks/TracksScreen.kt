@@ -525,9 +525,9 @@ private fun PillChip(
         animationSpec = tween(150),
         label = "pill-text",
     )
-    val interactionSource = remember { MutableInteractionSource() }
 
     Surface(
+        onClick = onClick,
         modifier = Modifier
             .height(34.dp)
             .shadow(elevation = 3.dp, shape = RoundedCornerShape(50)),
@@ -535,13 +535,7 @@ private fun PillChip(
         color = background,
     ) {
         Box(
-            modifier = Modifier
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    onClick = onClick,
-                )
-                .padding(horizontal = 14.dp),
+            modifier = Modifier.padding(horizontal = 14.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(
