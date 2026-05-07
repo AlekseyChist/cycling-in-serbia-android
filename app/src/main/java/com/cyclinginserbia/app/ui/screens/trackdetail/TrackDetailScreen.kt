@@ -61,6 +61,7 @@ import com.cyclinginserbia.app.data.model.Track
 import com.cyclinginserbia.app.ui.components.TrackMap
 import com.cyclinginserbia.app.ui.screens.tracks.trackHeroRes
 import com.cyclinginserbia.app.ui.theme.AppColors
+import com.cyclinginserbia.app.util.RouteEstimation
 import com.cyclinginserbia.app.ui.theme.ChipColors
 import com.cyclinginserbia.app.ui.theme.ChipPalette
 
@@ -275,7 +276,7 @@ private fun StatsGrid(track: Track) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         StatCard("Distance", "${track.distanceKm} km", Modifier.weight(1f))
         StatCard("Elevation", "${track.elevationM} m", Modifier.weight(1f))
-        StatCard("Time", track.estimatedTime?.takeIf { it.isNotBlank() } ?: "—", Modifier.weight(1f))
+        StatCard("Time", RouteEstimation.displayTime(track), Modifier.weight(1f))
         StatCard(
             "Difficulty",
             track.difficulty.name.replaceFirstChar { it.titlecase() },
