@@ -46,6 +46,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -380,15 +381,44 @@ private fun RoutePreview(track: Track) {
                 color = AppColors.Foreground,
             ),
         )
-        TrackMap(
-            track = track,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp)
-                .clip(RoundedCornerShape(12.dp)),
+        if (track.route.size < MIN_ROUTE_POINTS_FOR_PREVIEW) {
+            RoutePreviewPlaceholder()
+        } else {
+            TrackMap(
+                track = track,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+            )
+        }
+    }
+}
+
+@Composable
+private fun RoutePreviewPlaceholder() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(180.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(AppColors.Muted),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = "Route preview unavailable — download GPX to follow in a navigation app",
+            style = TextStyle(
+                fontSize = 13.sp,
+                color = AppColors.Gray500,
+                lineHeight = 18.sp,
+            ),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 24.dp),
         )
     }
 }
+
+private const val MIN_ROUTE_POINTS_FOR_PREVIEW = 5
 
 @Composable
 private fun ActionButtons(
