@@ -474,7 +474,7 @@ private fun ActionButtons(
             )
             Spacer(Modifier.width(8.dp))
             Text(
-                text = "Navigate to Start",
+                text = "Open Start in Maps",
                 style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Medium),
             )
         }
