@@ -196,6 +196,13 @@ fun TracksScreen(
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                     )
 
+                    MapLegend(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .statusBarsPadding()
+                            .padding(top = 76.dp, end = 16.dp),
+                    )
+
                     if (showFilters) {
                         FiltersModalSheet(
                             difficulty = state.difficulty,
