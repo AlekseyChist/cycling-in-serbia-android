@@ -7,12 +7,13 @@ lifecycle = "2.8.7"
 activityCompose = "1.9.3"
 composeBom = "2024.12.01"
 navigationCompose = "2.8.5"
-hilt = "2.52"
+hilt = "2.51.1"
 hiltNavigationCompose = "1.2.0"
 coroutines = "1.9.0"
 coil = "2.7.0"
-room = "2.6.1"
+room = "2.7.0"
 datastore = "1.1.1"
+coreSplashscreen = "1.0.1"
 supabase = "3.0.3"
 ktor = "3.0.1"
 osmdroid = "6.1.20"
@@ -58,6 +59,9 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 # DataStore
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
+# SplashScreen
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
+
 # Supabase (Kotlin)
 supabase-bom = { group = "io.github.jan-tennert.supabase", name = "bom", version.ref = "supabase" }
 supabase-postgrest = { group = "io.github.jan-tennert.supabase", name = "postgrest-kt" }
@@ -65,8 +69,10 @@ supabase-auth = { group = "io.github.jan-tennert.supabase", name = "auth-kt" }
 supabase-storage = { group = "io.github.jan-tennert.supabase", name = "storage-kt" }
 supabase-realtime = { group = "io.github.jan-tennert.supabase", name = "realtime-kt" }
 
-# Ktor (HTTP engine for Supabase)
+# Ktor (HTTP engine for Supabase + standalone Strava client)
 ktor-client-android = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktor" }
+ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
 # osmdroid
 osmdroid-android = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }

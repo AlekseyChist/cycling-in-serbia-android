@@ -1,117 +1,122 @@
 # Cycling in Serbia — Android (Kotlin)
 
-Native Android port of the **Cycling in Serbia** PWA.
-Stack: Kotlin · Jetpack Compose · Material 3 · Hilt · Coroutines · Supabase (`supabase-kt`) · osmdroid · Room · Coil.
+Нативное Android-приложение для велоклуба **DBB** (Belgrade Cycling Club) — список туров по Сербии, ближайшие групповые покатушки от Strava-клуба, веломагазины Белграда и правила дорожного движения для велосипедистов.
 
-The Vite/React web project (`Uaecyclinghubappdesign`) is **not** abandoned — we keep it alive while migrating to native. Same Supabase backend on both sides.
-
----
-
-## 1. First open in Android Studio
-
-1. **Studio version**: Android Studio Ladybug (2024.2.x) or newer.
-2. `File → Open` → выбрать папку `C:\Users\prost\CyclingInSerbia`.
-3. Studio → "Trust project" → подождать первый Gradle Sync (5–10 минут, качается AGP 8.7, Kotlin 2.1, Compose, Supabase, osmdroid).
-4. Если предложит установить Android SDK Platform 35 / Build-Tools — соглашаемся.
-5. Если предложит JDK 17 — соглашаемся (Android Studio обычно ставит свой Embedded JDK).
-6. Создаём AVD: `Tools → Device Manager → Create Device` → Pixel 7, system image API 35.
-7. `Run ▶` (Shift+F10).
-
-При первом запуске должен открыться Onboarding-экран → Get Started → список реальных треков из Supabase → клик по треку → детальный экран с картой OSM и polyline маршрута.
+Это нативный порт PWA-версии (`Uaecyclinghubappdesign`) — обе версии живут параллельно и используют один и тот же бэкенд Supabase.
 
 ---
 
-## 2. Конфигурация
+## Что внутри
 
-### Supabase
-Креды лежат в `local.properties` (НЕ в git). Используется тот же проект, что и в вебе:
-```
-SUPABASE_URL=https://umaeqrhjnfawmqdtovjt.supabase.co
-SUPABASE_ANON_KEY=sb_publishable_...
-```
-Они прокидываются в код через `BuildConfig` (см. `app/build.gradle.kts`).
+### 🛣️ Tracks — карта с маршрутами
+- **Map-first экран:** osmdroid-карта во весь экран с polyline'ами всех 114 маршрутов из Supabase.
+- Цвет линии = сложность маршрута (Easy/Medium/Hard).
+- Кластеры в местах, где несколько маршрутов начинаются рядом (~200 м); тап на кластер раскрывает все треки в нижнем листе.
+- **Поиск + фильтры в Bottom Sheet:** Difficulty / Surface / Ride Type (Coffee / Dark / Sun / DBB+ / Misc) / Region + переключатель «Только избранное».
+- **Избранное** — сердечко на карточке. Сохраняется через DataStore, переживает перезапуск.
+- Тап по polyline или кластеру с одним треком → лист фокусируется на этом треке, остальные тускнеют.
+- **Офлайн-кэш:** SSoT через Room — список рендерится мгновенно, фоновый sync с Supabase подтягивает свежие данные. Stale-window 6 часов.
 
-### Карты
-osmdroid использует raster-тайлы OpenStreetMap — те же, что и Leaflet в вебе. API key не нужен.
+### 🗺️ TrackDetail — карточка маршрута
+- Hero-фото 280 dp + плавающие круглые кнопки Back/Share поверх.
+- Сетка статов 2×2: Distance / Elevation / Time / Difficulty.
+- About + блок Safety Notes (амбер-предупреждение).
+- Превью-карта 180 dp с polyline'ом маршрута.
+- DBB tip-карточка с подсказкой.
+- **Действия:**
+  - **Download GPX** — качает `.gpx` в `Downloads/` через системный DownloadManager.
+  - **Navigate to Start** — пробует `google.navigation:` (велорежим) → fallback на универсальный `maps.google.com/dir` → fallback на `geo:`.
+  - **Share** — стандартный Intent.ACTION_SEND с текстом и GPX-ссылкой.
 
----
+### 📅 Events — групповые покатушки
+- **Live-фид от Strava-клуба DBB** через серверный proxy веб-приложения (`/api/strava/club-events`). Без OAuth для пользователя и без `client_secret` в APK.
+- Если proxy недоступен — fallback на локальный генератор повторяющихся ивентов клуба (Dark-On-Draft четверг, Coffee Ride суббота, Rekafary среда, Burekfast вторник).
+- Фильтры по типу + поиск.
+- **EventDetail:** hero-карточка, инфо-блок, секции *What to bring* и *Timeline*, кнопки *Add to Calendar* и *Open in Strava*.
 
-## 3. Что готово
+### 🏪 Shops — веломагазины Белграда
+- 4-табовый segmented control: All / Shops / Services / Friends.
+- Карточки магазинов с FlowRow-футером (адаптивно ломается на узких экранах).
+- Личные контакты (Mihail, Marko, Denis, Lena & Artur) — с круглым логотипом-аватаркой.
+- Inline-ссылки на Instagram / сайт / телефон.
 
-| Слой | Статус |
-|---|---|
-| Gradle skeleton + version catalog | ✅ |
-| Material 3 тема (light/dark + Material You dynamic colors на API 31+) | ✅ |
-| Single-Activity + Navigation Compose | ✅ |
-| BottomNav (Tracks / Events / Shops / Rules) | ✅ |
-| Onboarding-заглушка | ✅ |
-| Supabase-kt клиент + Hilt DI | ✅ |
-| `TrackRepository` — `getPublishedTracks()`, `getTrackByLegacyId()`, `gpxPublicUrl()` | ✅ |
-| `TracksScreen` — реальный список из Supabase, карточки с difficulty-цветом | ✅ |
-| `TrackDetailScreen` — детали + osmdroid-карта с polyline и стартовым маркером | ✅ |
-| EventsScreen / ShopsScreen / RegulationsScreen | заглушки |
+### 📜 Regulations — ПДД для велосипедистов
+- 4 категории, 18 правил.
+- Sticky search + раскрывающиеся карточки.
+- Закладки (в памяти текущей сессии).
+- Inline-ссылки `[label](url)` и пояснительные пиктограммы (`__distance`, `__overlap`, `__overshoot` и т. д.).
 
----
+### 👋 Onboarding
+- Cream-градиентный hero, 88 dp orange-логотип, 3 строки фич, кнопка *Get Started*.
+- Намеренно показывается на каждом cold start — это «обложка», под которой греется кэш Tracks (SWR-паттерн).
 
-## 4. Что портировать дальше (по приоритету)
-
-1. **EventsScreen + EventDetailScreen** — таблица `events` в Supabase, использовать `useClubEvents.ts` из веба как образец.
-2. **ShopsScreen** — карточки магазинов, аналогично `ShopCard.tsx`.
-3. **RegulationsScreen** — статический контент.
-4. **MapView с группировкой маркеров** — портировать `groupTracksByStartPoint` из `src/app/components/map/MapView.tsx`. Сейчас на `TrackDetailScreen` карта показывает только один трек; общая карта на TracksScreen — следующий шаг.
-5. **GPX-парсер** — порт `src/utils/gpxParser.ts` на Kotlin (или просто использовать `route_points` из БД, как сейчас).
-6. **Strava интеграция** — `src/services/stravaService.ts` → нативный OAuth.
-7. **BottomSheet** — Material 3 `ModalBottomSheet`.
-8. **Офлайн-кэш** — Room для треков (DAO + entity), синхронизация через repository.
-9. **Push-уведомления** — Firebase Cloud Messaging.
-10. **Иконки приложения и сплэш-скрин** — пока стоят placeholder-векторы; заменить на дизайн-иконки.
-
----
-
-## 5. Архитектурные решения
-
-- **Single-Activity + NavHost** — один `MainActivity`, навигация полностью через Compose. Стандарт Google.
-- **MVVM**: `ViewModel` владеет `StateFlow<UiState>`, экран собирает через `collectAsStateWithLifecycle()`.
-- **Hilt**: SupabaseClient — singleton, репозитории — `@Singleton`. ViewModels — `@HiltViewModel`.
-- **Material 3**: dynamic colors включены на API 31+; иначе — emerald-палитра, повторяющая веб.
-- **osmdroid вместо Google Maps** — open source, без API-key, OSM-тайлы, прямой аналог Leaflet.
-- **supabase-kt вместо REST вручную** — реиспользует Postgrest/Auth/Storage паттерны как в JS-клиенте.
-- **`legacyId` как навигационный ID** — тот же подход, что в вебе; UUID `id` остаётся как primary key.
+### 🎨 Дизайн-система
+- Strava-orange brand color (`#FC5200`), Material 3 light-only тема.
+- Единый источник цветов: `AppColors.kt` (Tailwind-derived палитра + warm tints).
+- Канонические компоненты: `SearchField`, `PillChip`, `EmptyState`.
+- Все экраны рендерятся в общий `Scaffold` из `RootNavigation` с `BottomNavigation` (Tracks / Events / Shops / Rules).
+- Splash screen (белый, центральный логотип) → Onboarding (cream) → главный экран.
 
 ---
 
-## 6. Структура проекта
+## Стек
 
-```
-app/src/main/java/com/cyclinginserbia/app/
-├── MainActivity.kt              — Compose host
-├── CyclingApp.kt                — Application + Hilt + osmdroid init
-├── di/AppModule.kt              — Hilt graph
-├── data/
-│   ├── model/Track.kt           — domain model
-│   ├── supabase/
-│   │   ├── SupabaseClientProvider.kt
-│   │   └── TrackDto.kt          — wire format → domain mapper
-│   └── repository/TrackRepository.kt
-└── ui/
-    ├── theme/                   — Color, Type, Theme
-    ├── navigation/              — Destination, RootNavigation, BottomBar
-    ├── components/TrackMap.kt   — osmdroid wrapper
-    └── screens/
-        ├── onboarding/
-        ├── tracks/              — list + ViewModel
-        ├── trackdetail/         — detail + ViewModel + map
-        ├── events/
-        ├── shops/
-        └── regulations/
-```
+- **Язык / UI:** Kotlin 2.1.0, Jetpack Compose, Material 3
+- **DI:** Hilt 2.51.1 + kapt _(см. quirks ниже)_
+- **Async:** Coroutines + Flow
+- **Backend:** [supabase-kt 3.0](https://github.com/supabase-community/supabase-kt) — реиспользуем тот же Supabase-проект, что у веба.
+- **Карты:** [osmdroid 6.1](https://github.com/osmdroid/osmdroid) — OSM-тайлы без API-key, прямой аналог Leaflet из веба.
+- **Локальное хранилище:** Room 2.7.0 (треки SSoT) + DataStore Preferences (sync timestamp, избранное).
+- **HTTP:** Ktor (под капотом supabase-kt + кастомный `StravaService`).
+- **Сериализация:** kotlinx.serialization
+- **Картинки:** Coil
+- **Min SDK:** 26 (Android 8.0), **Target/Compile SDK:** 35 (Android 15)
 
 ---
 
-## 7. Команды (из терминала)
+## Первый запуск
+
+### 1. Клон и настройка
 
 ```powershell
-# сборка
+git clone https://github.com/AlekseyChist/cycling-in-serbia-android.git
+cd cycling-in-serbia-android
+```
+
+### 2. `local.properties`
+
+Файл в `.gitignore` — после `clone` его НЕТ, нужно создать вручную в корне проекта:
+
+```properties
+# путь к Android SDK (свой)
+sdk.dir=C\:\\Users\\<you>\\AppData\\Local\\Android\\Sdk
+
+# Supabase — тот же проект, что у веб-версии
+SUPABASE_URL=https\://umaeqrhjnfawmqdtovjt.supabase.co
+SUPABASE_ANON_KEY=sb_publishable_...
+```
+
+`SUPABASE_ANON_KEY` — публичный ключ, безопасно держать в клиенте (RLS на стороне Supabase). Значения прокидываются в Kotlin через `BuildConfig`.
+
+### 3. Android Studio
+
+- Studio Ladybug (2024.2.x) или новее.
+- `File → Open` → выбрать папку проекта → *Trust project*.
+- Подождать первый Gradle Sync (5–10 мин — качает AGP 8.13, Kotlin 2.1, Compose, Supabase, osmdroid, Hilt, Room).
+- Если предложит SDK 35 / Build-Tools / JDK 17 — соглашаемся.
+- Создать AVD: Pixel 7, system image API 35.
+- `Run ▶` (Shift+F10).
+
+### 4. Карты
+
+osmdroid использует raster-тайлы OpenStreetMap — те же, что Leaflet в вебе. **API key не нужен.**
+
+---
+
+## Сборка из терминала
+
+```powershell
+# debug APK (пойдёт в app/build/outputs/apk/debug/app-debug.apk)
 .\gradlew :app:assembleDebug
 
 # установка на подключённое устройство/AVD
@@ -123,6 +128,127 @@ app/src/main/java/com/cyclinginserbia/app/
 
 ---
 
-## 8. Git
+## Архитектура
 
-Репозиторий ещё не инициализирован. Когда будем готовы — `git init` + первый коммит, потом создадим отдельный GitHub-репозиторий `cycling-in-serbia-android` и запушим.
+### Single-Activity + NavHost
+Один `MainActivity`, навигация полностью через Compose Navigation. Стандарт Google.
+
+### MVVM + StateFlow
+- `@HiltViewModel` владеет `StateFlow<UiState>`.
+- Экран собирает через `collectAsStateWithLifecycle()`.
+- `UiState` — обычная `data class` с флагами `isInitialLoading / isSyncing / syncError` (без sealed Loading/Ready/Error).
+
+### SSoT через Room
+- `TrackRepository` отдаёт `Flow<List<Track>>` из Room — UI не ходит напрямую в Supabase.
+- `refresh()` пишет результаты Supabase в Room и стампит `tracks_last_sync_at` в DataStore.
+- `refreshIfStale()` no-op'ит, если кэш свежий (<6 ч). Триггерится в `OnboardingViewModel`, чтобы кэш был тёплый к моменту открытия Tracks.
+
+### Strava через Vercel proxy
+Веб-приложение (`uaecyclinghubappdesign.vercel.app`) держит Strava `client_id` / `client_secret` / `refresh_token` на сервере и отдаёт events клуба JSON-ом по `/api/strava/club-events`. Android просто бьёт этот endpoint через ktor — никаких токенов в APK.
+
+### DI
+- Hilt `@Singleton` на репозитории и Supabase-клиент.
+- ViewModels — `@HiltViewModel`.
+
+### Серверная часть
+**Supabase содержит ТОЛЬКО** таблицу `tracks` (114 опубликованных) + Storage bucket `gpx-files`. Events / Shops / Regulations / Onboarding — НЕ в Supabase: либо генерятся клиентом (events fallback), либо статически зашиты, либо приходят от внешнего API (Strava через proxy).
+
+---
+
+## Структура проекта
+
+```
+app/src/main/java/com/cyclinginserbia/app/
+├── MainActivity.kt              — Compose host
+├── CyclingApp.kt                — Application + Hilt + osmdroid init
+├── di/AppModule.kt              — Hilt graph
+├── data/
+│   ├── model/                   — domain models (Track, Event, Shop, Regulation)
+│   ├── supabase/                — wire DTOs + клиент
+│   ├── strava/                  — StravaService через Vercel proxy
+│   ├── local/db/                — Room (entities, DAO, mapper)
+│   ├── local/datastore/         — SyncPreferences (timestamps, favorites)
+│   └── repository/              — TrackRepository, EventRepository, ShopRepository, RegulationRepository
+└── ui/
+    ├── theme/                   — AppColors, Theme, Type
+    ├── navigation/              — Destination, RootNavigation, BottomBar
+    ├── components/              — SearchField, PillChip, EmptyState, TrackMap
+    └── screens/
+        ├── onboarding/
+        ├── tracks/              — map-first list + filters modal sheet + favorites
+        ├── trackdetail/         — hero, stats, route preview, GPX/Navigate/Share
+        ├── events/              — Strava live + recurring fallback
+        ├── shops/               — segmented tabs + cards
+        └── regulations/         — categorized rules with bookmarks
+```
+
+---
+
+## Git workflow
+
+### Схема веток (gitflow-lite)
+
+```
+main   ●──────  стабильные релизы (только PR из dev, защищена)
+        │
+dev    ●──────  ежедневная интеграция: сюда сливаются все фичи
+        │
+feat/* ──────  короткоживущие feature-ветки от dev
+```
+
+- **`main`** — то, что считается «работающим». Только через PR из `dev`.
+- **`dev`** — рабочая ветка. Все фичи нарезаются от неё и через PR возвращаются обратно.
+- **`feat/*` / `fix/*` / `chore/*`** — одна логическая правка = одна ветка. После мержа ветка не реюзается.
+
+### Branch protection на `main`
+
+| Правило | Значение |
+|---|---|
+| Прямой `git push` в `main` | ❌ запрещён |
+| `git push --force` | ❌ запрещён |
+| Удаление ветки `main` | ❌ запрещено |
+| `enforce_admins` | ✅ правила распространяются и на админа |
+
+### Default branch
+
+GitHub default — `main`, поэтому при создании PR из feature-ветки **обязательно** указывать базу `dev`:
+
+```powershell
+gh pr create --base dev --fill
+```
+
+### Релиз (`dev → main`)
+
+Когда `dev` стабилен:
+
+```powershell
+gh pr create --base main --head dev --title "release: vX.Y.Z" --body "<changelog>"
+gh pr merge --merge   # без squash, чтобы сохранить историю фич
+```
+
+---
+
+## Build environment quirks (Windows + Kotlin 2.1.0)
+
+- **Hilt пинуется на 2.51.1 + kapt** (НЕ 2.52+, НЕ KSP). Причина: 2.52+ ввёл LazyClassKey ProGuard-rule generator, эмитит Windows-style `META-INF\\proguard\\...` пути → `JavaFileManager` отвергает их с `Invalid relative name`. Plus, Hilt KSP regression на Kotlin 2.1.0. Room — на KSP, всё ок.
+- **JBR 21** из Android Studio (`C:\Program Files\Android\Android Studio\jbr`) — `JAVA_HOME` для CLI-сборок. Project compile target — JDK 17, но Gradle сам бежит на JBR.
+
+---
+
+## Что осталось / Roadmap
+
+- ✅ Все основные экраны портированы и обведены под единую дизайн-систему.
+- ✅ Strava live events через proxy.
+- ✅ Room offline cache.
+- ✅ Splash screen + brand launcher icon.
+- ✅ Region + favorites filters в Tracks.
+- ⏳ Release signing config (для подписанных APK + Play Store).
+- ⏳ ProGuard/R8 minification (сейчас release без minify, APK ~30 MB).
+- ⏳ Push-уведомления о ближайших ивентах.
+- ⏳ Офлайн-кэш OSM-тайлов в видимых регионах.
+
+---
+
+## Сестринский проект
+
+Веб-версия живёт в [`Uaecyclinghubappdesign`](https://github.com/AlekseyChist) (Vite + React + Supabase). Схема и имена полей там — авторитетный источник: `src/services/trackService.ts`, `src/app/components/map/MapView.tsx`, `src/utils/gpxParser.ts`. Один и тот же Supabase, на двух фронтах — пока существуют параллельно.

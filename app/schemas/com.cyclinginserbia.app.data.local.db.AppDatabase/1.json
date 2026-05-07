@@ -1,0 +1,159 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "748dac35c48f8c3cf56221d5212649fd",
+    "entities": [
+      {
+        "tableName": "tracks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` TEXT NOT NULL, `legacy_id` TEXT NOT NULL, `name` TEXT NOT NULL, `region` TEXT NOT NULL, `distance_km` REAL NOT NULL, `elevation_m` INTEGER NOT NULL, `difficulty` TEXT NOT NULL, `surface` TEXT NOT NULL, `thumbnail_url` TEXT NOT NULL, `coordinates` TEXT, `description` TEXT, `safety_notes` TEXT, `estimated_time` TEXT, `photos` TEXT NOT NULL, `start_point` TEXT, `end_point` TEXT, `gpx_file_name` TEXT, `route` TEXT NOT NULL, `is_published` INTEGER NOT NULL, `sort_order` INTEGER NOT NULL, PRIMARY KEY(`uuid`))",
+        "fields": [
+          {
+            "fieldPath": "uuid",
+            "columnName": "uuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "legacyId",
+            "columnName": "legacy_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "region",
+            "columnName": "region",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "distanceKm",
+            "columnName": "distance_km",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "elevationM",
+            "columnName": "elevation_m",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "difficulty",
+            "columnName": "difficulty",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "surface",
+            "columnName": "surface",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "thumbnailUrl",
+            "columnName": "thumbnail_url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "coordinates",
+            "columnName": "coordinates",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "safetyNotes",
+            "columnName": "safety_notes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "estimatedTime",
+            "columnName": "estimated_time",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "photos",
+            "columnName": "photos",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startPoint",
+            "columnName": "start_point",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endPoint",
+            "columnName": "end_point",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "gpxFileName",
+            "columnName": "gpx_file_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "route",
+            "columnName": "route",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isPublished",
+            "columnName": "is_published",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sortOrder",
+            "columnName": "sort_order",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "uuid"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_tracks_legacy_id",
+            "unique": true,
+            "columnNames": [
+              "legacy_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_tracks_legacy_id` ON `${TABLE_NAME}` (`legacy_id`)"
+          },
+          {
+            "name": "index_tracks_is_published_sort_order",
+            "unique": false,
+            "columnNames": [
+              "is_published",
+              "sort_order"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tracks_is_published_sort_order` ON `${TABLE_NAME}` (`is_published`, `sort_order`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '748dac35c48f8c3cf56221d5212649fd')"
+    ]
+  }
+}

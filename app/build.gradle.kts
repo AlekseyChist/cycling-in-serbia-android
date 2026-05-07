@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    kotlin("kapt")
 }
 
 val localProperties = Properties().apply {
@@ -25,8 +26,8 @@ android {
         applicationId = "com.cyclinginserbia.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -69,6 +70,10 @@ android {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     // AndroidX core
     implementation(libs.androidx.core.ktx)
@@ -89,9 +94,11 @@ dependencies {
     // Navigation
     implementation(libs.androidx.navigation.compose)
 
-    // Hilt
+    // Hilt — kapt is stable on Kotlin 2.1.0 (Hilt's KSP support is unstable
+    // for Kotlin 2.x). Hilt is pinned at 2.51.1 (pre-LazyClassKey) to avoid
+    // the Windows META-INF\\proguard\\... path bug from 2.52+.
     implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
     // Coroutines + serialization
@@ -109,6 +116,9 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
 
+    // SplashScreen
+    implementation(libs.androidx.core.splashscreen)
+
     // Supabase
     implementation(platform(libs.supabase.bom))
     implementation(libs.supabase.postgrest)
@@ -116,6 +126,8 @@ dependencies {
     implementation(libs.supabase.storage)
     implementation(libs.supabase.realtime)
     implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
 
     // osmdroid (OSM raster tiles, direct Leaflet analogue)
     implementation(libs.osmdroid.android)

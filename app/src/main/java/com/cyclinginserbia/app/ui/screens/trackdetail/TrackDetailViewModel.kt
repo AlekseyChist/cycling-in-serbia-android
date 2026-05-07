@@ -10,12 +10,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed interface TrackDetailUiState {
     data object Loading : TrackDetailUiState
-    data class Ready(val track: Track) : TrackDetailUiState
+    data class Ready(val track: Track, val gpxUrl: String?) : TrackDetailUiState
     data class Error(val message: String) : TrackDetailUiState
 }
 
@@ -30,17 +31,35 @@ class TrackDetailViewModel @Inject constructor(
     private val _state = MutableStateFlow<TrackDetailUiState>(TrackDetailUiState.Loading)
     val state: StateFlow<TrackDetailUiState> = _state.asStateFlow()
 
-    init { load() }
+    private val refreshDone = MutableStateFlow(false)
 
-    fun load() {
-        _state.value = TrackDetailUiState.Loading
+    init {
+        observeTrack()
+        triggerRefresh()
+    }
+
+    private fun observeTrack() {
         viewModelScope.launch {
-            runCatching { repository.getTrackByLegacyId(trackId) }
-                .onSuccess { track ->
-                    _state.value = if (track != null) TrackDetailUiState.Ready(track)
-                    else TrackDetailUiState.Error("Track not found")
+            combine(
+                repository.observeTrack(trackId),
+                refreshDone,
+            ) { track, done ->
+                when {
+                    track != null -> {
+                        val gpxUrl = track.gpxFileName?.let { repository.gpxPublicUrl(it) }
+                        TrackDetailUiState.Ready(track = track, gpxUrl = gpxUrl)
+                    }
+                    !done -> TrackDetailUiState.Loading
+                    else -> TrackDetailUiState.Error("Track not found")
                 }
-                .onFailure { _state.value = TrackDetailUiState.Error(it.message ?: "Unknown error") }
+            }.collect { _state.value = it }
+        }
+    }
+
+    private fun triggerRefresh() {
+        viewModelScope.launch {
+            runCatching { repository.refreshIfStale() }
+            refreshDone.value = true
         }
     }
 }
