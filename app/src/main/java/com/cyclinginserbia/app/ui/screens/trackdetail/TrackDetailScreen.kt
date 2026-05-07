@@ -46,6 +46,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -61,6 +62,7 @@ import com.cyclinginserbia.app.data.model.Track
 import com.cyclinginserbia.app.ui.components.TrackMap
 import com.cyclinginserbia.app.ui.screens.tracks.trackHeroRes
 import com.cyclinginserbia.app.ui.theme.AppColors
+import com.cyclinginserbia.app.util.RouteEstimation
 import com.cyclinginserbia.app.ui.theme.ChipColors
 import com.cyclinginserbia.app.ui.theme.ChipPalette
 
@@ -275,7 +277,7 @@ private fun StatsGrid(track: Track) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         StatCard("Distance", "${track.distanceKm} km", Modifier.weight(1f))
         StatCard("Elevation", "${track.elevationM} m", Modifier.weight(1f))
-        StatCard("Time", track.estimatedTime?.takeIf { it.isNotBlank() } ?: "—", Modifier.weight(1f))
+        StatCard("Time", RouteEstimation.displayTime(track), Modifier.weight(1f))
         StatCard(
             "Difficulty",
             track.difficulty.name.replaceFirstChar { it.titlecase() },
@@ -379,15 +381,44 @@ private fun RoutePreview(track: Track) {
                 color = AppColors.Foreground,
             ),
         )
-        TrackMap(
-            track = track,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp)
-                .clip(RoundedCornerShape(12.dp)),
+        if (track.route.size < MIN_ROUTE_POINTS_FOR_PREVIEW) {
+            RoutePreviewPlaceholder()
+        } else {
+            TrackMap(
+                track = track,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+            )
+        }
+    }
+}
+
+@Composable
+private fun RoutePreviewPlaceholder() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(180.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(AppColors.Muted),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = "Route preview unavailable — download GPX to follow in a navigation app",
+            style = TextStyle(
+                fontSize = 13.sp,
+                color = AppColors.Gray500,
+                lineHeight = 18.sp,
+            ),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 24.dp),
         )
     }
 }
+
+private const val MIN_ROUTE_POINTS_FOR_PREVIEW = 5
 
 @Composable
 private fun ActionButtons(
@@ -443,7 +474,7 @@ private fun ActionButtons(
             )
             Spacer(Modifier.width(8.dp))
             Text(
-                text = "Navigate to Start",
+                text = "Open Start in Maps",
                 style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Medium),
             )
         }

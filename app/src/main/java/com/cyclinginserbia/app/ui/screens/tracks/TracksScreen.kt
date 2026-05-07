@@ -1,5 +1,6 @@
 package com.cyclinginserbia.app.ui.screens.tracks
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -29,6 +30,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Tune
@@ -99,6 +101,15 @@ fun TracksScreen(
     fun focusAndReveal(ids: Set<String>) {
         viewModel.onFocusTracks(ids)
         scope.launch { sheetState.expand() }
+    }
+
+    // Hardware/system back: when the user has focused on one or more tracks,
+    // the natural action is "go back to seeing all tracks", not "leave the
+    // screen". So back clears focus and collapses the sheet to its peek
+    // state. When focus is empty, fall through to default nav back.
+    BackHandler(enabled = state.isFocused) {
+        viewModel.clearFocus()
+        scope.launch { sheetState.partialExpand() }
     }
 
     val showInitialLoading = state.isInitialLoading && state.tracks.isEmpty()
@@ -183,6 +194,13 @@ fun TracksScreen(
                             .align(Alignment.TopCenter)
                             .statusBarsPadding()
                             .padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+
+                    MapLegend(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .statusBarsPadding()
+                            .padding(top = 76.dp, end = 16.dp),
                     )
 
                     if (showFilters) {
@@ -514,9 +532,9 @@ private fun PillChip(
         animationSpec = tween(150),
         label = "pill-text",
     )
-    val interactionSource = remember { MutableInteractionSource() }
 
     Surface(
+        onClick = onClick,
         modifier = Modifier
             .height(34.dp)
             .shadow(elevation = 3.dp, shape = RoundedCornerShape(50)),
@@ -524,13 +542,7 @@ private fun PillChip(
         color = background,
     ) {
         Box(
-            modifier = Modifier
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    onClick = onClick,
-                )
-                .padding(horizontal = 14.dp),
+            modifier = Modifier.padding(horizontal = 14.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -648,11 +660,14 @@ private fun SheetHeader(
             modifier = Modifier.weight(1f),
         )
         if (isFocused) {
-            TextButton(onClick = onClearFocus) {
-                Text(
-                    text = "Show all",
-                    color = AppColors.Primary,
-                    fontWeight = FontWeight.SemiBold,
+            IconButton(
+                onClick = onClearFocus,
+                modifier = Modifier.size(36.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Close,
+                    contentDescription = "Show all tracks",
+                    tint = AppColors.Gray700,
                 )
             }
         }
@@ -669,9 +684,8 @@ private fun TrackCard(
 ) {
     val borderColor = if (isSelected) AppColors.Primary else Color.Transparent
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 2.dp),
         colors = CardDefaults.cardColors(
