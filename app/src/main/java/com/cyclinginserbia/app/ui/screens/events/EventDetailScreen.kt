@@ -1,18 +1,23 @@
 package com.cyclinginserbia.app.ui.screens.events
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -28,14 +33,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -48,7 +50,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.BorderStroke
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cyclinginserbia.app.data.model.Event
@@ -59,7 +60,6 @@ import com.cyclinginserbia.app.ui.theme.AppColors
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventDetailScreen(
     eventId: String,
@@ -68,64 +68,92 @@ fun EventDetailScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Event") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-            )
-        },
-    ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            when (val s = state) {
-                is EventDetailUiState.Loading ->
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                is EventDetailUiState.Error ->
-                    Text(s.message, modifier = Modifier.align(Alignment.Center))
-                is EventDetailUiState.Ready -> Detail(event = s.event)
-            }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppColors.Background),
+    ) {
+        when (val s = state) {
+            is EventDetailUiState.Loading ->
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            is EventDetailUiState.Error ->
+                Text(s.message, modifier = Modifier.align(Alignment.Center))
+            is EventDetailUiState.Ready -> Detail(event = s.event, onBack = onBack)
         }
     }
 }
 
 @Composable
-private fun Detail(event: Event) {
-    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        HeroBanner(event)
-        Column(
+private fun Detail(event: Event, onBack: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+            HeroBanner(event)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+            ) {
+                TitleSection(event)
+                KeyInfoCard(event)
+                event.organizer?.takeIf { event.isFromStrava }?.let { OrganizerCard(it) }
+                DescriptionSection(event)
+                if (event.toBring.isNotEmpty()) WhatToBringSection(event.toBring)
+                if (event.timeline.isNotEmpty()) TimelineSection(event.timeline)
+                ActionButtons(event)
+                StatusFooter(event.status)
+                Spacer(Modifier.height(8.dp))
+            }
+        }
+
+        FloatingTopBar(
+            onBack = onBack,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-        ) {
-            TitleSection(event)
-            KeyInfoCard(event)
-            event.organizer?.takeIf { event.isFromStrava }?.let { OrganizerCard(it) }
-            DescriptionSection(event)
-            if (event.toBring.isNotEmpty()) WhatToBringSection(event.toBring)
-            if (event.timeline.isNotEmpty()) TimelineSection(event.timeline)
-            ActionButtons(event)
-            StatusFooter(event.status)
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+        )
+    }
+}
+
+@Composable
+private fun FloatingTopBar(onBack: () -> Unit, modifier: Modifier = Modifier) {
+    Row(modifier = modifier) {
+        CircleIconButton(onClick = onBack) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                tint = AppColors.Foreground,
+            )
+        }
+    }
+}
+
+@Composable
+private fun CircleIconButton(onClick: () -> Unit, content: @Composable () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .clip(CircleShape)
+            .background(AppColors.Background),
+        contentAlignment = Alignment.Center,
+    ) {
+        IconButton(onClick = onClick, modifier = Modifier.size(36.dp)) {
+            content()
         }
     }
 }
 
 @Composable
 private fun HeroBanner(event: Event) {
-    val (top, bottom) = if (event.isFromStrava) {
-        AppColors.Primary to AppColors.PrimaryDark
-    } else {
-        MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.tertiary
-    }
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp)
-            .background(Brush.verticalGradient(listOf(top, bottom))),
+            .height(220.dp)
+            .background(
+                Brush.verticalGradient(
+                    listOf(AppColors.Primary, AppColors.PrimaryDark),
+                ),
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -137,7 +165,7 @@ private fun HeroBanner(event: Event) {
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = if (event.isFromStrava) "DBB Club Event" else "Event",
+                text = if (event.isFromStrava) "DBB Club Event" else "Community Event",
                 color = Color.White.copy(alpha = 0.9f),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Medium,
@@ -153,6 +181,7 @@ private fun TitleSection(event: Event) {
             text = event.name,
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
+            color = AppColors.Foreground,
         )
         Spacer(Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -167,7 +196,7 @@ private fun KeyInfoCard(event: Event) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        colors = CardDefaults.cardColors(containerColor = AppColors.Muted),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -206,7 +235,7 @@ private fun InfoRow(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = AppColors.Gray500,
             modifier = Modifier.size(20.dp),
         )
         Spacer(Modifier.width(12.dp))
@@ -214,18 +243,19 @@ private fun InfoRow(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = AppColors.Gray500,
             )
             Text(
                 text = primary,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
+                color = AppColors.Foreground,
             )
             if (secondary != null) {
                 Text(
                     text = secondary,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = AppColors.Gray500,
                 )
             }
         }
@@ -237,7 +267,7 @@ private fun OrganizerCard(organizer: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = AppColors.Primary.copy(alpha = 0.08f)),
+        colors = CardDefaults.cardColors(containerColor = AppColors.StravaChipBg),
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -246,7 +276,7 @@ private fun OrganizerCard(organizer: String) {
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(RoundedCornerShape(50))
+                    .clip(CircleShape)
                     .background(AppColors.Primary.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center,
             ) {
@@ -262,12 +292,13 @@ private fun OrganizerCard(organizer: String) {
                 Text(
                     text = "Organized by",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = AppColors.Gray500,
                 )
                 Text(
                     text = organizer,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
+                    color = AppColors.Foreground,
                 )
             }
         }
@@ -283,12 +314,13 @@ private fun DescriptionSection(event: Event) {
             text = "About this event",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            color = AppColors.Foreground,
         )
         Spacer(Modifier.height(6.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = AppColors.Gray500,
         )
     }
 }
@@ -308,6 +340,7 @@ private fun WhatToBringSection(items: List<String>) {
                 text = "What to bring",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
+                color = AppColors.Foreground,
             )
             items.forEach { line ->
                 Row(verticalAlignment = Alignment.Top) {
@@ -321,7 +354,7 @@ private fun WhatToBringSection(items: List<String>) {
                     Text(
                         text = line,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = AppColors.Foreground,
                     )
                 }
             }
@@ -334,7 +367,7 @@ private fun TimelineSection(items: List<TimelineItem>) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        colors = CardDefaults.cardColors(containerColor = AppColors.Muted),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -352,6 +385,7 @@ private fun TimelineSection(items: List<TimelineItem>) {
                     text = "Event Timeline",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
+                    color = AppColors.Foreground,
                 )
             }
             items.forEachIndexed { index, item ->
@@ -371,7 +405,7 @@ private fun TimelineRow(item: TimelineItem, isLast: Boolean) {
             Box(
                 modifier = Modifier
                     .size(10.dp)
-                    .clip(RoundedCornerShape(50))
+                    .clip(CircleShape)
                     .background(AppColors.Primary),
             )
             if (!isLast) {
@@ -395,7 +429,7 @@ private fun TimelineRow(item: TimelineItem, isLast: Boolean) {
             Text(
                 text = item.label,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = AppColors.Foreground,
             )
         }
     }
@@ -411,7 +445,7 @@ private fun ActionButtons(event: Event) {
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = AppColors.Primary,
-                contentColor = Color.White,
+                contentColor = AppColors.PrimaryForeground,
             ),
         ) {
             Icon(Icons.Outlined.CalendarMonth, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -444,13 +478,13 @@ private fun TypeChip(type: EventType) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
-            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .background(AppColors.Gray100)
             .padding(horizontal = 12.dp, vertical = 6.dp),
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            color = AppColors.Gray700,
         )
     }
 }
@@ -458,16 +492,8 @@ private fun TypeChip(type: EventType) {
 @Composable
 private fun StatusChip(status: EventStatus) {
     val (label, container, content) = when (status) {
-        EventStatus.soldOut -> Triple(
-            "Sold Out",
-            MaterialTheme.colorScheme.errorContainer,
-            MaterialTheme.colorScheme.onErrorContainer,
-        )
-        EventStatus.canceled -> Triple(
-            "Canceled",
-            MaterialTheme.colorScheme.error,
-            MaterialTheme.colorScheme.onError,
-        )
+        EventStatus.soldOut -> Triple("Sold Out", AppColors.Amber100, AppColors.Amber700)
+        EventStatus.canceled -> Triple("Canceled", AppColors.Red500, AppColors.Background)
         EventStatus.upcoming -> return
     }
     Box(
@@ -486,14 +512,12 @@ private fun StatusFooter(status: EventStatus) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f),
-        ),
+        colors = CardDefaults.cardColors(containerColor = AppColors.Amber50),
     ) {
         Text(
             text = "Recurring DBB club ride. Confirm route and meeting point on the club's Strava page before joining.",
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onTertiaryContainer,
+            color = AppColors.Amber700,
             modifier = Modifier.padding(12.dp),
         )
     }
