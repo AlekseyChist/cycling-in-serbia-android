@@ -89,10 +89,15 @@ class TracksViewModel @Inject constructor(
         }
     }
 
+    // Always re-fetch on Tracks-tab entry: Room delivers cached data instantly
+    // via observePublishedTracks(), so the UI never blocks; the network call
+    // runs in parallel and Room emits fresh rows when it completes. The 6h
+    // TTL on refreshIfStale was masking server-side data fixes for users who
+    // came back within the same day.
     fun sync() {
         viewModelScope.launch {
             _state.update { it.copy(isSyncing = true, syncError = null) }
-            runCatching { repository.refreshIfStale() }
+            runCatching { repository.refresh() }
                 .onSuccess {
                     _state.update {
                         it.copy(isSyncing = false, isInitialLoading = false, syncError = null)

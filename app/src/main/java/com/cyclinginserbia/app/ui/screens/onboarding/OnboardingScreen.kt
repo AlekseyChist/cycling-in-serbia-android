@@ -231,5 +231,16 @@ private fun BottomBlock(onGetStarted: () -> Unit) {
             ),
             textAlign = TextAlign.Center,
         )
+
+        Spacer(Modifier.height(8.dp))
+
+        Text(
+            text = "Made with ❤️ by Aleksei Chistiakov",
+            style = TextStyle(
+                fontSize = 11.sp,
+                color = AppColors.Gray400,
+            ),
+            textAlign = TextAlign.Center,
+        )
     }
 }

@@ -2,6 +2,7 @@ package com.cyclinginserbia.app.ui.screens.tracks
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -86,6 +87,13 @@ import com.cyclinginserbia.app.ui.theme.ChipColors
 import com.cyclinginserbia.app.ui.theme.ChipPalette
 import kotlinx.coroutines.launch
 
+private val CollapsedSheetPeekHeight = 96.dp
+
+// When the user focuses one or more tracks, the sheet rises just enough to
+// reveal the SheetHeader plus the first focused card — about 240 dp on most
+// devices. The user can still pull it higher to browse the full list.
+private val FocusedSheetPeekHeight = 240.dp
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TracksScreen(
@@ -98,26 +106,32 @@ fun TracksScreen(
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
-    fun focusAndReveal(ids: Set<String>) {
-        viewModel.onFocusTracks(ids)
-        scope.launch { sheetState.expand() }
+    // Sheet stays in PartiallyExpanded state on track tap — we just grow the
+    // peek height so the user sees a hint of what they selected (header +
+    // first focused card), without yanking the full list over the map. They
+    // can pull the sheet up themselves to browse the rest.
+    val peekHeight by animateDpAsState(
+        targetValue = if (state.isFocused) FocusedSheetPeekHeight else CollapsedSheetPeekHeight,
+        label = "tracks-peek-height",
+    )
+
+    fun clearFocusAndCollapse() {
+        viewModel.clearFocus()
+        scope.launch { sheetState.partialExpand() }
     }
 
     // Hardware/system back: when the user has focused on one or more tracks,
     // the natural action is "go back to seeing all tracks", not "leave the
     // screen". So back clears focus and collapses the sheet to its peek
     // state. When focus is empty, fall through to default nav back.
-    BackHandler(enabled = state.isFocused) {
-        viewModel.clearFocus()
-        scope.launch { sheetState.partialExpand() }
-    }
+    BackHandler(enabled = state.isFocused, onBack = ::clearFocusAndCollapse)
 
     val showInitialLoading = state.isInitialLoading && state.tracks.isEmpty()
     val showError = state.tracks.isEmpty() && !state.isInitialLoading && state.syncError != null
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
-        sheetPeekHeight = 96.dp,
+        sheetPeekHeight = peekHeight,
         sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
         sheetContainerColor = AppColors.Background,
         sheetContent = {
@@ -168,12 +182,12 @@ fun TracksScreen(
                         tracks = state.visible,
                         focusedIds = state.focusedIds,
                         onClusterClick = { cluster ->
-                            focusAndReveal(cluster.tracks.map { it.uuid }.toSet())
+                            viewModel.onFocusTracks(cluster.tracks.map { it.uuid }.toSet())
                         },
                         onPolylineClick = { track ->
-                            focusAndReveal(setOf(track.uuid))
+                            viewModel.onFocusTracks(setOf(track.uuid))
                         },
-                        onMapClear = viewModel::clearFocus,
+                        onMapClear = ::clearFocusAndCollapse,
                         modifier = Modifier.fillMaxSize(),
                     )
 
@@ -523,7 +537,7 @@ private fun PillChip(
     onClick: () -> Unit,
 ) {
     val background by animateColorAsState(
-        targetValue = if (isSelected) AppColors.Primary else AppColors.Background,
+        targetValue = if (isSelected) AppColors.Primary else AppColors.Gray100,
         animationSpec = tween(150),
         label = "pill-bg",
     )
@@ -535,9 +549,7 @@ private fun PillChip(
 
     Surface(
         onClick = onClick,
-        modifier = Modifier
-            .height(34.dp)
-            .shadow(elevation = 3.dp, shape = RoundedCornerShape(50)),
+        modifier = Modifier.height(34.dp),
         shape = RoundedCornerShape(50),
         color = background,
     ) {

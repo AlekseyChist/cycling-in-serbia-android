@@ -19,8 +19,9 @@ import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 
-private val SERBIA_CENTER = GeoPoint(44.0165, 21.0059)
-private const val DEFAULT_ZOOM = 7.0
+// Belgrade as the default focus — most tracks (and the DBB community) live around the capital.
+private val DEFAULT_CENTER = GeoPoint(44.7866, 20.4489)
+private const val DEFAULT_ZOOM = 9.5
 
 /** Cap for how close fit-to-bounds is allowed to zoom in on tight loops. */
 private const val FOCUSED_MAX_ZOOM = 14.0
@@ -44,7 +45,7 @@ fun TracksMapView(
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
             controller.setZoom(DEFAULT_ZOOM)
-            controller.setCenter(SERBIA_CENTER)
+            controller.setCenter(DEFAULT_CENTER)
             isVerticalMapRepetitionEnabled = false
             isHorizontalMapRepetitionEnabled = false
         }
@@ -128,15 +129,20 @@ fun TracksMapView(
         onDispose { /* MapView reused via remember */ }
     }
 
+    // Camera moves only when the user actively focuses tracks. On deselect
+    // (and on filter changes that empty/shrink the visible set) we leave the
+    // camera where it is, so tapping nearby elements doesn't fling the user
+    // back to the country overview. Initial Serbia view comes from the
+    // mapView factory above.
     DisposableEffect(focusedIds, tracks) {
-        val targetTracks = if (focusedIds.isEmpty()) tracks
-        else tracks.filter { it.uuid in focusedIds }
-        val points = targetTracks.flatMap { t -> t.route.map { GeoPoint(it.lat, it.lng) } }
-        if (points.isNotEmpty()) {
-            mapView.post {
-                val bounds = BoundingBox.fromGeoPointsSafe(points)
-                val padding = if (focusedIds.isEmpty()) 64 else FOCUSED_PADDING_PX
-                mapView.zoomToBoundingBox(bounds, true, padding, FOCUSED_MAX_ZOOM, 650L)
+        if (focusedIds.isNotEmpty()) {
+            val focusedTracks = tracks.filter { it.uuid in focusedIds }
+            val points = focusedTracks.flatMap { t -> t.route.map { GeoPoint(it.lat, it.lng) } }
+            if (points.isNotEmpty()) {
+                mapView.post {
+                    val bounds = BoundingBox.fromGeoPointsSafe(points)
+                    mapView.zoomToBoundingBox(bounds, true, FOCUSED_PADDING_PX, FOCUSED_MAX_ZOOM, 650L)
+                }
             }
         }
         onDispose { }
