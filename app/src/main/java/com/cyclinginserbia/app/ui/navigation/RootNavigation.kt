@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -24,7 +25,11 @@ import com.cyclinginserbia.app.ui.screens.trackdetail.TrackDetailScreen
 import com.cyclinginserbia.app.ui.screens.tracks.TracksScreen
 
 @Composable
-fun RootNavigation() {
+fun RootNavigation(rootViewModel: RootViewModel) {
+    val initialRoute by rootViewModel.initialRoute.collectAsStateWithLifecycle()
+    // Splash screen is held by MainActivity until initialRoute resolves.
+    val startRoute = initialRoute ?: return
+
     val nav = rememberNavController()
     val backStack by nav.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
@@ -37,11 +42,12 @@ fun RootNavigation() {
     ) { padding ->
         NavHost(
             navController = nav,
-            startDestination = Destination.Onboarding.route,
+            startDestination = startRoute,
             modifier = Modifier.padding(padding),
         ) {
             composable(Destination.Onboarding.route) {
                 OnboardingScreen(onFinished = {
+                    rootViewModel.markOnboardingCompleted()
                     nav.navigate(Destination.Tracks.route) {
                         popUpTo(Destination.Onboarding.route) { inclusive = true }
                     }
