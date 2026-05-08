@@ -501,6 +501,7 @@ private fun DbbTipCard() {
     }
 }
 
+@Composable
 private fun buildDbbTip(): AnnotatedString = buildAnnotatedString {
     withStyle(
         SpanStyle(
