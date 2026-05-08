@@ -128,15 +128,20 @@ fun TracksMapView(
         onDispose { /* MapView reused via remember */ }
     }
 
+    // Camera moves only when the user actively focuses tracks. On deselect
+    // (and on filter changes that empty/shrink the visible set) we leave the
+    // camera where it is, so tapping nearby elements doesn't fling the user
+    // back to the country overview. Initial Serbia view comes from the
+    // mapView factory above.
     DisposableEffect(focusedIds, tracks) {
-        val targetTracks = if (focusedIds.isEmpty()) tracks
-        else tracks.filter { it.uuid in focusedIds }
-        val points = targetTracks.flatMap { t -> t.route.map { GeoPoint(it.lat, it.lng) } }
-        if (points.isNotEmpty()) {
-            mapView.post {
-                val bounds = BoundingBox.fromGeoPointsSafe(points)
-                val padding = if (focusedIds.isEmpty()) 64 else FOCUSED_PADDING_PX
-                mapView.zoomToBoundingBox(bounds, true, padding, FOCUSED_MAX_ZOOM, 650L)
+        if (focusedIds.isNotEmpty()) {
+            val focusedTracks = tracks.filter { it.uuid in focusedIds }
+            val points = focusedTracks.flatMap { t -> t.route.map { GeoPoint(it.lat, it.lng) } }
+            if (points.isNotEmpty()) {
+                mapView.post {
+                    val bounds = BoundingBox.fromGeoPointsSafe(points)
+                    mapView.zoomToBoundingBox(bounds, true, FOCUSED_PADDING_PX, FOCUSED_MAX_ZOOM, 650L)
+                }
             }
         }
         onDispose { }
