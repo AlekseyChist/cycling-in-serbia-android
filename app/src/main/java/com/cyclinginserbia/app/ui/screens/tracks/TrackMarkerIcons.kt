@@ -11,7 +11,6 @@ import android.graphics.drawable.Drawable
 import android.util.TypedValue
 import androidx.compose.ui.graphics.toArgb
 import com.cyclinginserbia.app.data.model.Difficulty
-import com.cyclinginserbia.app.ui.theme.AppColors
 import com.cyclinginserbia.app.ui.theme.DifficultyMapColors
 
 internal fun buildClusterMarker(
@@ -58,8 +57,11 @@ internal fun buildClusterMarker(
         val badgeCy = padding + badgeRadius / 2f
         val badgeBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE }
         canvas.drawCircle(badgeCx, badgeCy, badgeRadius, badgeBorderPaint)
+        // Hardcoded Red500 — this paint runs in non-@Composable scope (osmdroid
+        // overlay rendering) where the theme-aware AppColors accessor isn't
+        // available. The badge color is theme-invariant anyway.
         val badgeFillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = AppColors.Red500.toArgb()
+            color = androidx.compose.ui.graphics.Color(0xFFEF4444).toArgb()
         }
         canvas.drawCircle(badgeCx, badgeCy, badgeRadius - 1.5f.toPx(context), badgeFillPaint)
         val text = count.toString()

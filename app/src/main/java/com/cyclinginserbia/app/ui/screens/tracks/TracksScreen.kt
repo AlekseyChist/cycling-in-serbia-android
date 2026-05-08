@@ -701,7 +701,11 @@ private fun TrackCard(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) AppColors.OrangeTint else AppColors.Background,
+            // AppColors.Card is the same hex as Background in light, but in dark
+            // it's #1C1C1E vs the sheet's #0F0F0F — gives the cards a visible
+            // edge against the sheet without relying on shadows that don't read
+            // on dark surfaces.
+            containerColor = if (isSelected) AppColors.OrangeTint else AppColors.Card,
         ),
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
