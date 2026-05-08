@@ -45,36 +45,19 @@ internal fun navigateToStart(context: Context, track: Track) {
     val lng = target.lng
     val label = Uri.encode(track.name)
 
-    // Try in order of strongest navigation experience to weakest fallback.
-    val attempts = listOf(
-        // 1. Google Maps — direct turn-by-turn navigation in cycling mode
-        Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse("google.navigation:q=$lat,$lng&mode=b"),
-        ).setPackage("com.google.android.apps.maps"),
-        // 2. Universal Google Maps directions URL — opens Maps app via intent
-        // filter, or any browser as last resort. travelmode=bicycling.
-        Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=bicycling"),
-        ),
-        // 3. Generic geo: — any map app shows the point (no auto-routing)
-        Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse("geo:$lat,$lng?q=$lat,$lng($label)"),
-        ),
+    // Hand the coordinates to whatever map / nav app the user prefers.
+    // No transport mode — a person heading to the start might be driving with
+    // a bike on the rack, walking, or taking a taxi; let them pick the tool
+    // and the mode. Google Maps in Serbia doesn't do cycling routing anyway.
+    val intent = Intent(
+        Intent.ACTION_VIEW,
+        Uri.parse("geo:$lat,$lng?q=$lat,$lng($label)"),
     )
-
-    for (intent in attempts) {
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        try {
-            context.startActivity(intent)
-            return
-        } catch (_: Exception) {
-            // try next fallback
-        }
+    val chooser = Intent.createChooser(intent, "Open in").apply {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
-    Toast.makeText(context, "No maps app installed", Toast.LENGTH_LONG).show()
+    runCatching { context.startActivity(chooser) }
+        .onFailure { Toast.makeText(context, "No maps app installed", Toast.LENGTH_LONG).show() }
 }
 
 internal fun shareTrack(context: Context, track: Track, gpxUrl: String?) {
