@@ -18,3 +18,5 @@ local.properties
 .kotlin/
 .claude/settings.local.json
 .claude-screenshots/
+# Generated SQL from data-ops scripts (regenerable, often large).
+scripts/*.sql
