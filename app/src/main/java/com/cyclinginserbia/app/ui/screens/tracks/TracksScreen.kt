@@ -523,7 +523,7 @@ private fun PillChip(
     onClick: () -> Unit,
 ) {
     val background by animateColorAsState(
-        targetValue = if (isSelected) AppColors.Primary else AppColors.Background,
+        targetValue = if (isSelected) AppColors.Primary else AppColors.Gray100,
         animationSpec = tween(150),
         label = "pill-bg",
     )
@@ -535,9 +535,7 @@ private fun PillChip(
 
     Surface(
         onClick = onClick,
-        modifier = Modifier
-            .height(34.dp)
-            .shadow(elevation = 3.dp, shape = RoundedCornerShape(50)),
+        modifier = Modifier.height(34.dp),
         shape = RoundedCornerShape(50),
         color = background,
     ) {
