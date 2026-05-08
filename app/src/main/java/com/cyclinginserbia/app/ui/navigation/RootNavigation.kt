@@ -33,7 +33,15 @@ fun RootNavigation(rootViewModel: RootViewModel) {
     val nav = rememberNavController()
     val backStack by nav.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
-    val showBottomBar = currentRoute in bottomTabs.map { it.destination.route }
+
+    // Hide the bar on Onboarding and on detail screens; default to "show"
+    // when currentRoute is null (mid-navigation), so the bar doesn't briefly
+    // collapse and snap the layout while transitioning between tabs.
+    val showBottomBar = currentRoute?.let { route ->
+        route != Destination.Onboarding.route &&
+            !route.startsWith("tracks/") &&
+            !route.startsWith("events/")
+    } ?: true
 
     Scaffold(
         bottomBar = {
@@ -81,9 +89,13 @@ fun RootNavigation(rootViewModel: RootViewModel) {
 private fun AppBottomBar(nav: NavHostController, currentRoute: String?) {
     NavigationBar {
         bottomTabs.forEach { tab ->
+            val selected = currentRoute == tab.destination.route
             NavigationBarItem(
-                selected = currentRoute == tab.destination.route,
+                selected = selected,
                 onClick = {
+                    // No-op when the active tab is tapped — avoids a needless
+                    // navigate() that re-creates the back-stack entry.
+                    if (selected) return@NavigationBarItem
                     nav.navigate(tab.destination.route) {
                         popUpTo(nav.graph.findStartDestination().id) { saveState = true }
                         launchSingleTop = true
