@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Event
 import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -13,6 +14,7 @@ sealed class Destination(val route: String) {
     data object Events : Destination("events")
     data object Shops : Destination("shops")
     data object Regulations : Destination("regulations")
+    data object Profile : Destination("profile")
 
     data object TrackDetail : Destination("tracks/{trackId}") {
         fun create(trackId: String) = "tracks/$trackId"
@@ -36,4 +38,5 @@ val bottomTabs = listOf(
     BottomTab(Destination.Events, "Events", Icons.Outlined.Event),
     BottomTab(Destination.Shops, "Shops", Icons.Outlined.Storefront),
     BottomTab(Destination.Regulations, "Rules", Icons.Outlined.Description),
+    BottomTab(Destination.Profile, "Profile", Icons.Outlined.Person),
 )
