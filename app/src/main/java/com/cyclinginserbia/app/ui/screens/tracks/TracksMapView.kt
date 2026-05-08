@@ -19,8 +19,9 @@ import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 
-private val SERBIA_CENTER = GeoPoint(44.0165, 21.0059)
-private const val DEFAULT_ZOOM = 7.0
+// Belgrade as the default focus — most tracks (and the DBB community) live around the capital.
+private val DEFAULT_CENTER = GeoPoint(44.7866, 20.4489)
+private const val DEFAULT_ZOOM = 9.5
 
 /** Cap for how close fit-to-bounds is allowed to zoom in on tight loops. */
 private const val FOCUSED_MAX_ZOOM = 14.0
@@ -44,7 +45,7 @@ fun TracksMapView(
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
             controller.setZoom(DEFAULT_ZOOM)
-            controller.setCenter(SERBIA_CENTER)
+            controller.setCenter(DEFAULT_CENTER)
             isVerticalMapRepetitionEnabled = false
             isHorizontalMapRepetitionEnabled = false
         }
