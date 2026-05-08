@@ -75,7 +75,10 @@ fun RootNavigation(rootViewModel: RootViewModel) {
             composable(Destination.Shops.route) { ShopsScreen() }
             composable(Destination.Regulations.route) { RegulationsScreen() }
             composable(Destination.Profile.route) {
-                ProfileScreen(rootViewModel = rootViewModel)
+                ProfileScreen(
+                    rootViewModel = rootViewModel,
+                    onTrackClick = { id -> nav.navigate(Destination.TrackDetail.create(id)) },
+                )
             }
             composable(Destination.TrackDetail.route) { entry ->
                 val id = entry.arguments?.getString(Destination.TrackDetail.ARG_TRACK_ID).orEmpty()
