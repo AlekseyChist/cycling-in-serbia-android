@@ -19,6 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import com.cyclinginserbia.app.ui.screens.events.EventDetailScreen
 import com.cyclinginserbia.app.ui.screens.events.EventsScreen
 import com.cyclinginserbia.app.ui.screens.onboarding.OnboardingScreen
+import com.cyclinginserbia.app.ui.screens.profile.ProfileScreen
 import com.cyclinginserbia.app.ui.screens.regulations.RegulationsScreen
 import com.cyclinginserbia.app.ui.screens.shops.ShopsScreen
 import com.cyclinginserbia.app.ui.screens.trackdetail.TrackDetailScreen
@@ -73,6 +74,12 @@ fun RootNavigation(rootViewModel: RootViewModel) {
             }
             composable(Destination.Shops.route) { ShopsScreen() }
             composable(Destination.Regulations.route) { RegulationsScreen() }
+            composable(Destination.Profile.route) {
+                ProfileScreen(
+                    rootViewModel = rootViewModel,
+                    onTrackClick = { id -> nav.navigate(Destination.TrackDetail.create(id)) },
+                )
+            }
             composable(Destination.TrackDetail.route) { entry ->
                 val id = entry.arguments?.getString(Destination.TrackDetail.ARG_TRACK_ID).orEmpty()
                 TrackDetailScreen(trackId = id, onBack = { nav.popBackStack() })
