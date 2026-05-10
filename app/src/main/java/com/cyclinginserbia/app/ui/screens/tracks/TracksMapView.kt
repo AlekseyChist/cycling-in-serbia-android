@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.cyclinginserbia.app.data.model.Difficulty
+import com.cyclinginserbia.app.data.model.Shop
 import com.cyclinginserbia.app.data.model.Track
 import com.cyclinginserbia.app.ui.theme.DifficultyMapColors
 import org.osmdroid.events.MapEventsReceiver
@@ -33,8 +34,11 @@ private const val FOCUSED_PADDING_PX = 96
 fun TracksMapView(
     tracks: List<Track>,
     focusedIds: Set<String>,
+    shops: List<Shop>,
+    shopsEnabled: Boolean,
     onClusterClick: (TrackCluster) -> Unit,
     onPolylineClick: (Track) -> Unit,
+    onShopClick: (Shop) -> Unit,
     onMapClear: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -51,7 +55,7 @@ fun TracksMapView(
         }
     }
 
-    DisposableEffect(tracks, focusedIds) {
+    DisposableEffect(tracks, focusedIds, shops, shopsEnabled) {
         mapView.overlays.clear()
 
         // Bottom-most overlay: catches taps that no polyline / marker handled,
@@ -123,6 +127,24 @@ fun TracksMapView(
                 }
             }
             mapView.overlays.add(marker)
+        }
+
+        if (shopsEnabled) {
+            for (shop in shops) {
+                for (loc in shop.locations) {
+                    val marker = Marker(mapView).apply {
+                        position = GeoPoint(loc.lat, loc.lng)
+                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                        icon = buildShopMarker(context)
+                        title = shop.name
+                        setOnMarkerClickListener { _, _ ->
+                            onShopClick(shop)
+                            true
+                        }
+                    }
+                    mapView.overlays.add(marker)
+                }
+            }
         }
 
         mapView.invalidate()

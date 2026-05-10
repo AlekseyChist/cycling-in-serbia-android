@@ -2,6 +2,7 @@ package com.cyclinginserbia.app.data.repository
 
 import com.cyclinginserbia.app.R
 import com.cyclinginserbia.app.data.model.Shop
+import com.cyclinginserbia.app.data.model.ShopLocation
 import com.cyclinginserbia.app.data.model.ShopTab
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -57,6 +58,7 @@ class ShopRepository @Inject constructor() {
                 linkLabel = "probike.rs",
                 logoRes = R.drawable.probike_logo,
                 tabs = listOf(ShopTab.SHOPS),
+                locations = listOf(ShopLocation(44.80447, 20.47452, "Patrijarha Gavrila 14, Beograd")),
             ),
             Shop(
                 id = "sportofis",
@@ -68,6 +70,7 @@ class ShopRepository @Inject constructor() {
                 linkLabel = "sportofis.com",
                 logoRes = R.drawable.sportofis_logo,
                 tabs = listOf(ShopTab.SHOPS),
+                locations = listOf(ShopLocation(44.78486, 20.41452, "Radnička 39, Beograd (Čukarica)")),
             ),
             Shop(
                 id = "bikesport",
@@ -79,6 +82,7 @@ class ShopRepository @Inject constructor() {
                 linkLabel = "bikesport.rs",
                 logoRes = R.drawable.bikesport_logo,
                 tabs = listOf(ShopTab.SHOPS),
+                locations = listOf(ShopLocation(43.57517, 21.33730, "Dušanova 114, Kruševac")),
             ),
             Shop(
                 id = "decathlon",
@@ -115,6 +119,7 @@ class ShopRepository @Inject constructor() {
                 logoRes = R.drawable.mihail_photo,
                 tabs = listOf(ShopTab.SERVICES),
                 isPersonal = true,
+                locations = listOf(ShopLocation(44.79372, 20.40781, "11TRI House of Triathlon, Beograd (Banovo brdo)")),
             ),
             Shop(
                 id = "marko-curcic",
@@ -138,6 +143,7 @@ class ShopRepository @Inject constructor() {
                 linkLabel = "ris-cycling.com",
                 logoRes = R.drawable.ris_logo,
                 tabs = listOf(ShopTab.SHOPS, ShopTab.SERVICES),
+                locations = listOf(ShopLocation(45.25721, 19.83540, "Bulevar oslobođenja 67a, Novi Sad")),
             ),
             Shop(
                 id = "oliver-strbac",
@@ -149,6 +155,7 @@ class ShopRepository @Inject constructor() {
                 linkLabel = "instagram",
                 logoRes = R.drawable.freedom_logo,
                 tabs = listOf(ShopTab.SERVICES),
+                locations = listOf(ShopLocation(45.25290, 19.83474, "Ćirpanova 8, Novi Sad")),
             ),
             Shop(
                 id = "denis-chertkov",
@@ -172,6 +179,7 @@ class ShopRepository @Inject constructor() {
                 linkLabel = "dikidi.net",
                 logoRes = R.drawable.recoverypoint_logo,
                 tabs = listOf(ShopTab.SERVICES),
+                locations = listOf(ShopLocation(44.80413, 20.47772, "Golsvordijeva 37, Beograd (Vračar)")),
             ),
             Shop(
                 id = "lena-artur",
@@ -195,6 +203,9 @@ class ShopRepository @Inject constructor() {
                 linkLabel = "instagram",
                 logoRes = R.drawable.palych_logo,
                 tabs = listOf(ShopTab.SERVICES),
+                // Same building as Ris Cycling (Boris Popović) — Anton works
+                // out of that workshop in Novi Sad.
+                locations = listOf(ShopLocation(45.25715, 19.83512, "Bulevar oslobođenja 67, Novi Sad")),
             ),
             Shop(
                 id = "laktat-zona",
@@ -219,6 +230,10 @@ class ShopRepository @Inject constructor() {
                 linkLabel = "sonderbelgrade.com",
                 logoRes = R.drawable.sonder_logo,
                 tabs = listOf(ShopTab.FRIENDS),
+                // Sonder has 3 locations in Belgrade — only the Gastrošor branch
+                // has the bike-parking + hose + floor pump that the description
+                // calls out, so just that one goes on the map.
+                locations = listOf(ShopLocation(44.82336, 20.47161, "Žorža Klemansoa 27v, Beograd (Dorćol)")),
             ),
             Shop(
                 id = "dechkotzar",
@@ -230,6 +245,10 @@ class ShopRepository @Inject constructor() {
                 linkLabel = "dechkotzar.com",
                 logoRes = R.drawable.dechkotzar_logo,
                 tabs = listOf(ShopTab.FRIENDS),
+                locations = listOf(
+                    ShopLocation(44.81740, 20.45444, "Gračanička 16, Beograd (Stari Grad)"),
+                    ShopLocation(44.80089, 20.47286, "Baba Višnjina 26, Beograd (Vračar)"),
+                ),
             ),
             Shop(
                 id = "chop-chop",
@@ -241,6 +260,7 @@ class ShopRepository @Inject constructor() {
                 linkLabel = "chopchop.one",
                 logoRes = R.drawable.chop_chop_logo,
                 tabs = listOf(ShopTab.FRIENDS),
+                locations = listOf(ShopLocation(44.80684, 20.47104, "Beogradska 57, Beograd (Vračar)")),
             ),
             Shop(
                 id = "anygo",
