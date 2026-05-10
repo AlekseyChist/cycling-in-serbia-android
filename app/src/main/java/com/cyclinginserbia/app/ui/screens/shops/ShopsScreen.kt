@@ -150,14 +150,12 @@ private fun SegmentedTab(
         animationSpec = tween(150),
         label = "tab-text",
     )
-    val elevation = if (isSelected) 1.dp else 0.dp
     val interactionSource = remember { MutableInteractionSource() }
 
     Surface(
         modifier = modifier.height(32.dp),
         shape = RoundedCornerShape(12.dp),
         color = background,
-        shadowElevation = elevation,
     ) {
         Box(
             modifier = Modifier
