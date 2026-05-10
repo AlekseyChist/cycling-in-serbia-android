@@ -31,9 +31,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -78,7 +81,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
 import com.cyclinginserbia.app.data.model.Difficulty
+import com.cyclinginserbia.app.data.model.Shop
 import com.cyclinginserbia.app.data.model.Surface as SurfaceType
 import com.cyclinginserbia.app.data.model.Track
 import com.cyclinginserbia.app.ui.components.SearchField
@@ -178,15 +185,20 @@ fun TracksScreen(
                 }
 
                 else -> {
+                    var selectedShop by remember { mutableStateOf<Shop?>(null) }
+
                     TracksMapView(
                         tracks = state.visible,
                         focusedIds = state.focusedIds,
+                        shops = state.shops,
+                        shopsEnabled = state.shopsEnabled,
                         onClusterClick = { cluster ->
                             viewModel.onFocusTracks(cluster.tracks.map { it.uuid }.toSet())
                         },
                         onPolylineClick = { track ->
                             viewModel.onFocusTracks(setOf(track.uuid))
                         },
+                        onShopClick = { shop -> selectedShop = shop },
                         onMapClear = ::clearFocusAndCollapse,
                         modifier = Modifier.fillMaxSize(),
                     )
@@ -210,12 +222,27 @@ fun TracksScreen(
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                     )
 
-                    MapLegend(
+                    Column(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .statusBarsPadding()
                             .padding(top = 76.dp, end = 16.dp),
-                    )
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalAlignment = Alignment.End,
+                    ) {
+                        MapLegend()
+                        ShopsToggleButton(
+                            enabled = state.shopsEnabled,
+                            onClick = viewModel::onToggleShops,
+                        )
+                    }
+
+                    if (selectedShop != null) {
+                        ShopDetailsSheet(
+                            shop = selectedShop!!,
+                            onDismiss = { selectedShop = null },
+                        )
+                    }
 
                     if (showFilters) {
                         FiltersModalSheet(
@@ -843,4 +870,119 @@ private fun ErrorView(message: String, onRetry: () -> Unit) {
         Spacer(Modifier.height(16.dp))
         Button(onClick = onRetry) { Text("Retry") }
     }
+}
+
+@Composable
+private fun ShopsToggleButton(enabled: Boolean, onClick: () -> Unit) {
+    val container = if (enabled) AppColors.Primary else AppColors.Background
+    val tint = if (enabled) AppColors.PrimaryForeground else AppColors.Gray700
+    Surface(
+        modifier = Modifier
+            .size(40.dp)
+            .shadow(elevation = 4.dp, shape = CircleShape),
+        shape = CircleShape,
+        color = container,
+        onClick = onClick,
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = Icons.Outlined.Storefront,
+                contentDescription = if (enabled) "Hide shops" else "Show shops",
+                tint = tint,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ShopDetailsSheet(shop: Shop, onDismiss: () -> Unit) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val context = LocalContext.current
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = AppColors.Background,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = shop.name,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                text = shop.category,
+                style = MaterialTheme.typography.bodyMedium,
+                color = AppColors.Gray500,
+            )
+            Text(
+                text = shop.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = AppColors.Gray700,
+            )
+            shop.locations.firstOrNull()?.address?.let { addr ->
+                Text(
+                    text = addr,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AppColors.Gray600,
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                shop.locations.firstOrNull()?.let { loc ->
+                    Button(
+                        onClick = { openInMaps(context, loc.lat, loc.lng, shop.name) },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Map,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text("Open in Maps")
+                    }
+                }
+                TextButton(
+                    onClick = { openLink(context, shop.link) },
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(shop.linkLabel)
+                }
+            }
+        }
+    }
+}
+
+private fun openInMaps(context: android.content.Context, lat: Double, lng: Double, label: String) {
+    // Generic geo: URI + chooser — leaves transport mode out of it (per
+    // feedback_navigation_no_mode.md: a user might drive with bike on rack,
+    // walk, taxi, etc.). Falls back gracefully to whatever maps app is installed.
+    val uri = Uri.parse("geo:$lat,$lng?q=$lat,$lng(${Uri.encode(label)})")
+    val intent = Intent(Intent.ACTION_VIEW, uri)
+    val chooser = Intent.createChooser(intent, "Open in maps")
+    chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(chooser)
+}
+
+private fun openLink(context: android.content.Context, link: String) {
+    val intent = if (link.startsWith("tel:")) Intent(Intent.ACTION_DIAL, Uri.parse(link))
+    else Intent(Intent.ACTION_VIEW, Uri.parse(link))
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(intent)
 }
