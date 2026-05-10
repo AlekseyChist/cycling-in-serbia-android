@@ -119,7 +119,7 @@ class ShopRepository @Inject constructor() {
                 logoRes = R.drawable.mihail_photo,
                 tabs = listOf(ShopTab.SERVICES),
                 isPersonal = true,
-                locations = listOf(ShopLocation(44.78444, 20.38104, "Ada Ciganlija bb, Beograd")),
+                locations = listOf(ShopLocation(44.79372, 20.40781, "11TRI House of Triathlon, Beograd (Banovo brdo)")),
             ),
             Shop(
                 id = "marko-curcic",
