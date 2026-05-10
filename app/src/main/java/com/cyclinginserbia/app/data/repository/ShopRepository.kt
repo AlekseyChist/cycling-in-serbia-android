@@ -203,6 +203,9 @@ class ShopRepository @Inject constructor() {
                 linkLabel = "instagram",
                 logoRes = R.drawable.palych_logo,
                 tabs = listOf(ShopTab.SERVICES),
+                // Same building as Ris Cycling (Boris Popović) — Anton works
+                // out of that workshop in Novi Sad.
+                locations = listOf(ShopLocation(45.25715, 19.83512, "Bulevar oslobođenja 67, Novi Sad")),
             ),
             Shop(
                 id = "laktat-zona",
