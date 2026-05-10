@@ -119,9 +119,7 @@ class ShopRepository @Inject constructor() {
                 logoRes = R.drawable.mihail_photo,
                 tabs = listOf(ShopTab.SERVICES),
                 isPersonal = true,
-                // Plus Code QCV5+F4 Belgrade → Banovo brdo, Čukarica.
-                // Provided by Aleksei (with Mihail's consent implicit).
-                locations = listOf(ShopLocation(44.79320, 20.40975, "Banovo brdo, Beograd (Čukarica)")),
+                locations = listOf(ShopLocation(44.78444, 20.38104, "Ada Ciganlija bb, Beograd")),
             ),
             Shop(
                 id = "marko-curcic",
