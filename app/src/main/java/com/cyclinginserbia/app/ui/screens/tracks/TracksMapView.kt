@@ -15,6 +15,7 @@ import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
@@ -48,6 +49,9 @@ fun TracksMapView(
         MapView(context).apply {
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
+            // No +/- buttons — pinch-to-zoom is universally understood and the
+            // buttons just clutter the map.
+            zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
             controller.setZoom(DEFAULT_ZOOM)
             controller.setCenter(DEFAULT_CENTER)
             isVerticalMapRepetitionEnabled = false
