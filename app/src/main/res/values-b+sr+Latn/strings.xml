@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- app_name intentionally not translated — it's the brand name. -->
+
+    <!-- Bottom navigation -->
+    <string name="nav_tracks">Staze</string>
+    <string name="nav_events">Događaji</string>
+    <string name="nav_shops">Prodavnice</string>
+    <string name="nav_regulations">Pravila</string>
+    <string name="nav_profile">Profil</string>
+
+    <string name="track_detail_title">Staza</string>
+    <string name="event_detail_title">Događaj</string>
+
+    <string name="loading">Učitavanje…</string>
+    <string name="error_generic">Nešto je pošlo naopako</string>
+    <string name="retry">Pokušaj ponovo</string>
+
+    <!-- Profile screen -->
+    <string name="profile_title">Profil</string>
+    <string name="profile_appearance">Izgled</string>
+    <string name="profile_language">Jezik</string>
+    <string name="profile_language_caption">Promena jezika ponovo učitava ekran.</string>
+    <string name="profile_favorites">Vaše omiljeno · %1$d</string>
+    <string name="profile_favorites_empty">Dodirnite srce na bilo kojoj stazi da biste je sačuvali ovde.</string>
+
+    <!-- Theme picker -->
+    <string name="theme_system">Sistemska</string>
+    <string name="theme_light">Svetla</string>
+    <string name="theme_dark">Tamna</string>
+    <string name="theme_desc_system">Prati podešavanje ekrana telefona.</string>
+    <string name="theme_desc_light">Uvek svetla, bez obzira na podešavanje telefona.</string>
+    <string name="theme_desc_dark">Uvek tamna, bez obzira na podešavanje telefona.</string>
+
+    <!-- Language picker -->
+    <string name="language_system">Sistemski</string>
+</resources>

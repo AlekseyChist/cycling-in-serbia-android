@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.annotation.StringRes
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -41,12 +42,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cyclinginserbia.app.BuildConfig
+import com.cyclinginserbia.app.R
+import com.cyclinginserbia.app.data.local.preferences.AppLanguage
 import com.cyclinginserbia.app.data.local.preferences.ThemeMode
 import com.cyclinginserbia.app.data.model.Track
 import com.cyclinginserbia.app.ui.navigation.RootViewModel
@@ -60,6 +64,7 @@ fun ProfileScreen(
     profileViewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val themeMode by rootViewModel.themeMode.collectAsStateWithLifecycle()
+    val appLanguage by rootViewModel.appLanguage.collectAsStateWithLifecycle()
     val favorites by profileViewModel.favorites.collectAsStateWithLifecycle()
 
     Box(
@@ -76,7 +81,7 @@ fun ProfileScreen(
         ) {
             item {
                 Text(
-                    text = "Profile",
+                    text = stringResource(R.string.profile_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = AppColors.Foreground,
@@ -94,7 +99,16 @@ fun ProfileScreen(
 
             item { Spacer(Modifier.height(24.dp)) }
 
-            item { SectionHeader("Your favorites · ${favorites.size}") }
+            item {
+                LanguageSection(
+                    current = appLanguage,
+                    onChange = rootViewModel::setAppLanguage,
+                )
+            }
+
+            item { Spacer(Modifier.height(24.dp)) }
+
+            item { SectionHeader(stringResource(R.string.profile_favorites, favorites.size)) }
             item { Spacer(Modifier.height(8.dp)) }
 
             if (favorites.isEmpty()) {
@@ -114,7 +128,7 @@ fun ProfileScreen(
 
 @Composable
 private fun AppearanceSection(current: ThemeMode, onChange: (ThemeMode) -> Unit) {
-    SectionHeader("Appearance")
+    SectionHeader(stringResource(R.string.profile_appearance))
     Spacer(Modifier.height(12.dp))
 
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -131,18 +145,49 @@ private fun AppearanceSection(current: ThemeMode, onChange: (ThemeMode) -> Unit)
                     )
                 },
             ) {
-                Text(opt.label)
+                Text(stringResource(opt.labelRes))
             }
         }
     }
 
     Spacer(Modifier.height(8.dp))
     Text(
-        text = when (current) {
-            ThemeMode.SYSTEM -> "Follows your phone's display setting."
-            ThemeMode.LIGHT -> "Always light, regardless of phone setting."
-            ThemeMode.DARK -> "Always dark, regardless of phone setting."
-        },
+        text = stringResource(
+            when (current) {
+                ThemeMode.SYSTEM -> R.string.theme_desc_system
+                ThemeMode.LIGHT -> R.string.theme_desc_light
+                ThemeMode.DARK -> R.string.theme_desc_dark
+            },
+        ),
+        fontSize = 13.sp,
+        color = AppColors.MutedForeground,
+    )
+}
+
+@Composable
+private fun LanguageSection(current: AppLanguage, onChange: (AppLanguage) -> Unit) {
+    SectionHeader(stringResource(R.string.profile_language))
+    Spacer(Modifier.height(12.dp))
+
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        LanguageOption.entries.forEachIndexed { idx, opt ->
+            // Language names are autonyms (English/Русский/Srpski) shown the same
+            // in every locale; only "System" is translated.
+            val label = opt.autonym ?: stringResource(R.string.language_system)
+            SegmentedButton(
+                selected = opt.language == current,
+                onClick = { onChange(opt.language) },
+                shape = SegmentedButtonDefaults.itemShape(idx, LanguageOption.entries.size),
+                icon = {},
+            ) {
+                Text(label, maxLines = 1)
+            }
+        }
+    }
+
+    Spacer(Modifier.height(8.dp))
+    Text(
+        text = stringResource(R.string.profile_language_caption),
         fontSize = 13.sp,
         color = AppColors.MutedForeground,
     )
@@ -225,7 +270,7 @@ private fun FavoritesEmptyState() {
             )
             Spacer(Modifier.size(10.dp))
             Text(
-                text = "Tap the heart on any track to save it here.",
+                text = stringResource(R.string.profile_favorites_empty),
                 fontSize = 13.sp,
                 color = AppColors.MutedForeground,
             )
@@ -286,8 +331,21 @@ private fun SectionHeader(text: String) {
     )
 }
 
-private enum class ThemeModeOption(val mode: ThemeMode, val label: String, val icon: ImageVector) {
-    System(ThemeMode.SYSTEM, "System", Icons.Outlined.PhoneAndroid),
-    Light(ThemeMode.LIGHT, "Light", Icons.Outlined.LightMode),
-    Dark(ThemeMode.DARK, "Dark", Icons.Outlined.DarkMode),
+private enum class ThemeModeOption(
+    val mode: ThemeMode,
+    @StringRes val labelRes: Int,
+    val icon: ImageVector,
+) {
+    System(ThemeMode.SYSTEM, R.string.theme_system, Icons.Outlined.PhoneAndroid),
+    Light(ThemeMode.LIGHT, R.string.theme_light, Icons.Outlined.LightMode),
+    Dark(ThemeMode.DARK, R.string.theme_dark, Icons.Outlined.DarkMode),
+}
+
+// autonym = the language's own name, shown identically in every locale; null
+// for SYSTEM, which is translated via R.string.language_system.
+private enum class LanguageOption(val language: AppLanguage, val autonym: String?) {
+    System(AppLanguage.SYSTEM, null),
+    English(AppLanguage.EN, "English"),
+    Russian(AppLanguage.RU, "Русский"),
+    Serbian(AppLanguage.SR, "Srpski"),
 }

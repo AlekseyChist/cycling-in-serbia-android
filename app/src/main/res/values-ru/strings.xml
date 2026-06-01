@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- app_name intentionally not translated — it's the brand name. -->
+
+    <!-- Bottom navigation -->
+    <string name="nav_tracks">Маршруты</string>
+    <string name="nav_events">События</string>
+    <string name="nav_shops">Магазины</string>
+    <string name="nav_regulations">Правила</string>
+    <string name="nav_profile">Профиль</string>
+
+    <string name="track_detail_title">Маршрут</string>
+    <string name="event_detail_title">Событие</string>
+
+    <string name="loading">Загрузка…</string>
+    <string name="error_generic">Что-то пошло не так</string>
+    <string name="retry">Повторить</string>
+
+    <!-- Profile screen -->
+    <string name="profile_title">Профиль</string>
+    <string name="profile_appearance">Оформление</string>
+    <string name="profile_language">Язык</string>
+    <string name="profile_language_caption">При смене языка экран перезагрузится.</string>
+    <string name="profile_favorites">Избранное · %1$d</string>
+    <string name="profile_favorites_empty">Нажмите на сердечко у любого маршрута, чтобы сохранить его здесь.</string>
+
+    <!-- Theme picker -->
+    <string name="theme_system">Системная</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="theme_desc_system">Следует настройке экрана телефона.</string>
+    <string name="theme_desc_light">Всегда светлая, независимо от настроек телефона.</string>
+    <string name="theme_desc_dark">Всегда тёмная, независимо от настроек телефона.</string>
+
+    <!-- Language picker -->
+    <string name="language_system">Системный</string>
+</resources>

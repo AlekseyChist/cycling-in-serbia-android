@@ -2,10 +2,12 @@
 <resources>
     <string name="app_name">Cycling in Serbia</string>
 
+    <!-- Bottom navigation -->
     <string name="nav_tracks">Tracks</string>
     <string name="nav_events">Events</string>
     <string name="nav_shops">Shops</string>
     <string name="nav_regulations">Rules</string>
+    <string name="nav_profile">Profile</string>
 
     <string name="track_detail_title">Track</string>
     <string name="event_detail_title">Event</string>
@@ -13,4 +15,24 @@
     <string name="loading">Loading…</string>
     <string name="error_generic">Something went wrong</string>
     <string name="retry">Retry</string>
+
+    <!-- Profile screen -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_appearance">Appearance</string>
+    <string name="profile_language">Language</string>
+    <string name="profile_language_caption">Changing the language reloads the screen.</string>
+    <string name="profile_favorites">Your favorites · %1$d</string>
+    <string name="profile_favorites_empty">Tap the heart on any track to save it here.</string>
+
+    <!-- Theme picker -->
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_desc_system">Follows your phone\'s display setting.</string>
+    <string name="theme_desc_light">Always light, regardless of phone setting.</string>
+    <string name="theme_desc_dark">Always dark, regardless of phone setting.</string>
+
+    <!-- Language picker. EN/RU/SR options show their own autonym (defined in
+         code); only the "System" option is translated. -->
+    <string name="language_system">System</string>
 </resources>

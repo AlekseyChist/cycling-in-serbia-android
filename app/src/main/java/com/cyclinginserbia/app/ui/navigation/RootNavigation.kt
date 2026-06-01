@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -97,6 +98,7 @@ private fun AppBottomBar(nav: NavHostController, currentRoute: String?) {
     NavigationBar {
         bottomTabs.forEach { tab ->
             val selected = currentRoute == tab.destination.route
+            val label = stringResource(tab.labelRes)
             NavigationBarItem(
                 selected = selected,
                 onClick = {
@@ -109,8 +111,8 @@ private fun AppBottomBar(nav: NavHostController, currentRoute: String?) {
                         restoreState = true
                     }
                 },
-                icon = { Icon(tab.icon, contentDescription = tab.label) },
-                label = { Text(tab.label) },
+                icon = { Icon(tab.icon, contentDescription = label) },
+                label = { Text(label) },
             )
         }
     }
