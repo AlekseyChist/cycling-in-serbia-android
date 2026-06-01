@@ -3,7 +3,9 @@ package com.cyclinginserbia.app.ui.screens.tracks
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cyclinginserbia.app.data.local.preferences.SyncPreferences
+import com.cyclinginserbia.app.data.model.Shop
 import com.cyclinginserbia.app.data.model.Track
+import com.cyclinginserbia.app.data.repository.ShopRepository
 import com.cyclinginserbia.app.data.repository.TrackRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +28,8 @@ data class TracksUiState(
     val favoritesOnly: Boolean = false,
     val favoriteIds: Set<String> = emptySet(),
     val focusedIds: Set<String> = emptySet(),
+    val shopsEnabled: Boolean = false,
+    val shops: List<Shop> = emptyList(),
 ) {
     val visible: List<Track>
         get() = tracks.applyTrackFilters(
@@ -57,6 +61,7 @@ data class TracksUiState(
 class TracksViewModel @Inject constructor(
     private val repository: TrackRepository,
     private val preferences: SyncPreferences,
+    private val shopRepository: ShopRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TracksUiState())
@@ -65,8 +70,21 @@ class TracksViewModel @Inject constructor(
     init {
         observeTracks()
         observeFavorites()
+        loadShops()
         sync()
     }
+
+    private fun loadShops() {
+        viewModelScope.launch {
+            // Shops are hardcoded in ShopRepository (no network), so this just
+            // pulls them once on construction. Only shops with at least one
+            // ShopLocation make it into the on-map list.
+            val mappable = shopRepository.getShops().filter { it.locations.isNotEmpty() }
+            _state.update { it.copy(shops = mappable) }
+        }
+    }
+
+    fun onToggleShops() = _state.update { it.copy(shopsEnabled = !it.shopsEnabled) }
 
     private fun observeFavorites() {
         viewModelScope.launch {

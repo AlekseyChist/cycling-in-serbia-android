@@ -12,6 +12,7 @@ import com.cyclinginserbia.app.data.model.Track
 import com.cyclinginserbia.app.ui.theme.DifficultyMapColors
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
@@ -29,6 +30,8 @@ fun TrackMap(track: Track, modifier: Modifier = Modifier) {
         MapView(context).apply {
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
+            // No +/- buttons — pinch-to-zoom is enough.
+            zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
         }
     }
 
