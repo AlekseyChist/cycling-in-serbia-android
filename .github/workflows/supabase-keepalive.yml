@@ -1,0 +1,38 @@
+name: Supabase keep-alive
+
+# Supabase free-tier pauses a project after ~7 days with no activity, which
+# takes the tracks API — and therefore the app's live data — offline until it
+# is manually restored from the dashboard. This job pings a tiny read-only
+# endpoint daily so the project always counts as active.
+#
+# It doubles as an uptime monitor: a non-200 response fails the run, so GitHub
+# emails us if the project is ever down again.
+#
+# NOTE: scheduled workflows only fire from the repository's DEFAULT branch
+# (main), so this file has no effect until it is merged there.
+
+on:
+  schedule:
+    # Daily at 07:23 UTC. Minutes are offset off the top of the hour per
+    # GitHub's guidance (scheduled jobs at :00 are heavily delayed).
+    - cron: "23 7 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            "${SUPABASE_URL}/rest/v1/tracks?select=id&limit=1")
+          echo "Supabase tracks endpoint returned HTTP ${code}"
+          if [ "${code}" != "200" ]; then
+            echo "::error::Keep-alive ping failed (HTTP ${code}) — the project may be paused or down."
+            exit 1
+          fi
+          echo "Project is active."
