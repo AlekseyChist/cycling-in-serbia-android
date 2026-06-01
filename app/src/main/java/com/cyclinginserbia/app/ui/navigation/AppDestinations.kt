@@ -6,7 +6,9 @@ import androidx.compose.material.icons.outlined.Event
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Storefront
+import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.cyclinginserbia.app.R
 
 sealed class Destination(val route: String) {
     data object Onboarding : Destination("onboarding")
@@ -29,14 +31,14 @@ sealed class Destination(val route: String) {
 
 data class BottomTab(
     val destination: Destination,
-    val label: String,
+    @StringRes val labelRes: Int,
     val icon: ImageVector,
 )
 
 val bottomTabs = listOf(
-    BottomTab(Destination.Tracks, "Tracks", Icons.Outlined.Map),
-    BottomTab(Destination.Events, "Events", Icons.Outlined.Event),
-    BottomTab(Destination.Shops, "Shops", Icons.Outlined.Storefront),
-    BottomTab(Destination.Regulations, "Rules", Icons.Outlined.Description),
-    BottomTab(Destination.Profile, "Profile", Icons.Outlined.Person),
+    BottomTab(Destination.Tracks, R.string.nav_tracks, Icons.Outlined.Map),
+    BottomTab(Destination.Events, R.string.nav_events, Icons.Outlined.Event),
+    BottomTab(Destination.Shops, R.string.nav_shops, Icons.Outlined.Storefront),
+    BottomTab(Destination.Regulations, R.string.nav_regulations, Icons.Outlined.Description),
+    BottomTab(Destination.Profile, R.string.nav_profile, Icons.Outlined.Person),
 )
