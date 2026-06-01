@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -112,7 +114,19 @@ private fun AppBottomBar(nav: NavHostController, currentRoute: String?) {
                     }
                 },
                 icon = { Icon(tab.icon, contentDescription = label) },
-                label = { Text(label) },
+                label = {
+                    // Single line + slightly smaller font so longer RU/SR labels
+                    // (Маршруты, Магазины, Prodavnice) don't wrap and break the
+                    // bar's alignment. Ellipsis is the safety net for anything
+                    // that still doesn't fit.
+                    Text(
+                        text = label,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 10.sp,
+                    )
+                },
             )
         }
     }

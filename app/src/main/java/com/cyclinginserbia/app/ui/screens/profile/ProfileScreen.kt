@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +30,7 @@ import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
@@ -164,24 +167,29 @@ private fun AppearanceSection(current: ThemeMode, onChange: (ThemeMode) -> Unit)
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun LanguageSection(current: AppLanguage, onChange: (AppLanguage) -> Unit) {
     SectionHeader(stringResource(R.string.profile_language))
     Spacer(Modifier.height(12.dp))
 
-    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-        LanguageOption.entries.forEachIndexed { idx, opt ->
+    // FilterChips in a FlowRow instead of equal-width segments: chips size to
+    // their text and wrap to a second line when needed, so a long option like
+    // "Системный"/"Sistemski" is never truncated.
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        LanguageOption.entries.forEach { opt ->
             // Language names are autonyms (English/Русский/Srpski) shown the same
             // in every locale; only "System" is translated.
             val label = opt.autonym ?: stringResource(R.string.language_system)
-            SegmentedButton(
+            FilterChip(
                 selected = opt.language == current,
                 onClick = { onChange(opt.language) },
-                shape = SegmentedButtonDefaults.itemShape(idx, LanguageOption.entries.size),
-                icon = {},
-            ) {
-                Text(label, maxLines = 1)
-            }
+                label = { Text(label, maxLines = 1) },
+            )
         }
     }
 

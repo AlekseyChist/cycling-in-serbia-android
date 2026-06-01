@@ -25,6 +25,8 @@ import com.cyclinginserbia.app.ui.theme.CyclingInSerbiaTheme
 import com.cyclinginserbia.app.ui.theme.DarkAppColors
 import com.cyclinginserbia.app.ui.theme.LightAppColors
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -53,11 +55,18 @@ class MainActivity : ComponentActivity() {
 
         // Recreate the Activity when the user picks a different language so the
         // new locale takes effect (Compose won't re-read resources otherwise).
+        //
+        // drop(1) skips the StateFlow's current value at subscription time: its
+        // seed is SYSTEM and the persisted value loads from DataStore a beat
+        // later, so without the drop we'd fire a spurious recreate() at startup
+        // whenever the saved language isn't SYSTEM. filter guards the rare case
+        // where the post-drop emission still matches what we already applied.
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                rootViewModel.appLanguage.collect { language ->
-                    if (language != appliedLanguage) recreate()
-                }
+                rootViewModel.appLanguage
+                    .drop(1)
+                    .filter { it != appliedLanguage }
+                    .collect { recreate() }
             }
         }
 
