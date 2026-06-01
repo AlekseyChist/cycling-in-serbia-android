@@ -34,4 +34,57 @@
 
     <!-- Language picker -->
     <string name="language_system">Sistemski</string>
+
+    <!-- ===== Tracks screen ===== -->
+    <string name="tracks_error_load">Učitavanje staza nije uspelo</string>
+    <string name="tracks_error_unknown">Nepoznata greška</string>
+    <string name="tracks_search_placeholder">Pretraga staza</string>
+    <string name="tracks_filters">Filteri</string>
+    <string name="tracks_difficulty">Težina</string>
+    <string name="tracks_surface">Podloga</string>
+    <string name="tracks_ride_type">Tip vožnje</string>
+    <string name="tracks_region">Region</string>
+    <string name="tracks_all_regions">Svi regioni</string>
+    <string name="tracks_favorites_only">Samo omiljene</string>
+    <string name="tracks_reset">Poništi</string>
+    <string name="tracks_apply">Primeni</string>
+    <string name="tracks_cached_banner">Osvežavanje nije uspelo — prikazane su keširane staze</string>
+    <string name="tracks_empty_title">Nema staza za izabrane filtere</string>
+    <string name="tracks_empty_subtitle">Probajte drugu težinu, podlogu ili pojam pretrage.</string>
+    <string name="tracks_clear_filters">Obriši filtere</string>
+    <string name="tracks_show_all">Prikaži sve staze</string>
+    <string name="tracks_stat_distance">Razdaljina</string>
+    <string name="tracks_stat_elevation">Uspon</string>
+    <string name="tracks_fav_add">Dodaj u omiljene</string>
+    <string name="tracks_fav_remove">Ukloni iz omiljenih</string>
+    <string name="tracks_legend_show">Prikaži legendu</string>
+    <string name="tracks_legend_hide">Sakrij legendu</string>
+    <string name="tracks_shops_show">Prikaži prodavnice</string>
+    <string name="tracks_shops_hide">Sakrij prodavnice</string>
+    <string name="tracks_open_in_maps">Otvori u mapama</string>
+    <string name="tracks_maps_chooser">Otvori u mapama</string>
+    <string name="tracks_header_one_selected">1 izabrana staza</string>
+    <string name="tracks_header_focused">%1$d od %2$d izabrano</string>
+    <string name="tracks_header_partial">%1$d od %2$d staza</string>
+    <plurals name="tracks_count">
+        <item quantity="one">%d staza</item>
+        <item quantity="few">%d staze</item>
+        <item quantity="other">%d staza</item>
+    </plurals>
+
+    <!-- ===== Zajednički rečnik (težina / podloga / tip vožnje) ===== -->
+    <string name="difficulty_all">Sve</string>
+    <string name="difficulty_easy">Lako</string>
+    <string name="difficulty_medium">Srednje</string>
+    <string name="difficulty_hard">Teško</string>
+    <string name="surface_all">Sve podloge</string>
+    <string name="surface_road">Asfalt</string>
+    <string name="surface_gravel">Šljunak</string>
+    <string name="surface_mixed">Mešovito</string>
+    <string name="ridetype_all">Sve vožnje</string>
+    <string name="ridetype_coffee">Kafa</string>
+    <string name="ridetype_dark">Mrak</string>
+    <string name="ridetype_sun">Sunce</string>
+    <string name="ridetype_plus">DBB+</string>
+    <string name="ridetype_misc">Ostalo</string>
 </resources>

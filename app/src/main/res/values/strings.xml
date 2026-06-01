@@ -35,4 +35,56 @@
     <!-- Language picker. EN/RU/SR options show their own autonym (defined in
          code); only the "System" option is translated. -->
     <string name="language_system">System</string>
+
+    <!-- ===== Tracks screen ===== -->
+    <string name="tracks_error_load">Couldn\'t load tracks</string>
+    <string name="tracks_error_unknown">Unknown error</string>
+    <string name="tracks_search_placeholder">Search tracks</string>
+    <string name="tracks_filters">Filters</string>
+    <string name="tracks_difficulty">Difficulty</string>
+    <string name="tracks_surface">Surface</string>
+    <string name="tracks_ride_type">Ride Type</string>
+    <string name="tracks_region">Region</string>
+    <string name="tracks_all_regions">All Regions</string>
+    <string name="tracks_favorites_only">Favorites only</string>
+    <string name="tracks_reset">Reset</string>
+    <string name="tracks_apply">Apply</string>
+    <string name="tracks_cached_banner">Couldn\'t refresh — showing cached tracks</string>
+    <string name="tracks_empty_title">No tracks match your filters</string>
+    <string name="tracks_empty_subtitle">Try a different difficulty, surface, or search term.</string>
+    <string name="tracks_clear_filters">Clear filters</string>
+    <string name="tracks_show_all">Show all tracks</string>
+    <string name="tracks_stat_distance">Distance</string>
+    <string name="tracks_stat_elevation">Elevation</string>
+    <string name="tracks_fav_add">Add to favorites</string>
+    <string name="tracks_fav_remove">Remove from favorites</string>
+    <string name="tracks_legend_show">Show legend</string>
+    <string name="tracks_legend_hide">Hide legend</string>
+    <string name="tracks_shops_show">Show shops</string>
+    <string name="tracks_shops_hide">Hide shops</string>
+    <string name="tracks_open_in_maps">Open in Maps</string>
+    <string name="tracks_maps_chooser">Open in maps</string>
+    <string name="tracks_header_one_selected">1 selected route</string>
+    <string name="tracks_header_focused">%1$d of %2$d focused</string>
+    <string name="tracks_header_partial">%1$d of %2$d tracks</string>
+    <plurals name="tracks_count">
+        <item quantity="one">%d track</item>
+        <item quantity="other">%d tracks</item>
+    </plurals>
+
+    <!-- ===== Shared vocabulary (difficulty / surface / ride type) ===== -->
+    <string name="difficulty_all">All</string>
+    <string name="difficulty_easy">Easy</string>
+    <string name="difficulty_medium">Medium</string>
+    <string name="difficulty_hard">Hard</string>
+    <string name="surface_all">All Surfaces</string>
+    <string name="surface_road">Road</string>
+    <string name="surface_gravel">Gravel</string>
+    <string name="surface_mixed">Mixed</string>
+    <string name="ridetype_all">All Rides</string>
+    <string name="ridetype_coffee">Coffee</string>
+    <string name="ridetype_dark">Dark</string>
+    <string name="ridetype_sun">Sun</string>
+    <string name="ridetype_plus">DBB+</string>
+    <string name="ridetype_misc">Misc</string>
 </resources>

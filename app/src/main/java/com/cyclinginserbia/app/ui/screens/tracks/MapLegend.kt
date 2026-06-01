@@ -31,10 +31,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cyclinginserbia.app.R
 import com.cyclinginserbia.app.ui.theme.AppColors
 import com.cyclinginserbia.app.ui.theme.DifficultyMapColors
 
@@ -65,12 +67,14 @@ fun MapLegend(modifier: Modifier = Modifier) {
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Info,
-                    contentDescription = if (expanded) "Hide legend" else "Show legend",
+                    contentDescription = stringResource(
+                        if (expanded) R.string.tracks_legend_hide else R.string.tracks_legend_show,
+                    ),
                     tint = AppColors.Gray700,
                     modifier = Modifier.size(16.dp),
                 )
                 Text(
-                    text = "Difficulty",
+                    text = stringResource(R.string.tracks_difficulty),
                     style = TextStyle(
                         color = AppColors.Gray700,
                         fontSize = 12.sp,
@@ -84,9 +88,9 @@ fun MapLegend(modifier: Modifier = Modifier) {
                 exit = shrinkVertically() + fadeOut(),
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    LegendRow(color = DifficultyMapColors.Easy, label = "Easy")
-                    LegendRow(color = DifficultyMapColors.Medium, label = "Medium")
-                    LegendRow(color = DifficultyMapColors.Hard, label = "Hard")
+                    LegendRow(color = DifficultyMapColors.Easy, label = stringResource(R.string.difficulty_easy))
+                    LegendRow(color = DifficultyMapColors.Medium, label = stringResource(R.string.difficulty_medium))
+                    LegendRow(color = DifficultyMapColors.Hard, label = stringResource(R.string.difficulty_hard))
                 }
             }
         }
