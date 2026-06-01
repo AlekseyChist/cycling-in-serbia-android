@@ -1,20 +1,22 @@
 package com.cyclinginserbia.app.ui.screens.events
 
+import androidx.annotation.StringRes
+import com.cyclinginserbia.app.R
 import com.cyclinginserbia.app.data.model.Event
 import com.cyclinginserbia.app.data.model.EventCategory
 import com.cyclinginserbia.app.data.model.EventType
 
-enum class EventCategoryFilter(val label: String) {
-    ALL("All"),
-    DBB("DBB Club"),
-    COMMUNITY("Community"),
+enum class EventCategoryFilter(@StringRes val labelRes: Int) {
+    ALL(R.string.eventcat_all),
+    DBB(R.string.eventcat_dbb),
+    COMMUNITY(R.string.eventcat_community),
 }
 
-enum class EventTypeFilter(val label: String) {
-    ALL("All Types"),
-    RACE("Race"),
-    GRANFONDO("Gran Fondo"),
-    GROUP_RIDE("Group Ride"),
+enum class EventTypeFilter(@StringRes val labelRes: Int) {
+    ALL(R.string.eventtype_all),
+    RACE(R.string.eventtype_race),
+    GRANFONDO(R.string.eventtype_granfondo),
+    GROUP_RIDE(R.string.eventtype_group_ride),
 }
 
 internal fun List<Event>.applyFilters(

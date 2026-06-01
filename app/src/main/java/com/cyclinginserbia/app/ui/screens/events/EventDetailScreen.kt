@@ -47,11 +47,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.cyclinginserbia.app.R
 import com.cyclinginserbia.app.data.model.Event
 import com.cyclinginserbia.app.data.model.EventStatus
 import com.cyclinginserbia.app.data.model.EventType
@@ -121,7 +123,7 @@ private fun FloatingTopBar(onBack: () -> Unit, modifier: Modifier = Modifier) {
         CircleIconButton(onClick = onBack) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
+                contentDescription = stringResource(R.string.events_back),
                 tint = AppColors.Foreground,
             )
         }
@@ -165,7 +167,9 @@ private fun HeroBanner(event: Event) {
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = if (event.isFromStrava) "DBB Club Event" else "Community Event",
+                text = stringResource(
+                    if (event.isFromStrava) R.string.event_banner_dbb else R.string.event_banner_community,
+                ),
                 color = Color.White.copy(alpha = 0.9f),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Medium,
@@ -204,19 +208,19 @@ private fun KeyInfoCard(event: Event) {
         ) {
             InfoRow(
                 icon = Icons.Outlined.CalendarMonth,
-                label = "Date & Time",
+                label = stringResource(R.string.event_info_datetime),
                 primary = formatLongDate(event),
                 secondary = event.time.format(timeFormatter),
             )
             InfoRow(
                 icon = Icons.Outlined.LocationOn,
-                label = "Location",
+                label = stringResource(R.string.event_info_location),
                 primary = event.location,
             )
             if (event.distanceOptions.isNotEmpty()) {
                 InfoRow(
                     icon = Icons.Outlined.Person,
-                    label = "Distance Options",
+                    label = stringResource(R.string.event_info_distance),
                     primary = event.distanceOptions.joinToString(", "),
                 )
             }
@@ -290,7 +294,7 @@ private fun OrganizerCard(organizer: String) {
             Spacer(Modifier.width(12.dp))
             Column {
                 Text(
-                    text = "Organized by",
+                    text = stringResource(R.string.event_organized_by),
                     style = MaterialTheme.typography.labelSmall,
                     color = AppColors.Gray500,
                 )
@@ -308,10 +312,10 @@ private fun OrganizerCard(organizer: String) {
 @Composable
 private fun DescriptionSection(event: Event) {
     val text = event.description?.takeIf { it.isNotBlank() }
-        ?: "Join fellow cyclists for an exciting ride through the beautiful landscapes of ${event.location}."
+        ?: stringResource(R.string.event_description_fallback, event.location)
     Column {
         Text(
-            text = "About this event",
+            text = stringResource(R.string.event_about),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             color = AppColors.Foreground,
@@ -337,7 +341,7 @@ private fun WhatToBringSection(items: List<String>) {
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
-                text = "What to bring",
+                text = stringResource(R.string.event_what_to_bring),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = AppColors.Foreground,
@@ -382,7 +386,7 @@ private fun TimelineSection(items: List<TimelineItem>) {
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "Event Timeline",
+                    text = stringResource(R.string.event_timeline),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = AppColors.Foreground,
@@ -450,7 +454,7 @@ private fun ActionButtons(event: Event) {
         ) {
             Icon(Icons.Outlined.CalendarMonth, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            Text("Add to Calendar", fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.event_add_to_calendar), fontWeight = FontWeight.SemiBold)
         }
         if (event.isFromStrava) {
             OutlinedButton(
@@ -462,7 +466,7 @@ private fun ActionButtons(event: Event) {
             ) {
                 Icon(Icons.AutoMirrored.Outlined.OpenInNew, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Open in Strava", fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.event_open_in_strava), fontWeight = FontWeight.SemiBold)
             }
         }
     }
@@ -470,11 +474,13 @@ private fun ActionButtons(event: Event) {
 
 @Composable
 private fun TypeChip(type: EventType) {
-    val label = when (type) {
-        EventType.race -> "Race"
-        EventType.granfondo -> "Gran Fondo"
-        EventType.groupRide -> "Group Ride"
-    }
+    val label = stringResource(
+        when (type) {
+            EventType.race -> R.string.eventtype_race
+            EventType.granfondo -> R.string.eventtype_granfondo
+            EventType.groupRide -> R.string.eventtype_group_ride
+        },
+    )
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
@@ -491,9 +497,9 @@ private fun TypeChip(type: EventType) {
 
 @Composable
 private fun StatusChip(status: EventStatus) {
-    val (label, container, content) = when (status) {
-        EventStatus.soldOut -> Triple("Sold Out", AppColors.Amber100, AppColors.Amber700)
-        EventStatus.canceled -> Triple("Canceled", AppColors.Red500, AppColors.Background)
+    val (labelRes, container, content) = when (status) {
+        EventStatus.soldOut -> Triple(R.string.eventstatus_soldout, AppColors.Amber100, AppColors.Amber700)
+        EventStatus.canceled -> Triple(R.string.eventstatus_canceled, AppColors.Red500, AppColors.Background)
         EventStatus.upcoming -> return
     }
     Box(
@@ -502,7 +508,7 @@ private fun StatusChip(status: EventStatus) {
             .background(container)
             .padding(horizontal = 12.dp, vertical = 6.dp),
     ) {
-        Text(text = label, style = MaterialTheme.typography.labelMedium, color = content)
+        Text(text = stringResource(labelRes), style = MaterialTheme.typography.labelMedium, color = content)
     }
 }
 
@@ -515,7 +521,7 @@ private fun StatusFooter(status: EventStatus) {
         colors = CardDefaults.cardColors(containerColor = AppColors.Amber50),
     ) {
         Text(
-            text = "Recurring DBB club ride. Confirm route and meeting point on the club's Strava page before joining.",
+            text = stringResource(R.string.event_status_recurring),
             style = MaterialTheme.typography.bodySmall,
             color = AppColors.Amber700,
             modifier = Modifier.padding(12.dp),

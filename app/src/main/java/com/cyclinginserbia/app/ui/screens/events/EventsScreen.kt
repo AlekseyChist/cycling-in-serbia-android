@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.cyclinginserbia.app.R
 import com.cyclinginserbia.app.data.model.Event
 import com.cyclinginserbia.app.data.model.EventType
 import com.cyclinginserbia.app.ui.components.SearchField
@@ -112,18 +114,18 @@ private fun FilterHeader(
         SearchField(
             value = query,
             onValueChange = onQueryChange,
-            placeholder = "Search events",
+            placeholder = stringResource(R.string.events_search_placeholder),
         )
         FilterChipRow(
             entries = EventCategoryFilter.entries,
             selected = category,
-            label = { it.label },
+            label = { stringResource(it.labelRes) },
             onSelect = onCategoryChange,
         )
         FilterChipRow(
             entries = EventTypeFilter.entries,
             selected = type,
-            label = { it.label },
+            label = { stringResource(it.labelRes) },
             onSelect = onTypeChange,
         )
     }
@@ -139,7 +141,7 @@ private fun FilterHeader(
 private fun <T> FilterChipRow(
     entries: List<T>,
     selected: T,
-    label: (T) -> String,
+    label: @Composable (T) -> String,
     onSelect: (T) -> Unit,
 ) {
     LazyRow(
@@ -291,11 +293,13 @@ private fun EventCard(event: Event, onClick: () -> Unit) {
 
 @Composable
 private fun TypeChip(type: EventType) {
-    val label = when (type) {
-        EventType.race -> "Race"
-        EventType.granfondo -> "Gran Fondo"
-        EventType.groupRide -> "Group Ride"
-    }
+    val label = stringResource(
+        when (type) {
+            EventType.race -> R.string.eventtype_race
+            EventType.granfondo -> R.string.eventtype_granfondo
+            EventType.groupRide -> R.string.eventtype_group_ride
+        },
+    )
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
@@ -320,14 +324,16 @@ private fun EmptyState(
 ) {
     val (title, subtitle) = when {
         state.category == EventCategoryFilter.COMMUNITY -> {
-            "Community events coming soon" to
-                "We're working on opening event submissions to local clubs and individual riders."
+            stringResource(R.string.events_empty_community_title) to
+                stringResource(R.string.events_empty_community_sub)
         }
         state.hasActiveFilters -> {
-            "No events match your filters" to "Try a different category, type, or search term."
+            stringResource(R.string.events_empty_filtered_title) to
+                stringResource(R.string.events_empty_filtered_sub)
         }
         else -> {
-            "No upcoming events" to "Check back later — new rides are scheduled every week."
+            stringResource(R.string.events_empty_none_title) to
+                stringResource(R.string.events_empty_none_sub)
         }
     }
     Column(
@@ -358,7 +364,7 @@ private fun EmptyState(
         if (state.hasActiveFilters && state.category != EventCategoryFilter.COMMUNITY) {
             Spacer(Modifier.height(12.dp))
             TextButton(onClick = onClearFilters) {
-                Text("Clear filters", color = AppColors.Primary, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.events_clear_filters), color = AppColors.Primary, fontWeight = FontWeight.SemiBold)
             }
         }
     }
@@ -368,7 +374,7 @@ private fun EmptyState(
 private fun ErrorView(message: String, onRetry: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = "Couldn't load events",
+            text = stringResource(R.string.events_error_load),
             style = TextStyle(
                 color = AppColors.Gray900,
                 fontSize = 16.sp,
@@ -381,7 +387,7 @@ private fun ErrorView(message: String, onRetry: () -> Unit) {
             style = TextStyle(color = AppColors.Gray500, fontSize = 14.sp),
         )
         Spacer(Modifier.height(16.dp))
-        Button(onClick = onRetry) { Text("Retry") }
+        Button(onClick = onRetry) { Text(stringResource(R.string.retry)) }
     }
 }
 
