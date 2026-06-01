@@ -88,4 +88,44 @@
     <string name="ridetype_sun">Солнце</string>
     <string name="ridetype_plus">DBB+</string>
     <string name="ridetype_misc">Прочее</string>
+
+    <!-- ===== Events screen ===== -->
+    <string name="events_search_placeholder">Поиск событий</string>
+    <string name="events_clear_filters">Сбросить фильтры</string>
+    <string name="events_error_load">Не удалось загрузить события</string>
+    <string name="events_back">Назад</string>
+    <string name="events_empty_community_title">События сообщества — скоро</string>
+    <string name="events_empty_community_sub">Мы готовим возможность добавлять события для местных клубов и райдеров.</string>
+    <string name="events_empty_filtered_title">Нет событий под фильтры</string>
+    <string name="events_empty_filtered_sub">Измените категорию, тип или поисковый запрос.</string>
+    <string name="events_empty_none_title">Нет предстоящих событий</string>
+    <string name="events_empty_none_sub">Загляните позже — новые заезды появляются каждую неделю.</string>
+    <string name="events_no_calendar">Нет приложения календаря</string>
+    <string name="events_no_browser">Нет браузера</string>
+
+    <!-- Event detail -->
+    <string name="event_banner_dbb">Событие клуба DBB</string>
+    <string name="event_banner_community">Событие сообщества</string>
+    <string name="event_info_datetime">Дата и время</string>
+    <string name="event_info_location">Место</string>
+    <string name="event_info_distance">Варианты дистанции</string>
+    <string name="event_organized_by">Организатор</string>
+    <string name="event_about">Об этом событии</string>
+    <string name="event_description_fallback">Присоединяйтесь к велосипедистам и прокатитесь по живописным местам: %1$s.</string>
+    <string name="event_what_to_bring">Что взять с собой</string>
+    <string name="event_timeline">Расписание</string>
+    <string name="event_add_to_calendar">Добавить в календарь</string>
+    <string name="event_open_in_strava">Открыть в Strava</string>
+    <string name="event_status_recurring">Регулярный заезд клуба DBB. Уточните маршрут и точку сбора на странице клуба в Strava перед участием.</string>
+
+    <!-- Event vocabulary (type / category / status) -->
+    <string name="eventcat_all">Все</string>
+    <string name="eventcat_dbb">Клуб DBB</string>
+    <string name="eventcat_community">Сообщество</string>
+    <string name="eventtype_all">Все типы</string>
+    <string name="eventtype_race">Гонка</string>
+    <string name="eventtype_granfondo">Гран-фондо</string>
+    <string name="eventtype_group_ride">Групповой заезд</string>
+    <string name="eventstatus_soldout">Мест нет</string>
+    <string name="eventstatus_canceled">Отменено</string>
 </resources>

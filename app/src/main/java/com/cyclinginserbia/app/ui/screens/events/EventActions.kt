@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.CalendarContract
 import android.widget.Toast
+import com.cyclinginserbia.app.R
 import com.cyclinginserbia.app.data.model.Event
 import java.time.ZoneId
 
@@ -30,7 +31,7 @@ object EventActions {
         try {
             context.startActivity(intent)
         } catch (_: ActivityNotFoundException) {
-            Toast.makeText(context, "No calendar app available", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.events_no_calendar), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -43,7 +44,7 @@ object EventActions {
         try {
             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         } catch (_: ActivityNotFoundException) {
-            Toast.makeText(context, "No browser available", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.events_no_browser), Toast.LENGTH_SHORT).show()
         }
     }
 }

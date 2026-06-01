@@ -87,4 +87,44 @@
     <string name="ridetype_sun">Sunce</string>
     <string name="ridetype_plus">DBB+</string>
     <string name="ridetype_misc">Ostalo</string>
+
+    <!-- ===== Events screen ===== -->
+    <string name="events_search_placeholder">Pretraga događaja</string>
+    <string name="events_clear_filters">Obriši filtere</string>
+    <string name="events_error_load">Učitavanje događaja nije uspelo</string>
+    <string name="events_back">Nazad</string>
+    <string name="events_empty_community_title">Događaji zajednice — uskoro</string>
+    <string name="events_empty_community_sub">Radimo na otvaranju prijava događaja za lokalne klubove i pojedinačne vozače.</string>
+    <string name="events_empty_filtered_title">Nema događaja za izabrane filtere</string>
+    <string name="events_empty_filtered_sub">Probajte drugu kategoriju, tip ili pojam pretrage.</string>
+    <string name="events_empty_none_title">Nema predstojećih događaja</string>
+    <string name="events_empty_none_sub">Svratite kasnije — nove vožnje se zakazuju svake nedelje.</string>
+    <string name="events_no_calendar">Nema aplikacije za kalendar</string>
+    <string name="events_no_browser">Nema pregledača</string>
+
+    <!-- Event detail -->
+    <string name="event_banner_dbb">Događaj DBB kluba</string>
+    <string name="event_banner_community">Događaj zajednice</string>
+    <string name="event_info_datetime">Datum i vreme</string>
+    <string name="event_info_location">Lokacija</string>
+    <string name="event_info_distance">Opcije razdaljine</string>
+    <string name="event_organized_by">Organizator</string>
+    <string name="event_about">O ovom događaju</string>
+    <string name="event_description_fallback">Pridružite se biciklistima u uzbudljivoj vožnji kroz prelepe predele: %1$s.</string>
+    <string name="event_what_to_bring">Šta poneti</string>
+    <string name="event_timeline">Raspored događaja</string>
+    <string name="event_add_to_calendar">Dodaj u kalendar</string>
+    <string name="event_open_in_strava">Otvori u Stravi</string>
+    <string name="event_status_recurring">Redovna vožnja DBB kluba. Potvrdite rutu i mesto okupljanja na Strava stranici kluba pre nego što se pridružite.</string>
+
+    <!-- Event vocabulary (type / category / status) -->
+    <string name="eventcat_all">Sve</string>
+    <string name="eventcat_dbb">DBB klub</string>
+    <string name="eventcat_community">Zajednica</string>
+    <string name="eventtype_all">Svi tipovi</string>
+    <string name="eventtype_race">Trka</string>
+    <string name="eventtype_granfondo">Gran Fondo</string>
+    <string name="eventtype_group_ride">Grupna vožnja</string>
+    <string name="eventstatus_soldout">Rasprodato</string>
+    <string name="eventstatus_canceled">Otkazano</string>
 </resources>
