@@ -1,32 +1,34 @@
 package com.cyclinginserbia.app.ui.screens.tracks
 
+import androidx.annotation.StringRes
+import com.cyclinginserbia.app.R
 import com.cyclinginserbia.app.data.model.Difficulty
 import com.cyclinginserbia.app.data.model.Surface
 import com.cyclinginserbia.app.data.model.Track
 
-enum class DifficultyFilter(val label: String) {
-    ALL("All"),
-    EASY("Easy"),
-    MEDIUM("Medium"),
-    HARD("Hard"),
+enum class DifficultyFilter(@StringRes val labelRes: Int) {
+    ALL(R.string.difficulty_all),
+    EASY(R.string.difficulty_easy),
+    MEDIUM(R.string.difficulty_medium),
+    HARD(R.string.difficulty_hard),
 }
 
-enum class SurfaceFilter(val label: String) {
-    ALL("All Surfaces"),
-    ROAD("Road"),
-    GRAVEL("Gravel"),
-    MIXED("Mixed"),
+enum class SurfaceFilter(@StringRes val labelRes: Int) {
+    ALL(R.string.surface_all),
+    ROAD(R.string.surface_road),
+    GRAVEL(R.string.surface_gravel),
+    MIXED(R.string.surface_mixed),
 }
 
 enum class RideType { COFFEE, DARK, SUN, PLUS, MISC }
 
-enum class RideTypeFilter(val label: String) {
-    ALL("All Rides"),
-    COFFEE("Coffee"),
-    DARK("Dark"),
-    SUN("Sun"),
-    PLUS("DBB+"),
-    MISC("Misc"),
+enum class RideTypeFilter(@StringRes val labelRes: Int) {
+    ALL(R.string.ridetype_all),
+    COFFEE(R.string.ridetype_coffee),
+    DARK(R.string.ridetype_dark),
+    SUN(R.string.ridetype_sun),
+    PLUS(R.string.ridetype_plus),
+    MISC(R.string.ridetype_misc),
 }
 
 /**

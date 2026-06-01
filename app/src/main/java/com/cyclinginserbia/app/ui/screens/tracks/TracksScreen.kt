@@ -74,6 +74,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -84,6 +86,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.ui.platform.LocalContext
+import com.cyclinginserbia.app.R
 import com.cyclinginserbia.app.data.model.Difficulty
 import com.cyclinginserbia.app.data.model.Shop
 import com.cyclinginserbia.app.data.model.Surface as SurfaceType
@@ -150,7 +153,9 @@ fun TracksScreen(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = if (showError) "Couldn't load tracks" else "Loading…",
+                        text = stringResource(
+                            if (showError) R.string.tracks_error_load else R.string.loading,
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = AppColors.Gray600,
                     )
@@ -179,7 +184,7 @@ fun TracksScreen(
                     contentAlignment = Alignment.Center,
                 ) {
                     ErrorView(
-                        message = state.syncError?.message ?: "Unknown error",
+                        message = state.syncError?.message ?: stringResource(R.string.tracks_error_unknown),
                         onRetry = viewModel::sync,
                     )
                 }
@@ -306,7 +311,7 @@ private fun FloatingHeader(
                 SearchField(
                     value = query,
                     onValueChange = onQueryChange,
-                    placeholder = "Search tracks",
+                    placeholder = stringResource(R.string.tracks_search_placeholder),
                 )
             }
             FilterButton(
@@ -349,7 +354,7 @@ private fun FilterButton(activeCount: Int, onClick: () -> Unit) {
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Tune,
-                    contentDescription = "Filters",
+                    contentDescription = stringResource(R.string.tracks_filters),
                     tint = AppColors.Gray700,
                 )
             }
@@ -388,41 +393,41 @@ private fun FiltersModalSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                text = "Filters",
+                text = stringResource(R.string.tracks_filters),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
             )
 
-            FilterSection(title = "Difficulty") {
+            FilterSection(title = stringResource(R.string.tracks_difficulty)) {
                 FilterChipRow(
                     entries = DifficultyFilter.entries,
                     selected = difficulty,
-                    label = { it.label },
+                    label = { stringResource(it.labelRes) },
                     onSelect = onDifficultyChange,
                 )
             }
-            FilterSection(title = "Surface") {
+            FilterSection(title = stringResource(R.string.tracks_surface)) {
                 FilterChipRow(
                     entries = SurfaceFilter.entries,
                     selected = surface,
-                    label = { it.label },
+                    label = { stringResource(it.labelRes) },
                     onSelect = onSurfaceChange,
                 )
             }
-            FilterSection(title = "Ride Type") {
+            FilterSection(title = stringResource(R.string.tracks_ride_type)) {
                 FilterChipRow(
                     entries = RideTypeFilter.entries,
                     selected = rideType,
-                    label = { it.label },
+                    label = { stringResource(it.labelRes) },
                     onSelect = onRideTypeChange,
                 )
             }
             if (regions.isNotEmpty()) {
-                FilterSection(title = "Region") {
+                FilterSection(title = stringResource(R.string.tracks_region)) {
                     FilterChipRow(
                         entries = listOf<String?>(null) + regions,
                         selected = region,
-                        label = { it ?: "All Regions" },
+                        label = { it ?: stringResource(R.string.tracks_all_regions) },
                         onSelect = onRegionChange,
                     )
                 }
@@ -435,7 +440,7 @@ private fun FiltersModalSheet(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Favorites only",
+                    text = stringResource(R.string.tracks_favorites_only),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.weight(1f),
@@ -464,7 +469,7 @@ private fun FiltersModalSheet(
                     modifier = Modifier.weight(1f),
                 ) {
                     Text(
-                        text = "Reset",
+                        text = stringResource(R.string.tracks_reset),
                         color = AppColors.Gray700,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -477,7 +482,7 @@ private fun FiltersModalSheet(
                         contentColor = AppColors.PrimaryForeground,
                     ),
                 ) {
-                    Text(text = "Apply", fontWeight = FontWeight.SemiBold)
+                    Text(text = stringResource(R.string.tracks_apply), fontWeight = FontWeight.SemiBold)
                 }
             }
         }
@@ -512,7 +517,7 @@ private fun SyncErrorBanner(onRetry: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Couldn't refresh — showing cached tracks",
+                text = stringResource(R.string.tracks_cached_banner),
                 style = TextStyle(
                     color = AppColors.Amber800,
                     fontSize = 13.sp,
@@ -526,7 +531,7 @@ private fun SyncErrorBanner(onRetry: () -> Unit) {
                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
             ) {
                 Text(
-                    text = "Retry",
+                    text = stringResource(R.string.retry),
                     color = AppColors.Primary,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 13.sp,
@@ -540,7 +545,7 @@ private fun SyncErrorBanner(onRetry: () -> Unit) {
 private fun <T> FilterChipRow(
     entries: List<T>,
     selected: T,
-    label: (T) -> String,
+    label: @Composable (T) -> String,
     onSelect: (T) -> Unit,
 ) {
     LazyRow(
@@ -630,14 +635,14 @@ private fun SheetTracksList(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = "No tracks match your filters",
+                    text = stringResource(R.string.tracks_empty_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center,
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = "Try a different difficulty, surface, or search term.",
+                    text = stringResource(R.string.tracks_empty_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = AppColors.Gray600,
                     textAlign = TextAlign.Center,
@@ -646,7 +651,7 @@ private fun SheetTracksList(
                     Spacer(Modifier.height(8.dp))
                     TextButton(onClick = onClearFilters) {
                         Text(
-                            "Clear filters",
+                            stringResource(R.string.tracks_clear_filters),
                             color = AppColors.Primary,
                             fontWeight = FontWeight.SemiBold,
                         )
@@ -689,10 +694,10 @@ private fun SheetHeader(
     ) {
         Text(
             text = when {
-                isFocused && sheetCount == 1 -> "1 selected route"
-                isFocused -> "$sheetCount of $totalCount focused"
-                sheetCount == totalCount -> "$totalCount tracks"
-                else -> "$sheetCount of $totalCount tracks"
+                isFocused && sheetCount == 1 -> stringResource(R.string.tracks_header_one_selected)
+                isFocused -> stringResource(R.string.tracks_header_focused, sheetCount, totalCount)
+                sheetCount == totalCount -> pluralStringResource(R.plurals.tracks_count, totalCount, totalCount)
+                else -> stringResource(R.string.tracks_header_partial, sheetCount, totalCount)
             },
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
@@ -705,7 +710,7 @@ private fun SheetHeader(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Close,
-                    contentDescription = "Show all tracks",
+                    contentDescription = stringResource(R.string.tracks_show_all),
                     tint = AppColors.Gray700,
                 )
             }
@@ -775,9 +780,9 @@ private fun TrackCard(
                     )
                     Spacer(Modifier.height(8.dp))
                     Row {
-                        Stat("Distance", "${track.distanceKm} km")
+                        Stat(stringResource(R.string.tracks_stat_distance), "${track.distanceKm} km")
                         Spacer(Modifier.width(20.dp))
-                        Stat("Elevation", "${track.elevationM} m")
+                        Stat(stringResource(R.string.tracks_stat_elevation), "${track.elevationM} m")
                     }
                 }
             }
@@ -789,7 +794,9 @@ private fun TrackCard(
             ) {
                 Icon(
                     imageVector = if (isFavorite) Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder,
-                    contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                    contentDescription = stringResource(
+                        if (isFavorite) R.string.tracks_fav_remove else R.string.tracks_fav_add,
+                    ),
                     tint = if (isFavorite) AppColors.Primary else AppColors.Gray500,
                 )
             }
@@ -810,11 +817,13 @@ private fun DifficultyChip(difficulty: Difficulty) {
         Difficulty.medium -> ChipColors.Medium
         Difficulty.hard -> ChipColors.Hard
     }
-    val label = when (difficulty) {
-        Difficulty.easy -> "Easy"
-        Difficulty.medium -> "Medium"
-        Difficulty.hard -> "Hard"
-    }
+    val label = stringResource(
+        when (difficulty) {
+            Difficulty.easy -> R.string.difficulty_easy
+            Difficulty.medium -> R.string.difficulty_medium
+            Difficulty.hard -> R.string.difficulty_hard
+        },
+    )
     SoftChip(label = label, palette = palette)
 }
 
@@ -825,11 +834,13 @@ private fun SurfaceChip(surface: SurfaceType) {
         SurfaceType.gravel -> ChipColors.Gravel
         SurfaceType.mixed -> ChipColors.Mixed
     }
-    val label = when (surface) {
-        SurfaceType.road -> "Road"
-        SurfaceType.gravel -> "Gravel"
-        SurfaceType.mixed -> "Mixed"
-    }
+    val label = stringResource(
+        when (surface) {
+            SurfaceType.road -> R.string.surface_road
+            SurfaceType.gravel -> R.string.surface_gravel
+            SurfaceType.mixed -> R.string.surface_mixed
+        },
+    )
     SoftChip(label = label, palette = palette)
 }
 
@@ -864,11 +875,11 @@ private fun Stat(label: String, value: String) {
 @Composable
 private fun ErrorView(message: String, onRetry: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Couldn't load tracks", style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.tracks_error_load), style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(4.dp))
         Text(message, style = MaterialTheme.typography.bodyMedium, color = AppColors.Gray600)
         Spacer(Modifier.height(16.dp))
-        Button(onClick = onRetry) { Text("Retry") }
+        Button(onClick = onRetry) { Text(stringResource(R.string.retry)) }
     }
 }
 
@@ -887,7 +898,9 @@ private fun ShopsToggleButton(enabled: Boolean, onClick: () -> Unit) {
         Box(contentAlignment = Alignment.Center) {
             Icon(
                 imageVector = Icons.Outlined.Storefront,
-                contentDescription = if (enabled) "Hide shops" else "Show shops",
+                contentDescription = stringResource(
+                    if (enabled) R.string.tracks_shops_hide else R.string.tracks_shops_show,
+                ),
                 tint = tint,
                 modifier = Modifier.size(20.dp),
             )
@@ -949,7 +962,7 @@ private fun ShopDetailsSheet(shop: Shop, onDismiss: () -> Unit) {
                             modifier = Modifier.size(18.dp),
                         )
                         Spacer(Modifier.width(8.dp))
-                        Text("Open in Maps")
+                        Text(stringResource(R.string.tracks_open_in_maps))
                     }
                 }
                 TextButton(
@@ -975,7 +988,7 @@ private fun openInMaps(context: android.content.Context, lat: Double, lng: Doubl
     // walk, taxi, etc.). Falls back gracefully to whatever maps app is installed.
     val uri = Uri.parse("geo:$lat,$lng?q=$lat,$lng(${Uri.encode(label)})")
     val intent = Intent(Intent.ACTION_VIEW, uri)
-    val chooser = Intent.createChooser(intent, "Open in maps")
+    val chooser = Intent.createChooser(intent, context.getString(R.string.tracks_maps_chooser))
     chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     context.startActivity(chooser)
 }
