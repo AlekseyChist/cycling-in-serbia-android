@@ -121,6 +121,36 @@ SUPABASE_ANON_KEY=sb_publishable_...
 
 osmdroid использует raster-тайлы OpenStreetMap — те же, что Leaflet в вебе. **API key не нужен.**
 
+### 5. Supabase keep-alive (одноразовая настройка)
+
+Free-tier ставит проект на паузу после ~7 дней без **активности БД**. Один read-GET в сутки оказался недостаточным сигналом, поэтому GitHub Action (`.github/workflows/supabase-keepalive.yml`) дважды в день делает реальную **запись** в строку-пустышку. Запись идёт под публичным `anon`-ключом через узкую RLS-политику — service_role key не нужен.
+
+Перед тем как это заработает, один раз выполни в Supabase (Dashboard → SQL Editor):
+
+```sql
+-- строка-пустышка, которую трогает GitHub Action
+create table if not exists public.keepalive (
+  id        int primary key,
+  last_ping timestamptz not null default now()
+);
+
+insert into public.keepalive (id, last_ping)
+values (1, now())
+on conflict (id) do nothing;
+
+-- RLS: anon может ТОЛЬКО обновлять эту таблицу (не читать/вставлять/удалять)
+alter table public.keepalive enable row level security;
+
+create policy "anon may touch keepalive"
+  on public.keepalive
+  for update
+  to anon
+  using (true)
+  with check (true);
+```
+
+GitHub-секреты `SUPABASE_URL` и `SUPABASE_ANON_KEY` уже заведены в репозитории. Проверка: вкладка Actions → *Supabase keep-alive* → **Run workflow** → оба шага зелёные.
+
 ---
 
 ## Сборка из терминала

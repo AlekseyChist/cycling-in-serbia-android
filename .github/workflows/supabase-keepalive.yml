@@ -1,28 +1,36 @@
 name: Supabase keep-alive
 
-# Supabase free-tier pauses a project after ~7 days with no activity, which
-# takes the tracks API — and therefore the app's live data — offline until it
-# is manually restored from the dashboard. This job pings a tiny read-only
-# endpoint daily so the project always counts as active.
+# Supabase free-tier pauses a project after ~7 days without sufficient DATABASE
+# activity, which takes the tracks API — and therefore the app's live data —
+# offline until it is manually restored from the dashboard.
 #
-# It doubles as an uptime monitor: a non-200 response fails the run, so GitHub
-# emails us if the project is ever down again.
+# A read-only GET turned out NOT to be enough on its own (Supabase warned us of
+# an imminent pause despite 9 days of green pings), so this job now performs a
+# real write: it PATCHes a single throwaway row in the `keepalive` table. A
+# write is unambiguously counted as database activity. The read is kept as a
+# lightweight health-check / uptime monitor.
+#
+# The write uses the ANON key against an RLS policy that only allows updating
+# the one keepalive row — no service_role key is needed. See the one-time SQL
+# setup in README / the PR description.
 #
 # NOTE: scheduled workflows only fire from the repository's DEFAULT branch
 # (main), so this file has no effect until it is merged there.
 
 on:
   schedule:
-    # Daily at 07:23 UTC. Minutes are offset off the top of the hour per
-    # GitHub's guidance (scheduled jobs at :00 are heavily delayed).
+    # Twice daily (07:23 and 19:23 UTC) for margin against the inactivity
+    # window. Minutes are offset off the top of the hour per GitHub's guidance
+    # (scheduled jobs at :00 are heavily delayed).
     - cron: "23 7 * * *"
+    - cron: "23 19 * * *"
   workflow_dispatch: {}
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase REST
+      - name: Health-check read
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
@@ -32,7 +40,30 @@ jobs:
             "${SUPABASE_URL}/rest/v1/tracks?select=id&limit=1")
           echo "Supabase tracks endpoint returned HTTP ${code}"
           if [ "${code}" != "200" ]; then
-            echo "::error::Keep-alive ping failed (HTTP ${code}) — the project may be paused or down."
+            echo "::error::Health-check read failed (HTTP ${code}) — the project may be paused or down."
             exit 1
           fi
-          echo "Project is active."
+          echo "Read OK."
+
+      - name: Keep-alive write
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          code=$(curl -sS --max-time 30 -o /dev/null -w '%{http_code}' \
+            -X PATCH \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            "${SUPABASE_URL}/rest/v1/keepalive?id=eq.1" \
+            -d "{\"last_ping\":\"${ts}\"}")
+          echo "Keep-alive PATCH returned HTTP ${code}"
+          # PostgREST returns 204 for a successful return=minimal write (200 if a
+          # body is sent back). Anything else means the row/policy is missing.
+          if [ "${code}" != "204" ] && [ "${code}" != "200" ]; then
+            echo "::error::Keep-alive write failed (HTTP ${code}) — check the keepalive table + RLS policy exist."
+            exit 1
+          fi
+          echo "Write OK — database activity registered at ${ts}."
