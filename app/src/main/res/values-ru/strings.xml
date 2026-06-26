@@ -118,6 +118,33 @@
     <string name="event_open_in_strava">Открыть в Strava</string>
     <string name="event_status_recurring">Регулярный заезд клуба DBB. Уточните маршрут и точку сбора на странице клуба в Strava перед участием.</string>
 
+    <!-- ===== Track detail screen ===== -->
+    <string name="trackdetail_back">Назад</string>
+    <string name="trackdetail_share">Поделиться</string>
+    <string name="trackdetail_stat_distance">Дистанция</string>
+    <string name="trackdetail_stat_elevation">Набор</string>
+    <string name="trackdetail_stat_time">Время</string>
+    <string name="trackdetail_stat_difficulty">Сложность</string>
+    <string name="trackdetail_unit_km">%1$s км</string>
+    <string name="trackdetail_unit_m">%1$s м</string>
+    <string name="trackdetail_about">Об этом маршруте</string>
+    <string name="trackdetail_safety">Меры безопасности</string>
+    <string name="trackdetail_route_preview">Предпросмотр маршрута</string>
+    <string name="trackdetail_route_preview_unavailable">Предпросмотр недоступен — скачайте GPX, чтобы открыть маршрут в навигаторе</string>
+    <string name="trackdetail_download_gpx">Скачать GPX</string>
+    <string name="trackdetail_gpx_unavailable">GPX недоступен</string>
+    <string name="trackdetail_open_start">Открыть старт в картах</string>
+    <string name="trackdetail_dbb_tip_label">Совет DBB: </string>
+    <string name="trackdetail_dbb_tip_body">Спланируйте поездку — проверьте прогноз погоды, наполните фляги и сообщите кому-нибудь о маршруте перед выездом.</string>
+    <!-- Track detail actions (toasts / choosers) -->
+    <string name="trackdetail_gpx_not_available">GPX для этого маршрута недоступен</string>
+    <string name="trackdetail_downloading">Скачивание %1$s.gpx</string>
+    <string name="trackdetail_download_failed">Не удалось скачать: %1$s</string>
+    <string name="trackdetail_no_start_coords">Нет координат старта</string>
+    <string name="trackdetail_chooser_open_in">Открыть в</string>
+    <string name="trackdetail_no_maps_app">Нет приложения для карт</string>
+    <string name="trackdetail_chooser_share">Поделиться маршрутом</string>
+
     <!-- Event vocabulary (type / category / status) -->
     <string name="eventcat_all">Все</string>
     <string name="eventcat_dbb">Клуб DBB</string>

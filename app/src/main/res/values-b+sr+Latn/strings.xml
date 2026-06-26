@@ -117,6 +117,33 @@
     <string name="event_open_in_strava">Otvori u Stravi</string>
     <string name="event_status_recurring">Redovna vožnja DBB kluba. Potvrdite rutu i mesto okupljanja na Strava stranici kluba pre nego što se pridružite.</string>
 
+    <!-- ===== Track detail screen ===== -->
+    <string name="trackdetail_back">Nazad</string>
+    <string name="trackdetail_share">Podeli</string>
+    <string name="trackdetail_stat_distance">Razdaljina</string>
+    <string name="trackdetail_stat_elevation">Uspon</string>
+    <string name="trackdetail_stat_time">Vreme</string>
+    <string name="trackdetail_stat_difficulty">Težina</string>
+    <string name="trackdetail_unit_km">%1$s km</string>
+    <string name="trackdetail_unit_m">%1$s m</string>
+    <string name="trackdetail_about">O ovoj ruti</string>
+    <string name="trackdetail_safety">Bezbednosne napomene</string>
+    <string name="trackdetail_route_preview">Pregled rute</string>
+    <string name="trackdetail_route_preview_unavailable">Pregled rute nije dostupan — preuzmite GPX da biste pratili rutu u navigaciji</string>
+    <string name="trackdetail_download_gpx">Preuzmi GPX</string>
+    <string name="trackdetail_gpx_unavailable">GPX nije dostupan</string>
+    <string name="trackdetail_open_start">Otvori start u mapama</string>
+    <string name="trackdetail_dbb_tip_label">DBB savet: </string>
+    <string name="trackdetail_dbb_tip_body">Isplanirajte vožnju — proverite vremensku prognozu, napunite flašice i obavestite nekoga o ruti pre polaska.</string>
+    <!-- Track detail actions (toasts / choosers) -->
+    <string name="trackdetail_gpx_not_available">GPX nije dostupan za ovu rutu</string>
+    <string name="trackdetail_downloading">Preuzimanje %1$s.gpx</string>
+    <string name="trackdetail_download_failed">Preuzimanje nije uspelo: %1$s</string>
+    <string name="trackdetail_no_start_coords">Nema koordinata starta</string>
+    <string name="trackdetail_chooser_open_in">Otvori u</string>
+    <string name="trackdetail_no_maps_app">Nije instalirana aplikacija za mape</string>
+    <string name="trackdetail_chooser_share">Podeli rutu</string>
+
     <!-- Event vocabulary (type / category / status) -->
     <string name="eventcat_all">Sve</string>
     <string name="eventcat_dbb">DBB klub</string>
