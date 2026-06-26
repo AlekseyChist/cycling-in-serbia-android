@@ -30,11 +30,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.cyclinginserbia.app.R
 import com.cyclinginserbia.app.data.model.ShopTab
 import com.cyclinginserbia.app.ui.components.EmptyState
 import com.cyclinginserbia.app.ui.components.SearchField
@@ -63,8 +65,8 @@ fun ShopsScreen(
         if (shops.isEmpty()) {
             EmptyState(
                 icon = Icons.Outlined.Storefront,
-                title = "No results found",
-                description = "Try adjusting your search or filter",
+                title = stringResource(R.string.shops_empty_title),
+                description = stringResource(R.string.shops_empty_sub),
             )
         } else {
             LazyColumn(
@@ -98,7 +100,7 @@ private fun StickyHeader(
         SearchField(
             value = query,
             onValueChange = onQueryChange,
-            placeholder = "Search shops and services",
+            placeholder = stringResource(R.string.shops_search_placeholder),
         )
     }
     Box(
@@ -168,7 +170,7 @@ private fun SegmentedTab(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = tab.label,
+                text = stringResource(tab.labelRes),
                 style = TextStyle(
                     color = textColor,
                     fontSize = 14.sp,

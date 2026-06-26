@@ -38,11 +38,13 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cyclinginserbia.app.R
 import com.cyclinginserbia.app.data.model.Shop
 import com.cyclinginserbia.app.ui.theme.AppColors
 import com.cyclinginserbia.app.ui.util.scaleOnPress
@@ -118,7 +120,7 @@ private fun ShopLogo(shop: Shop) {
         if (shop.logoRes != null) {
             Image(
                 painter = painterResource(id = shop.logoRes),
-                contentDescription = "${shop.name} logo",
+                contentDescription = stringResource(R.string.shops_logo_desc, shop.name),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()

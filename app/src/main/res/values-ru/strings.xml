@@ -155,4 +155,14 @@
     <string name="eventtype_group_ride">Групповой заезд</string>
     <string name="eventstatus_soldout">Мест нет</string>
     <string name="eventstatus_canceled">Отменено</string>
+
+    <!-- ===== Shops screen ===== -->
+    <string name="shoptab_all">Все</string>
+    <string name="shoptab_shops">Магазины</string>
+    <string name="shoptab_services">Сервисы</string>
+    <string name="shoptab_friends">Друзья</string>
+    <string name="shops_search_placeholder">Поиск магазинов и сервисов</string>
+    <string name="shops_empty_title">Ничего не найдено</string>
+    <string name="shops_empty_sub">Измените запрос или фильтр</string>
+    <string name="shops_logo_desc">Логотип %1$s</string>
 </resources>
