@@ -118,6 +118,33 @@
     <string name="event_open_in_strava">Открыть в Strava</string>
     <string name="event_status_recurring">Регулярный заезд клуба DBB. Уточните маршрут и точку сбора на странице клуба в Strava перед участием.</string>
 
+    <!-- ===== Track detail screen ===== -->
+    <string name="trackdetail_back">Назад</string>
+    <string name="trackdetail_share">Поделиться</string>
+    <string name="trackdetail_stat_distance">Дистанция</string>
+    <string name="trackdetail_stat_elevation">Набор</string>
+    <string name="trackdetail_stat_time">Время</string>
+    <string name="trackdetail_stat_difficulty">Сложность</string>
+    <string name="trackdetail_unit_km">%1$s км</string>
+    <string name="trackdetail_unit_m">%1$s м</string>
+    <string name="trackdetail_about">Об этом маршруте</string>
+    <string name="trackdetail_safety">Меры безопасности</string>
+    <string name="trackdetail_route_preview">Предпросмотр маршрута</string>
+    <string name="trackdetail_route_preview_unavailable">Предпросмотр недоступен — скачайте GPX, чтобы открыть маршрут в навигаторе</string>
+    <string name="trackdetail_download_gpx">Скачать GPX</string>
+    <string name="trackdetail_gpx_unavailable">GPX недоступен</string>
+    <string name="trackdetail_open_start">Открыть старт в картах</string>
+    <string name="trackdetail_dbb_tip_label">Совет DBB: </string>
+    <string name="trackdetail_dbb_tip_body">Спланируйте поездку — проверьте прогноз погоды, наполните фляги и сообщите кому-нибудь о маршруте перед выездом.</string>
+    <!-- Track detail actions (toasts / choosers) -->
+    <string name="trackdetail_gpx_not_available">GPX для этого маршрута недоступен</string>
+    <string name="trackdetail_downloading">Скачивание %1$s.gpx</string>
+    <string name="trackdetail_download_failed">Не удалось скачать: %1$s</string>
+    <string name="trackdetail_no_start_coords">Нет координат старта</string>
+    <string name="trackdetail_chooser_open_in">Открыть в</string>
+    <string name="trackdetail_no_maps_app">Нет приложения для карт</string>
+    <string name="trackdetail_chooser_share">Поделиться маршрутом</string>
+
     <!-- Event vocabulary (type / category / status) -->
     <string name="eventcat_all">Все</string>
     <string name="eventcat_dbb">Клуб DBB</string>
@@ -190,4 +217,13 @@
     <string name="reg_tip_6_content">Если у вас прокол или вы просто не можете дальше ехать в темпе группы — не переживайте. Скажите громко и чётко, что вам нужно сбавить скорость или остановиться. Как только это передадут ведущему, он или она так и сделает.\nОсобенность заездов DBB — если все вокруг вдруг ускоряются, не думайте, что вы обязаны делать то же самое. У нас есть определённые участки, где кто-то топит, но потом они ждут остальных. Трансляция геопозиции — в WhatsApp.</string>
     <string name="reg_tip_7_title">Используйте лучшие покрышки, какие можете</string>
     <string name="reg_tip_7_content">Из всех компонентов велосипеда покрышки — безусловно самое важное для поддержания скорости в группе. Кроме того, всем лучше, если кто-то не прокалывается постоянно и не падает на скользком повороте.\n\nРекомендуемые гравийные покрышки:\n• Hutchinson Caracal RACE (избегайте модели без слова race)\n• Tufo Thundero или Speedero (обе одинаково хороши, HD не нужна)\n\nРекомендуемые шоссейные покрышки:\n• Pirelli P Zero Race RS (RS — тоже отличительная часть названия)\n• Continental Grand Prix 5000 S TR\n\nВажно: накачивайте покрышки до оптимального давления, а не до указанного на боковине или подсказанного на глаз. Советуем пользоваться калькуляторами давления от [Silca](https://silca.cc/pages/sppc) или [Wolftooth](https://www.wolftoothcomponents.com/pages/tire-pressure-calculator).</string>
+    <!-- ===== Shops screen ===== -->
+    <string name="shoptab_all">Все</string>
+    <string name="shoptab_shops">Магазины</string>
+    <string name="shoptab_services">Сервисы</string>
+    <string name="shoptab_friends">Друзья</string>
+    <string name="shops_search_placeholder">Поиск магазинов и сервисов</string>
+    <string name="shops_empty_title">Ничего не найдено</string>
+    <string name="shops_empty_sub">Измените запрос или фильтр</string>
+    <string name="shops_logo_desc">Логотип %1$s</string>
 </resources>
