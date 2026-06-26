@@ -91,7 +91,12 @@ private fun StravaClubEventDto.toEvent(
         date = when_.toLocalDate(),
         time = when_.toLocalTime().withSecond(0).withNano(0),
         location = address?.takeIf { it.isNotBlank() } ?: "See Strava for details",
-        type = mapSkillToType(skillLevels),
+        // Recurring DBB club events are social group rides. Strava's
+        // `skill_levels` is a pace/difficulty bitmask (1=casual, 2=tempo,
+        // 4=hammerfest), not an event format — mapping it to race/granfondo
+        // mislabels every ride. Race/Gran Fondo are reserved for the
+        // manually-curated Supabase events, where the organizer sets the type.
+        type = EventType.groupRide,
         status = EventStatus.upcoming,
         description = description,
         organizer = organizerName,
@@ -99,10 +104,4 @@ private fun StravaClubEventDto.toEvent(
         stravaEventId = id.toString(),
         category = EventCategory.DBB,
     )
-}
-
-private fun mapSkillToType(skillLevels: Int?): EventType = when (skillLevels) {
-    2 -> EventType.race
-    1 -> EventType.granfondo
-    else -> EventType.groupRide
 }
