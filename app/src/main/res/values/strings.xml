@@ -117,6 +117,33 @@
     <string name="event_open_in_strava">Open in Strava</string>
     <string name="event_status_recurring">Recurring DBB club ride. Confirm route and meeting point on the club\'s Strava page before joining.</string>
 
+    <!-- ===== Track detail screen ===== -->
+    <string name="trackdetail_back">Back</string>
+    <string name="trackdetail_share">Share</string>
+    <string name="trackdetail_stat_distance">Distance</string>
+    <string name="trackdetail_stat_elevation">Elevation</string>
+    <string name="trackdetail_stat_time">Time</string>
+    <string name="trackdetail_stat_difficulty">Difficulty</string>
+    <string name="trackdetail_unit_km">%1$s km</string>
+    <string name="trackdetail_unit_m">%1$s m</string>
+    <string name="trackdetail_about">About this route</string>
+    <string name="trackdetail_safety">Safety Notes</string>
+    <string name="trackdetail_route_preview">Route Preview</string>
+    <string name="trackdetail_route_preview_unavailable">Route preview unavailable — download GPX to follow in a navigation app</string>
+    <string name="trackdetail_download_gpx">Download GPX</string>
+    <string name="trackdetail_gpx_unavailable">GPX unavailable</string>
+    <string name="trackdetail_open_start">Open Start in Maps</string>
+    <string name="trackdetail_dbb_tip_label">DBB Tip: </string>
+    <string name="trackdetail_dbb_tip_body">Plan your ride — check the weather forecast, top up your bottles, and let someone know your route before heading out.</string>
+    <!-- Track detail actions (toasts / choosers) -->
+    <string name="trackdetail_gpx_not_available">GPX not available for this track</string>
+    <string name="trackdetail_downloading">Downloading %1$s.gpx</string>
+    <string name="trackdetail_download_failed">Download failed: %1$s</string>
+    <string name="trackdetail_no_start_coords">No start coordinates</string>
+    <string name="trackdetail_chooser_open_in">Open in</string>
+    <string name="trackdetail_no_maps_app">No maps app installed</string>
+    <string name="trackdetail_chooser_share">Share track</string>
+
     <!-- Event vocabulary (type / category / status) -->
     <string name="eventcat_all">All</string>
     <string name="eventcat_dbb">DBB Club</string>
