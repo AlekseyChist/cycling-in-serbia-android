@@ -127,4 +127,14 @@
     <string name="eventtype_group_ride">Grupna vožnja</string>
     <string name="eventstatus_soldout">Rasprodato</string>
     <string name="eventstatus_canceled">Otkazano</string>
+
+    <!-- ===== Shops screen ===== -->
+    <string name="shoptab_all">Sve</string>
+    <string name="shoptab_shops">Prodavnice</string>
+    <string name="shoptab_services">Servisi</string>
+    <string name="shoptab_friends">Prijatelji</string>
+    <string name="shops_search_placeholder">Pretraga prodavnica i servisa</string>
+    <string name="shops_empty_title">Nema rezultata</string>
+    <string name="shops_empty_sub">Prilagodite pretragu ili filter</string>
+    <string name="shops_logo_desc">%1$s logo</string>
 </resources>

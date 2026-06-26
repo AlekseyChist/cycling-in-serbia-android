@@ -127,4 +127,14 @@
     <string name="eventtype_group_ride">Group Ride</string>
     <string name="eventstatus_soldout">Sold Out</string>
     <string name="eventstatus_canceled">Canceled</string>
+
+    <!-- ===== Shops screen ===== -->
+    <string name="shoptab_all">All</string>
+    <string name="shoptab_shops">Shops</string>
+    <string name="shoptab_services">Services</string>
+    <string name="shoptab_friends">Friends</string>
+    <string name="shops_search_placeholder">Search shops and services</string>
+    <string name="shops_empty_title">No results found</string>
+    <string name="shops_empty_sub">Try adjusting your search or filter</string>
+    <string name="shops_logo_desc">%1$s logo</string>
 </resources>
