@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
+import com.cyclinginserbia.app.R
 import com.cyclinginserbia.app.data.model.Track
 
 /**
@@ -15,7 +16,11 @@ import com.cyclinginserbia.app.data.model.Track
 
 internal fun downloadGpx(context: Context, track: Track, url: String?) {
     if (url == null || track.gpxFileName == null) {
-        Toast.makeText(context, "GPX not available for this track", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            context,
+            context.getString(R.string.trackdetail_gpx_not_available),
+            Toast.LENGTH_SHORT,
+        ).show()
         return
     }
 
@@ -29,16 +34,28 @@ internal fun downloadGpx(context: Context, track: Track, url: String?) {
     runCatching {
         val dm = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         dm.enqueue(request)
-        Toast.makeText(context, "Downloading ${track.name}.gpx", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            context,
+            context.getString(R.string.trackdetail_downloading, track.name),
+            Toast.LENGTH_SHORT,
+        ).show()
     }.onFailure {
-        Toast.makeText(context, "Download failed: ${it.message}", Toast.LENGTH_LONG).show()
+        Toast.makeText(
+            context,
+            context.getString(R.string.trackdetail_download_failed, it.message ?: ""),
+            Toast.LENGTH_LONG,
+        ).show()
     }
 }
 
 internal fun navigateToStart(context: Context, track: Track) {
     val target = track.startPoint ?: track.coordinates ?: track.route.firstOrNull()
     if (target == null) {
-        Toast.makeText(context, "No start coordinates", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            context,
+            context.getString(R.string.trackdetail_no_start_coords),
+            Toast.LENGTH_SHORT,
+        ).show()
         return
     }
     val lat = target.lat
@@ -53,11 +70,20 @@ internal fun navigateToStart(context: Context, track: Track) {
         Intent.ACTION_VIEW,
         Uri.parse("geo:$lat,$lng?q=$lat,$lng($label)"),
     )
-    val chooser = Intent.createChooser(intent, "Open in").apply {
+    val chooser = Intent.createChooser(
+        intent,
+        context.getString(R.string.trackdetail_chooser_open_in),
+    ).apply {
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
     runCatching { context.startActivity(chooser) }
-        .onFailure { Toast.makeText(context, "No maps app installed", Toast.LENGTH_LONG).show() }
+        .onFailure {
+            Toast.makeText(
+                context,
+                context.getString(R.string.trackdetail_no_maps_app),
+                Toast.LENGTH_LONG,
+            ).show()
+        }
 }
 
 internal fun shareTrack(context: Context, track: Track, gpxUrl: String?) {
@@ -73,7 +99,12 @@ internal fun shareTrack(context: Context, track: Track, gpxUrl: String?) {
         putExtra(Intent.EXTRA_SUBJECT, track.name)
         putExtra(Intent.EXTRA_TEXT, text)
     }
-    context.startActivity(Intent.createChooser(intent, "Share track").apply {
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    })
+    context.startActivity(
+        Intent.createChooser(
+            intent,
+            context.getString(R.string.trackdetail_chooser_share),
+        ).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        },
+    )
 }

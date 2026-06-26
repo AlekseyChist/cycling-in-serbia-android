@@ -1,12 +1,14 @@
 package com.cyclinginserbia.app.data.model
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+import com.cyclinginserbia.app.R
 
-enum class ShopTab(val label: String) {
-    ALL("All"),
-    SHOPS("Shops"),
-    SERVICES("Services"),
-    FRIENDS("Friends"),
+enum class ShopTab(@StringRes val labelRes: Int) {
+    ALL(R.string.shoptab_all),
+    SHOPS(R.string.shoptab_shops),
+    SERVICES(R.string.shoptab_services),
+    FRIENDS(R.string.shoptab_friends),
 }
 
 /**

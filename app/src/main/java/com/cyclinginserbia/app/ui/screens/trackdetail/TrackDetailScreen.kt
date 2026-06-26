@@ -56,6 +56,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import com.cyclinginserbia.app.R
 import com.cyclinginserbia.app.data.model.Difficulty
 import com.cyclinginserbia.app.data.model.Surface
 import com.cyclinginserbia.app.data.model.Track
@@ -170,14 +172,14 @@ private fun FloatingTopBar(
         CircleIconButton(onClick = onBack) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
+                contentDescription = stringResource(R.string.trackdetail_back),
                 tint = AppColors.Foreground,
             )
         }
         CircleIconButton(onClick = onShare) {
             Icon(
                 imageVector = Icons.Outlined.Share,
-                contentDescription = "Share",
+                contentDescription = stringResource(R.string.trackdetail_share),
                 tint = AppColors.Foreground,
             )
         }
@@ -228,10 +230,14 @@ private fun DifficultyChip(difficulty: Difficulty) {
         Difficulty.medium -> ChipColors.Medium
         Difficulty.hard -> ChipColors.Hard
     }
-    FilledChip(
-        text = difficulty.name.replaceFirstChar { it.titlecase() },
-        palette = palette,
+    val text = stringResource(
+        when (difficulty) {
+            Difficulty.easy -> R.string.difficulty_easy
+            Difficulty.medium -> R.string.difficulty_medium
+            Difficulty.hard -> R.string.difficulty_hard
+        },
     )
+    FilledChip(text = text, palette = palette)
 }
 
 @Composable
@@ -263,7 +269,13 @@ private fun SurfaceChip(surface: Surface) {
             .padding(horizontal = 10.dp, vertical = 4.dp),
     ) {
         Text(
-            text = surface.name.replaceFirstChar { it.titlecase() },
+            text = stringResource(
+                when (surface) {
+                    Surface.road -> R.string.surface_road
+                    Surface.gravel -> R.string.surface_gravel
+                    Surface.mixed -> R.string.surface_mixed
+                },
+            ),
             style = TextStyle(
                 fontSize = 12.sp,
                 color = AppColors.Gray500,
@@ -274,13 +286,32 @@ private fun SurfaceChip(surface: Surface) {
 
 @Composable
 private fun StatsGrid(track: Track) {
+    val difficultyLabel = stringResource(
+        when (track.difficulty) {
+            Difficulty.easy -> R.string.difficulty_easy
+            Difficulty.medium -> R.string.difficulty_medium
+            Difficulty.hard -> R.string.difficulty_hard
+        },
+    )
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        StatCard("Distance", "${track.distanceKm} km", Modifier.weight(1f))
-        StatCard("Elevation", "${track.elevationM} m", Modifier.weight(1f))
-        StatCard("Time", RouteEstimation.displayTime(track), Modifier.weight(1f))
         StatCard(
-            "Difficulty",
-            track.difficulty.name.replaceFirstChar { it.titlecase() },
+            stringResource(R.string.trackdetail_stat_distance),
+            stringResource(R.string.trackdetail_unit_km, track.distanceKm.toString()),
+            Modifier.weight(1f),
+        )
+        StatCard(
+            stringResource(R.string.trackdetail_stat_elevation),
+            stringResource(R.string.trackdetail_unit_m, track.elevationM.toString()),
+            Modifier.weight(1f),
+        )
+        StatCard(
+            stringResource(R.string.trackdetail_stat_time),
+            RouteEstimation.displayTime(track),
+            Modifier.weight(1f),
+        )
+        StatCard(
+            stringResource(R.string.trackdetail_stat_difficulty),
+            difficultyLabel,
             Modifier.weight(1f),
         )
     }
@@ -315,7 +346,7 @@ private fun StatCard(label: String, value: String, modifier: Modifier = Modifier
 private fun AboutSection(text: String) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            text = "About this route",
+            text = stringResource(R.string.trackdetail_about),
             style = TextStyle(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
@@ -351,7 +382,7 @@ private fun SafetyCard(text: String) {
         )
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
-                text = "Safety Notes",
+                text = stringResource(R.string.trackdetail_safety),
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
@@ -374,7 +405,7 @@ private fun SafetyCard(text: String) {
 private fun RoutePreview(track: Track) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            text = "Route Preview",
+            text = stringResource(R.string.trackdetail_route_preview),
             style = TextStyle(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
@@ -406,7 +437,7 @@ private fun RoutePreviewPlaceholder() {
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = "Route preview unavailable — download GPX to follow in a navigation app",
+            text = stringResource(R.string.trackdetail_route_preview_unavailable),
             style = TextStyle(
                 fontSize = 13.sp,
                 color = AppColors.Gray500,
@@ -449,7 +480,10 @@ private fun ActionButtons(
             )
             Spacer(Modifier.width(8.dp))
             Text(
-                text = if (hasGpx) "Download GPX" else "GPX unavailable",
+                text = stringResource(
+                    if (hasGpx) R.string.trackdetail_download_gpx
+                    else R.string.trackdetail_gpx_unavailable,
+                ),
                 style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold),
             )
         }
@@ -474,7 +508,7 @@ private fun ActionButtons(
             )
             Spacer(Modifier.width(8.dp))
             Text(
-                text = "Open Start in Maps",
+                text = stringResource(R.string.trackdetail_open_start),
                 style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Medium),
             )
         }
@@ -508,9 +542,6 @@ private fun buildDbbTip(): AnnotatedString = buildAnnotatedString {
             color = AppColors.Primary,
             fontWeight = FontWeight.Bold,
         ),
-    ) { append("DBB Tip: ") }
-    append(
-        "Plan your ride — check the weather forecast, top up your bottles, " +
-            "and let someone know your route before heading out.",
-    )
+    ) { append(stringResource(R.string.trackdetail_dbb_tip_label)) }
+    append(stringResource(R.string.trackdetail_dbb_tip_body))
 }
