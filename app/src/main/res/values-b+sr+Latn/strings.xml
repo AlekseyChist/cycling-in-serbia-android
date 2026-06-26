@@ -155,6 +155,67 @@
     <string name="eventstatus_soldout">Rasprodato</string>
     <string name="eventstatus_canceled">Otkazano</string>
 
+    <!-- ===== Regulations screen (UI chrome) ===== -->
+    <string name="reg_search_placeholder">Pretraga pravila</string>
+    <string name="reg_bookmark_add">Dodaj u obeleživače</string>
+    <string name="reg_bookmark_remove">Ukloni iz obeleživača</string>
+    <string name="reg_expand">Proširi</string>
+    <string name="reg_collapse">Skupi</string>
+    <string name="reg_empty_title">Nema rezultata</string>
+    <string name="reg_empty_sub">Prilagodite upit pretrage</string>
+    <string name="reg_error_load">Učitavanje pravila nije uspelo</string>
+    <string name="reg_disclaimer">Napomena o odgovornosti: nedeljne vožnje organizujemo besplatno. Sve se radi „takvo kakvo jeste”, tako da ni DBB ni bilo koja povezana lica, uključujući vođe vožnje i druge vozače, ne snose nikakvu odgovornost u vezi sa organizacijom događaja.</string>
+
+    <!-- ===== Regulations content (rule book prose) ===== -->
+    <!-- Category titles -->
+    <string name="reg_cat_basic">Pravila vožnje</string>
+    <string name="reg_cat_traffic">Saobraćajni propisi</string>
+    <string name="reg_cat_etiquette">Bonton</string>
+    <string name="reg_cat_tips">Saveti</string>
+
+    <!-- Riding Rules -->
+    <string name="reg_basic_1_title">Molimo vas da nosite kacigu</string>
+    <string name="reg_basic_1_content">U grupi, nenošenje kacige prebacuje dodatnu odgovornost na druge u slučaju da onaj ko je ne nosi zadobije povredu glave — bilo svojom, bilo tuđom krivicom.\nZato je nošenje kacige stvar osnovnog poštovanja prema ostalima, čak i ako ne nameravate da padnete.</string>
+    <string name="reg_basic_2_title">Dođite na drumskom ili gravel biciklu</string>
+    <string name="reg_basic_2_content">Uzak volan nam omogućava da vozimo bliže jedni drugima — dva u redu i pri preticanju. Tako ostaje više prostora za manevre.\nOsim toga, drumski volani se ređe zakače jedan za drugi. A u slučaju pada, krajevi volana okrenuti unazad ređe izazivaju povrede.\n\nMolimo vas da u grupi ne vozite nijedan od ovih:\n• hronometarske, triatlon bicikle ili sa nastavcima (clip-on)\n• sa ravnim volanom ili druge sa širokim volanom\n• fiksere bez bar prednje kočnice\n• bicikle sa kvarovima (npr. neispravnom kočnicom)</string>
+
+    <!-- Traffic Laws -->
+    <string name="reg_traffic_1_title">Bez vožnje u pijanom stanju</string>
+    <string name="reg_traffic_1_content">Dozvoljena granica alkohola u krvi za bicikliste u Srbiji je 0,2 mg/ml.\nJedno pivo je verovatno u redu, ali dva ili više mogu da vas odvedu u zatvor. Policija proverava bicikliste, makar i retko. A sigurno će testirati u slučaju saobraćajne nezgode.</string>
+    <string name="reg_traffic_2_title">Koristite svetla kada je potrebno</string>
+    <string name="reg_traffic_2_content">Netreptajuće belo svetlo napred i crveno pozadi moraju biti pričvršćeni na bicikl i upaljeni kada je mrak, magla ili kiša.\nMolimo vas da izbegavate jako treptajuća zadnja svetla u grupi kada za to nema posebnog razloga. Danju je grupa i tako jasno vidljiva otpozadi.</string>
+    <string name="reg_traffic_3_title">Bez muzike</string>
+    <string name="reg_traffic_3_content">Vožnja sa slušalicama u oba uva zabranjena je zakonom.\nU grupi, molimo vas da uopšte ne slušate muziku — uključujući preko jedne slušalice, slušalica sa otvorenim uvom ili koštanom provodljivošću, ili prenosnog zvučnika.\nTreba da možete da čujete ostale, a oni imaju pravo da ne dele vaš muzički ukus, koliko god da je dobar.</string>
+    <string name="reg_traffic_4_title">Pogledajte potpuni vodič kroz saobraćajne propise</string>
+    <string name="reg_traffic_4_content">Postoji sveobuhvatan i stalno ažuriran vodič kroz srpske saobraćajne propise od [Bike Gremlin](https://www.paragraf.rs/propisi/zakon_o_bezbednosti_saobracaja_na_putevima.html).</string>
+
+    <!-- Etiquette -->
+    <string name="reg_etiq_1_title">Ne pretičite vođu</string>
+    <string name="reg_etiq_1_content">Neke naše vožnje vodi vođa vožnje (pejser). Molimo vas da ga ili je ne pretičete bez zaista dobrog razloga.</string>
+    <string name="reg_etiq_2_title">Koristite znake rukama</string>
+    <string name="reg_etiq_2_content">Biciklistički bonton podrazumeva da vozači ispred vas pokazuju rupe i ostale stvari pokretima ruku — a vi to prenosite dalje onima iza.\n\n• Rupa dovoljno velika da izazove pucanje gume pokazuje se pokazivanjem nadole (ili mahanjem lakta sa iste strane, dok obe ruke ostaju na volanu).\n• Pokazivanje u stranu vodoravno ili nagore je znak za skretanje.\n• Ako postoji rizik od sudara (sa automobilom, pešakom, parking stubićem itd.), odmahnite od opasnosti rukom iza leđa.\n• Prepreke koje ne možemo da zaobiđemo (ležeći policajci ili šine) pokazuju se mahanjem bilo kojom rukom sa svoje strane (ali ne iza leđa).</string>
+    <string name="reg_etiq_3_title">Ne usporavajte bez razloga</string>
+    <string name="reg_etiq_3_content">Svi vaši pokreti u grupi treba da budu glatki i predvidljivi. Trudite se da nikada ne kočite niti čak prestajete da okrećete pedale. Ako naglo počnete da se kotrljate slobodno, to vas može usporiti dovoljno da izazove pogubnu lančanu reakciju iza vas.\nPosebno, nema razloga da se kotrljate slobodno nakon što vidite znak za ležećeg policajca ili šine — umesto da pokušavate da povećate prostor ispred sebe, pokušajte da se pomerite u stranu (vidite savet o šahovskom rasporedu ispod).</string>
+    <string name="reg_etiq_4_title">Budite samodovoljni</string>
+    <string name="reg_etiq_4_content">Treba da imate sve što vam može zatrebati u slučaju defekta ili mehaničkog kvara: rezervnu unutrašnju gumu i/ili čepove za gumu, mini-pumpu ili drugi uređaj za naduvavanje, multialat. Trebalo bi da znate kako da [zakrpite probušenu gumu](https://dropba.rs/blog/fix-flats) bez pribegavanja tuđoj pomoći (iako uvek pomažemo jedni drugima).\nNa dužim vožnjama ima smisla poneti nešto ugljenih hidrata i par flašica vode ili elektrolita. Takođe je dobra ideja imati napunjen telefon sa internet konekcijom i nešto gotovine za hitne slučajeve.</string>
+    <string name="reg_etiq_5_title">Snimajte i delite slike</string>
+    <string name="reg_etiq_5_content" formatted="false">Podstičemo vas da snimate fotografije i video zapise tokom naših vožnji, pod uslovom da to ne ugrožava vas ili druge (naročito pri vožnji sa jednom ili bez ruku na volanu — i molimo vas, bez dugih selfi štapova u grupi).\nMolimo vas da delite svoje fotografije i video zapise u DBB ćaskanjima na [Telegram](https://t.me/dropbarbar#), [WhatsApp](https://chat.whatsapp.com/LDYZnmoj4LDCYmFjLSrxcS) i [Viber](https://invite.viber.com/?g2=AQAoXTR0yDzRGlDpONaoGvsn3j%2BKN4tjWYnu4QK%2FhI8rAvaBiwH1Jz3L%2FiLbxzTJ&amp;lang=en).\nTime nam dajete svoj neopozivi pristanak da ih koristimo na bilo koji zamislivi način (ali uglavnom na našem [Instagram](https://www.instagram.com/dbb.club/)).\nDolaskom na naše događaje i vožnjom sa grupom, pristajete da budete snimani i dajete nam svoj neopozivi pristanak da koristimo vaše slike na bilo koji zamislivi način. Hvala!</string>
+
+    <!-- Tips -->
+    <string name="reg_tip_1_title">Razmak do vozača ispred</string>
+    <string name="reg_tip_1_content">Što ste bliže iza drugog vozača, lakše vam je da održavate tempo, zbog manjeg otpora vazduha. Razlika može biti ogromna! Ostati u zavetrini je ključ za to da se ne mučite sa tempom.\nNema potrebe da budete blizu na centimetre ako vam to nije prijatno. Oko pola metra je dobar razmak koji je dovoljno bezbedan, ali vam takođe omogućava da imate najveći deo aerodinamičke koristi.</string>
+    <string name="reg_tip_2_title">Vožnja u šahovskom rasporedu</string>
+    <string name="reg_tip_2_content">Ako vozač ispred vas preskače znake rukama ili vam iz nekog drugog razloga nije prijatno da budete tačno na njegovom točku, razmislite o pomeranju ka spoljnoj strani grupe za otprilike pola metra. I dalje će biti dovoljno zavetrine.\nTako ćete videti prepreke dalje ispred sebe, a vozač iza će takođe dobiti nešto prostora ispred sebe za dodatno vreme reakcije. Takav razmak dobro funkcioniše i pre ležećih policajaca i šina.</string>
+    <string name="reg_tip_3_title">Nikada ne preklapajte točkove</string>
+    <string name="reg_tip_3_content">Važno je da ne preklapate svoj točak sa vozačem ispred. Ako se on pomerio ka spolja, ostanite gde jeste u odnosu na njega da biste održali šahovski raspored — ne istiskujte ga!\nTakođe, izbegavajte vožnju tri u redu: to ne dozvoljava osobi u sredini da slobodno manevriše i izbegava prepreke.\nDok ustajete na pedalama, pazite da naglo ne odgurnete bicikl unazad ispod sebe u točak vozača iza. Pokažite svoju nameru dvostrukim mahanjem oba lakta nekoliko sekundi pre nego što ustanete, zatim glatko prebacite težinu nagore.</string>
+    <string name="reg_tip_4_title">Sustizanje nakon skretanja ili zaustavljanja</string>
+    <string name="reg_tip_4_content">Nakon krivine ili semafora, grupa će se neizbežno razvući. Vođa vožnje treba postepeno da dobija na brzini, omogućavajući svakom članu grupe da sustigne. Ne žurite, ali ni ne oklevajte.\nDok sustižete, zamislite da ste čamac koji želi da se „priveže” za vozača ispred bez velikog kašnjenja — ali bez kočnica. Pokušajte da smanjite razmak, ali to radite bez naglih promena brzine.\nAko se desi da prejurite, pokušajte da ne kočite, već se pomerite u stranu više od pola metra. Izgubićete zavetrinu, a vazduh će vas blago usporiti, tako da vozač iza neće naleteti na vas.</string>
+    <string name="reg_tip_5_title">Pozicioniranje pri bočnom vetru</string>
+    <string name="reg_tip_5_content">Ako duva bočni vetar, može biti teško održavati tempo jer je zavetrina narušena. Prvo, lakše je biti u liniji koja je zaklonjena od vetra. Takođe, možete pokušati da se malo pomerite u stranu od nje ako ima dovoljno mesta na putu.</string>
+    <string name="reg_tip_6_title">Ne zaostanite slučajno</string>
+    <string name="reg_tip_6_content">Ako imate defekt ili jednostavno ne možete da nastavite da vozite tempom grupe, ne brinite. Recite glasno i jasno da treba da usporite ili stanete. Čim se to prenese vođi vožnje, on ili ona će upravo to i učiniti.\nSpecifično za DBB vožnje — ako svi oko vas naglo ubrzavaju, nemojte osećati da i vi to morate. Imamo određene deonice gde neki ljudi guraju jako, ali onda sačekaju ostale. Deljenje lokacije uživo je na WhatsApp-u.</string>
+    <string name="reg_tip_7_title">Koristite najbolje gume koje možete</string>
+    <string name="reg_tip_7_content">Od svih komponenti vašeg bicikla, gume su daleko najvažnije za održavanje brzine u grupi. Pored toga, svima je bolje ako neko ne dobija defekt stalno i ne pada u klizavoj krivini.\n\nPreporučene gravel gume:\n• Hutchinson Caracal RACE (izbegavajte model bez reči race)\n• Tufo Thundero ili Speedero (obe su podjednako dobre, nema potrebe za HD)\n\nPreporučene drumske gume:\n• Pirelli P Zero Race RS (RS je takođe prepoznatljiv deo naziva)\n• Continental Grand Prix 5000 S TR\n\nVažno, naduvajte gume na optimalni pritisak, a ne na onaj naznačen na bočnoj strani gume ili na onaj koji vam je usputno preporučen. Predlažemo da koristite kalkulatore pritiska u gumama od [Silca](https://silca.cc/pages/sppc) ili [Wolftooth](https://www.wolftoothcomponents.com/pages/tire-pressure-calculator).</string>
     <!-- ===== Shops screen ===== -->
     <string name="shoptab_all">Sve</string>
     <string name="shoptab_shops">Prodavnice</string>

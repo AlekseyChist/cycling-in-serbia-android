@@ -42,16 +42,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.annotation.DrawableRes
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.cyclinginserbia.app.data.model.Regulation
-import com.cyclinginserbia.app.data.model.RegulationCategory
+import com.cyclinginserbia.app.R
 import com.cyclinginserbia.app.ui.components.SearchField
 import com.cyclinginserbia.app.ui.theme.AppColors
 
@@ -88,9 +89,26 @@ private fun RegulationsContent(
 ) {
     var query by remember { mutableStateOf("") }
 
-    val filtered by remember(state.categories, query) {
-        derivedStateOf { filterCategories(state.categories, query) }
+    // Resolve @StringRes prose here, in the Composable layer, so the
+    // user-selected locale is in scope (resolving in the repository/ViewModel
+    // would pick up the system locale instead). Search then runs on the
+    // resolved text. The rule book is small (~18 items), so re-resolving on
+    // each keystroke is negligible.
+    val resolved = state.categories.map { category ->
+        ResolvedCategory(
+            id = category.id,
+            title = stringResource(category.titleRes),
+            items = category.items.map { rule ->
+                ResolvedRule(
+                    id = rule.id,
+                    title = stringResource(rule.titleRes),
+                    content = stringResource(rule.contentRes),
+                    imageRes = rule.imageRes,
+                )
+            },
+        )
     }
+    val filtered = filterCategories(resolved, query)
 
     Column(modifier = Modifier.fillMaxSize()) {
         SearchHeader(query = query, onQueryChange = { query = it })
@@ -109,7 +127,7 @@ private fun RegulationsContent(
                     }
                     items(items = category.items, key = { it.id }) { rule ->
                         RegulationCard(
-                            regulation = rule,
+                            rule = rule,
                             isExpanded = rule.id in state.expandedIds,
                             isBookmarked = rule.id in state.bookmarkedIds,
                             onToggleExpand = { onToggleExpand(rule.id) },
@@ -134,7 +152,7 @@ private fun SearchHeader(query: String, onQueryChange: (String) -> Unit) {
         SearchField(
             value = query,
             onValueChange = onQueryChange,
-            placeholder = "Search rules",
+            placeholder = stringResource(R.string.reg_search_placeholder),
         )
     }
     Box(
@@ -166,7 +184,7 @@ private fun CategoryHeader(text: String) {
 
 @Composable
 private fun RegulationCard(
-    regulation: Regulation,
+    rule: ResolvedRule,
     isExpanded: Boolean,
     isBookmarked: Boolean,
     onToggleExpand: () -> Unit,
@@ -187,7 +205,7 @@ private fun RegulationCard(
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = regulation.title,
+                    text = rule.title,
                     style = TextStyle(
                         color = AppColors.Gray900,
                         fontSize = 14.sp,
@@ -199,29 +217,34 @@ private fun RegulationCard(
                     Icon(
                         imageVector = if (isBookmarked) Icons.Filled.Bookmark
                         else Icons.Outlined.BookmarkBorder,
-                        contentDescription = if (isBookmarked) "Remove bookmark" else "Bookmark",
+                        contentDescription = stringResource(
+                            if (isBookmarked) R.string.reg_bookmark_remove
+                            else R.string.reg_bookmark_add,
+                        ),
                         tint = if (isBookmarked) AppColors.Primary else AppColors.Gray500,
                     )
                 }
                 Icon(
                     imageVector = Icons.Rounded.KeyboardArrowDown,
-                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                    contentDescription = stringResource(
+                        if (isExpanded) R.string.reg_collapse else R.string.reg_expand,
+                    ),
                     tint = AppColors.Gray500,
                     modifier = Modifier.rotate(rotation),
                 )
             }
 
             AnimatedVisibility(visible = isExpanded) {
-                ExpandedRegulationBody(regulation)
+                ExpandedRegulationBody(rule)
             }
         }
     }
 }
 
 @Composable
-private fun ExpandedRegulationBody(regulation: Regulation) {
+private fun ExpandedRegulationBody(rule: ResolvedRule) {
     Column(modifier = Modifier.padding(top = 8.dp)) {
-        regulation.content.split("\n\n").forEach { paragraph ->
+        rule.content.split("\n\n").forEach { paragraph ->
             Text(
                 text = rememberRegulationParagraph(paragraph),
                 style = TextStyle(
@@ -232,11 +255,11 @@ private fun ExpandedRegulationBody(regulation: Regulation) {
                 modifier = Modifier.padding(bottom = 8.dp),
             )
         }
-        regulation.imageRes?.let { res ->
+        rule.imageRes?.let { res ->
             Spacer(Modifier.height(4.dp))
             Image(
                 painter = painterResource(id = res),
-                contentDescription = regulation.title,
+                contentDescription = rule.title,
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -256,9 +279,7 @@ private fun DisclaimerFooter() {
         color = AppColors.Cream50,
     ) {
         Text(
-            text = "Disclaimer: We organise the weekly rides for free. This is done “as is”, " +
-                "so neither DBB nor any associated persons including the ride leaders and other " +
-                "riders shall bear any responsibility regarding event organisation.",
+            text = stringResource(R.string.reg_disclaimer),
             style = TextStyle(
                 color = AppColors.Gray500,
                 fontSize = 12.sp,
@@ -286,7 +307,7 @@ private fun EmptyResults() {
         )
         Spacer(Modifier.height(12.dp))
         Text(
-            text = "No results found",
+            text = stringResource(R.string.reg_empty_title),
             style = TextStyle(
                 color = AppColors.Gray900,
                 fontSize = 16.sp,
@@ -295,7 +316,7 @@ private fun EmptyResults() {
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Try adjusting your search query",
+            text = stringResource(R.string.reg_empty_sub),
             style = TextStyle(color = AppColors.Gray500, fontSize = 14.sp),
         )
     }
@@ -305,7 +326,7 @@ private fun EmptyResults() {
 private fun ErrorView(message: String, onRetry: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = "Couldn't load rules",
+            text = stringResource(R.string.reg_error_load),
             style = TextStyle(
                 color = AppColors.Gray900,
                 fontSize = 16.sp,
@@ -318,14 +339,29 @@ private fun ErrorView(message: String, onRetry: () -> Unit) {
             style = TextStyle(color = AppColors.Gray500, fontSize = 14.sp),
         )
         Spacer(Modifier.height(16.dp))
-        Button(onClick = onRetry) { Text("Retry") }
+        Button(onClick = onRetry) { Text(stringResource(R.string.retry)) }
     }
 }
 
+/** A category with its @StringRes prose already resolved for the current locale. */
+private data class ResolvedCategory(
+    val id: String,
+    val title: String,
+    val items: List<ResolvedRule>,
+)
+
+/** A single rule with its title/content already resolved for the current locale. */
+private data class ResolvedRule(
+    val id: String,
+    val title: String,
+    val content: String,
+    @DrawableRes val imageRes: Int?,
+)
+
 private fun filterCategories(
-    categories: List<RegulationCategory>,
+    categories: List<ResolvedCategory>,
     query: String,
-): List<RegulationCategory> {
+): List<ResolvedCategory> {
     if (query.isBlank()) return categories
     val q = query.trim().lowercase()
     return categories.mapNotNull { category ->
