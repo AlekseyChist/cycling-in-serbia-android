@@ -31,9 +31,10 @@
   - **Share** — стандартный Intent.ACTION_SEND с текстом и GPX-ссылкой.
 
 ### 📅 Events — групповые покатушки
-- **Live-фид от Strava-клуба DBB** через серверный proxy веб-приложения (`/api/strava/club-events`). Без OAuth для пользователя и без `client_secret` в APK.
+- **Live-фид от Strava-клуба DBB** через серверный proxy веб-приложения (`/api/strava/club-events`). Без OAuth для пользователя и без `client_secret` в APK. Регулярные заезды клуба — тип *Group Ride*.
 - Если proxy недоступен — fallback на локальный генератор повторяющихся ивентов клуба (Dark-On-Draft четверг, Coffee Ride суббота, Rekafary среда, Burekfast вторник).
-- Фильтры по типу + поиск.
+- **Кураторские события (гонки, гран-фондо, community)** — таблица `events` в Supabase, вносятся вручную через дашборд (`is_published = true`), мержатся со Strava-фидом в `EventRepository`. Тип *Race / Gran Fondo* задаёт организатор.
+- Фильтры по категории (DBB / Community) и типу + поиск.
 - **EventDetail:** hero-карточка, инфо-блок, секции *What to bring* и *Timeline*, кнопки *Add to Calendar* и *Open in Strava*.
 
 ### 🏪 Shops — веломагазины Белграда
@@ -287,7 +288,8 @@ gh pr merge --merge   # без squash, чтобы сохранить истор�
 - ✅ Beta feedback batch 1 + 2 (route_points data fix, ETA, navigate, sheet UX, tab flicker и т.д. — см. историю v0.2.0 → v0.3.0).
 - ✅ Тёмная тема (System/Light/Dark) + Profile-таб с фаворитами.
 - ✅ Магазины и партнёры на карте треков (за тоглом Storefront).
-- 🚧 Локализация ru / sr (sr-Latn) — переключатель языка в Profile; готовы Profile/навигация, Tracks, Events; осталось TrackDetail, Shops, Regulations.
+- ✅ Локализация en / ru / sr (sr-Latn) — переключатель языка в Profile; покрыты все экраны (Profile/навигация, Tracks, TrackDetail, Events, Shops, Regulations + свод правил). Серверные данные (имена/описания треков, магазинов) и проза Regulations на sr-Latn ждут вычитки носителем.
+- ✅ Кураторские события через таблицу `events` в Supabase (ручной ввод, мерж со Strava-фидом).
 - ✅ Кнопки зума +/- убраны с карт (только pinch-to-zoom).
 - ✅ Supabase keep-alive (GitHub Action) против автопаузы free-tier.
 - ⏳ Performance-аудит скролла Tracks-листа (image downsample, LazyColumn keys).
