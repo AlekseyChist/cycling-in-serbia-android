@@ -131,4 +131,7 @@ dependencies {
 
     // osmdroid (OSM raster tiles, direct Leaflet analogue)
     implementation(libs.osmdroid.android)
+
+    // Unit tests (local JVM)
+    testImplementation("junit:junit:4.13.2")
 }
