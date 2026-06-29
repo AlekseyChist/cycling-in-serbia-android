@@ -20,3 +20,4 @@ local.properties
 .claude-screenshots/
 # Generated SQL from data-ops scripts (regenerable, often large).
 scripts/*.sql
+.aider*
