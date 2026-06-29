@@ -115,17 +115,19 @@ class TracksViewModel @Inject constructor(
     fun sync() {
         viewModelScope.launch {
             _state.update { it.copy(isSyncing = true, syncError = null) }
-            runCatching { repository.refresh() }
-                .onSuccess {
-                    _state.update {
-                        it.copy(isSyncing = false, isInitialLoading = false, syncError = null)
-                    }
+            runCatching { 
+                repository.refresh() 
+            }
+            .onSuccess {
+                _state.update {
+                    it.copy(isSyncing = false, isInitialLoading = false, syncError = null)
                 }
-                .onFailure { error ->
-                    _state.update {
-                        it.copy(isSyncing = false, isInitialLoading = false, syncError = error)
-                    }
+            }
+            .onFailure { error ->
+                _state.update {
+                    it.copy(isSyncing = false, isInitialLoading = false, syncError = error)
                 }
+            }
         }
     }
 
