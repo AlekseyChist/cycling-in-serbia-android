@@ -13,6 +13,8 @@ import com.cyclinginserbia.app.data.model.Surface
     indices = [
         Index(value = ["legacy_id"], unique = true),
         Index(value = ["is_published", "sort_order"]),
+        Index(value = ["difficulty"]),
+        Index(value = ["surface"]),
     ],
 )
 data class TrackEntity(

@@ -9,7 +9,7 @@ import com.cyclinginserbia.app.data.local.db.track.TrackEntity
 @Database(
     entities = [TrackEntity::class],
     version = 1,
-    exportSchema = true,
+    exportSchema = false,
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
