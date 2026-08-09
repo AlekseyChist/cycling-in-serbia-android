@@ -5,6 +5,7 @@ import com.cyclinginserbia.app.R
 import com.cyclinginserbia.app.data.model.Difficulty
 import com.cyclinginserbia.app.data.model.Surface
 import com.cyclinginserbia.app.data.model.Track
+import com.cyclinginserbia.app.util.containsFolded
 
 enum class DifficultyFilter(@StringRes val labelRes: Int) {
     ALL(R.string.difficulty_all),
@@ -106,8 +107,8 @@ internal fun List<Track>.applyTrackFilters(
         .filter { track -> !favoritesOnly || track.uuid in favoriteIds }
         .filter { track ->
             q.isEmpty() ||
-                track.name.contains(q, ignoreCase = true) ||
-                track.region.contains(q, ignoreCase = true)
+                track.name.containsFolded(q) ||
+                track.region.containsFolded(q)
         }
         .toList()
 }
