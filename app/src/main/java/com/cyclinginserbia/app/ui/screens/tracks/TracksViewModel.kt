@@ -30,6 +30,7 @@ data class TracksUiState(
     val focusedIds: Set<String> = emptySet(),
     val shopsEnabled: Boolean = false,
     val shops: List<Shop> = emptyList(),
+    val distance: DistanceFilter = DistanceFilter.ALL,
 ) {
     val visible: List<Track>
         get() = tracks.applyTrackFilters(
@@ -40,6 +41,7 @@ data class TracksUiState(
             region = region,
             favoritesOnly = favoritesOnly,
             favoriteIds = favoriteIds,
+            distance = distance,
         )
 
     val sheetTracks: List<Track>
@@ -54,7 +56,8 @@ data class TracksUiState(
             surface != SurfaceFilter.ALL ||
             rideType != RideTypeFilter.ALL ||
             region != null ||
-            favoritesOnly
+            favoritesOnly ||
+            distance != DistanceFilter.ALL
 }
 
 @HiltViewModel
@@ -108,7 +111,7 @@ class TracksViewModel @Inject constructor(
     }
 
     // Always re-fetch on Tracks-tab entry: Room delivers cached data instantly
-    // via observePublishedTracks(), so the UI never blocks; the network call
+    // via observePublishedTracks(), so the UI never blocks; the  network call
     // runs in parallel and Room emits fresh rows when it completes. The 6h
     // TTL on refreshIfStale was masking server-side data fixes for users who
     // came back within the same day.
@@ -149,6 +152,9 @@ class TracksViewModel @Inject constructor(
     fun onToggleFavoritesOnly() =
         _state.update { it.copy(favoritesOnly = !it.favoritesOnly, focusedIds = emptySet()) }
 
+    fun onDistanceChange(distance: DistanceFilter) =
+        _state.update { it.copy(distance = distance, focusedIds = emptySet()) }
+
     fun onToggleFavorite(uuid: String) {
         viewModelScope.launch { preferences.toggleFavoriteTrack(uuid) }
     }
@@ -168,6 +174,7 @@ class TracksViewModel @Inject constructor(
             region = null,
             favoritesOnly = false,
             focusedIds = emptySet(),
+            distance = DistanceFilter.ALL,
         )
     }
 }

@@ -31,6 +31,23 @@ enum class RideTypeFilter(@StringRes val labelRes: Int) {
     MISC(R.string.ridetype_misc),
 }
 
+enum class DistanceFilter(@StringRes val labelRes: Int, val minKm: Double, val maxKm: Double) {
+    ALL(R.string.distance_all, 0.0, Double.MAX_VALUE),
+    SHORT(R.string.distance_short, 0.0, 10.0),
+    MEDIUM(R.string.distance_medium, 10.0, 30.0),
+    LONG(R.string.distance_long, 30.0, Double.MAX_VALUE);
+
+    companion object {
+        fun fromDistance(km: Double): DistanceFilter {
+            return when {
+                km < 10.0 -> SHORT
+                km < 30.0 -> MEDIUM
+                else -> LONG
+            }
+        }
+    }
+}
+
 /**
  * Derives a track's ride type from its name. Mirrors the web app's
  * `getRideType` heuristic in `src/app/screens/TracksScreen.tsx`.
@@ -54,6 +71,7 @@ internal fun List<Track>.applyTrackFilters(
     region: String?,
     favoritesOnly: Boolean,
     favoriteIds: Set<String>,
+    distance: DistanceFilter,
 ): List<Track> {
     val q = query.trim()
     return asSequence()
@@ -85,6 +103,14 @@ internal fun List<Track>.applyTrackFilters(
         }
         .filter { track -> region == null || track.region == region }
         .filter { track -> !favoritesOnly || track.uuid in favoriteIds }
+        .filter { track ->
+            when (distance) {
+                DistanceFilter.ALL -> true
+                DistanceFilter.SHORT -> track.distanceKm <= 10.0
+                DistanceFilter.MEDIUM -> track.distanceKm > 10.0 && track.distanceKm <= 30.0
+                DistanceFilter.LONG -> track.distanceKm > 30.0
+            }
+        }
         .filter { track ->
             q.isEmpty() ||
                 track.name.contains(q, ignoreCase = true) ||

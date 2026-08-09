@@ -257,11 +257,13 @@ fun TracksScreen(
                             region = state.region,
                             regions = regions,
                             favoritesOnly = state.favoritesOnly,
+                            distance = state.distance,
                             onDifficultyChange = viewModel::onDifficultyChange,
                             onSurfaceChange = viewModel::onSurfaceChange,
                             onRideTypeChange = viewModel::onRideTypeChange,
                             onRegionChange = viewModel::onRegionChange,
                             onToggleFavoritesOnly = viewModel::onToggleFavoritesOnly,
+                            onDistanceChange = viewModel::onDistanceChange,
                             onReset = viewModel::clearFilters,
                             onDismiss = { showFilters = false },
                         )
@@ -279,6 +281,7 @@ private fun activeFilterCount(state: TracksUiState): Int {
     if (state.rideType != RideTypeFilter.ALL) n++
     if (state.region != null) n++
     if (state.favoritesOnly) n++
+    if (state.distance != DistanceFilter.ALL) n++
     return n
 }
 
@@ -371,11 +374,13 @@ private fun FiltersModalSheet(
     region: String?,
     regions: List<String>,
     favoritesOnly: Boolean,
+    distance: DistanceFilter,
     onDifficultyChange: (DifficultyFilter) -> Unit,
     onSurfaceChange: (SurfaceFilter) -> Unit,
     onRideTypeChange: (RideTypeFilter) -> Unit,
     onRegionChange: (String?) -> Unit,
     onToggleFavoritesOnly: () -> Unit,
+    onDistanceChange: (DistanceFilter) -> Unit,
     onReset: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -431,6 +436,15 @@ private fun FiltersModalSheet(
                         onSelect = onRegionChange,
                     )
                 }
+            }
+
+            FilterSection(title = stringResource(R.string.tracks_distance)) {
+                FilterChipRow(
+                    entries = DistanceFilter.entries,
+                    selected = distance,
+                    label = { stringResource(it.labelRes) },
+                    onSelect = onDistanceChange,
+                )
             }
 
             Row(
