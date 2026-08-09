@@ -44,6 +44,7 @@
     <string name="tracks_difficulty">Difficulty</string>
     <string name="tracks_surface">Surface</string>
     <string name="tracks_distance">Distance</string>
+    <string name="tracks_distance_range">%1$d–%2$d km</string>
     <string name="tracks_ride_type">Ride Type</string>
     <string name="tracks_region">Region</string>
     <string name="tracks_all_regions">All Regions</string>
@@ -82,10 +83,6 @@
     <string name="surface_road">Road</string>
     <string name="surface_gravel">Gravel</string>
     <string name="surface_mixed">Mixed</string>
-    <string name="distance_all">All Distances</string>
-    <string name="distance_short">Up to 10 km</string>
-    <string name="distance_medium">10–30 km</string>
-    <string name="distance_long">30+ km</string>
     <string name="ridetype_all">All Rides</string>
     <string name="ridetype_coffee">Coffee</string>
     <string name="ridetype_dark">Dark</string>

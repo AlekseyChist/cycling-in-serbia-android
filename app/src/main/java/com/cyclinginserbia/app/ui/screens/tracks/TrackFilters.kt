@@ -6,6 +6,7 @@ import com.cyclinginserbia.app.data.model.Difficulty
 import com.cyclinginserbia.app.data.model.Surface
 import com.cyclinginserbia.app.data.model.Track
 import com.cyclinginserbia.app.util.containsFolded
+import kotlin.math.ceil
 
 enum class DifficultyFilter(@StringRes val labelRes: Int) {
     ALL(R.string.difficulty_all),
@@ -32,22 +33,27 @@ enum class RideTypeFilter(@StringRes val labelRes: Int) {
     MISC(R.string.ridetype_misc),
 }
 
-/**
- * Distance buckets for the Tracks filter sheet. Ranges are half-open
- * (`minKm` inclusive, `maxKm` exclusive) so every track falls into exactly one.
- */
-enum class DistanceFilter(
-    @StringRes val labelRes: Int,
-    private val minKm: Double,
-    private val maxKm: Double,
-) {
-    ALL(R.string.distance_all, 0.0, Double.POSITIVE_INFINITY),
-    SHORT(R.string.distance_short, 0.0, 10.0),
-    MEDIUM(R.string.distance_medium, 10.0, 30.0),
-    LONG(R.string.distance_long, 30.0, Double.POSITIVE_INFINITY);
+/** Smallest distance window the slider may be squeezed to, in km. */
+const val MIN_DISTANCE_SPAN_KM = 1f
 
-    fun matches(distanceKm: Double): Boolean = distanceKm >= minKm && distanceKm < maxKm
+/**
+ * Slider bounds for the distance filter: always starts at 0 and ends at the
+ * longest track, rounded up so that track stays selectable at the top end.
+ * Falls back to 0..[MIN_DISTANCE_SPAN_KM] while the list is still empty, since a
+ * RangeSlider cannot take an empty range.
+ */
+fun distanceBoundsKm(tracks: List<Track>): ClosedFloatingPointRange<Float> {
+    val longest = tracks.maxOfOrNull { it.distanceKm } ?: 0.0
+    return 0f..ceil(longest).toFloat().coerceAtLeast(MIN_DISTANCE_SPAN_KM)
 }
+
+/**
+ * True when [distanceKm] falls inside the selected window. Both ends are
+ * inclusive: the slider is a user-facing "from X to Y", so a track sitting
+ * exactly on a handle must stay visible.
+ */
+fun distanceInRange(distanceKm: Double, range: ClosedFloatingPointRange<Float>?): Boolean =
+    range == null || distanceKm.toFloat() in range
 
 /**
  * Derives a track's ride type from its name. Mirrors the web app's
@@ -68,7 +74,7 @@ internal fun List<Track>.applyTrackFilters(
     query: String,
     difficulty: DifficultyFilter,
     surface: SurfaceFilter,
-    distance: DistanceFilter,
+    distanceKm: ClosedFloatingPointRange<Float>?,
     rideType: RideTypeFilter,
     region: String?,
     favoritesOnly: Boolean,
@@ -92,7 +98,7 @@ internal fun List<Track>.applyTrackFilters(
                 SurfaceFilter.MIXED -> track.surface == Surface.mixed
             }
         }
-        .filter { track -> distance.matches(track.distanceKm) }
+        .filter { track -> distanceInRange(track.distanceKm, distanceKm) }
         .filter { track ->
             when (rideType) {
                 RideTypeFilter.ALL -> true

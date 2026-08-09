@@ -43,6 +43,7 @@
     <string name="tracks_difficulty">Сложность</string>
     <string name="tracks_surface">Покрытие</string>
     <string name="tracks_distance">Дистанция</string>
+    <string name="tracks_distance_range">%1$d–%2$d км</string>
     <string name="tracks_ride_type">Тип заезда</string>
     <string name="tracks_region">Регион</string>
     <string name="tracks_all_regions">Все регионы</string>
@@ -83,10 +84,6 @@
     <string name="surface_road">Асфальт</string>
     <string name="surface_gravel">Гравий</string>
     <string name="surface_mixed">Смешанное</string>
-    <string name="distance_all">Любая</string>
-    <string name="distance_short">До 10 км</string>
-    <string name="distance_medium">10–30 км</string>
-    <string name="distance_long">30+ км</string>
     <string name="ridetype_all">Все заезды</string>
     <string name="ridetype_coffee">Кофе</string>
     <string name="ridetype_dark">Тёмные</string>

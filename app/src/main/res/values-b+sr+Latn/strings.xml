@@ -43,6 +43,7 @@
     <string name="tracks_difficulty">Težina</string>
     <string name="tracks_surface">Podloga</string>
     <string name="tracks_distance">Dužina</string>
+    <string name="tracks_distance_range">%1$d–%2$d km</string>
     <string name="tracks_ride_type">Tip vožnje</string>
     <string name="tracks_region">Region</string>
     <string name="tracks_all_regions">Svi regioni</string>
@@ -82,10 +83,6 @@
     <string name="surface_road">Asfalt</string>
     <string name="surface_gravel">Šljunak</string>
     <string name="surface_mixed">Mešovito</string>
-    <string name="distance_all">Sve dužine</string>
-    <string name="distance_short">Do 10 km</string>
-    <string name="distance_medium">10–30 km</string>
-    <string name="distance_long">30+ km</string>
     <string name="ridetype_all">Sve vožnje</string>
     <string name="ridetype_coffee">Kafa</string>
     <string name="ridetype_dark">Mrak</string>
