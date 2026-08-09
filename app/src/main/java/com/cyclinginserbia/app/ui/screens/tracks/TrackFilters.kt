@@ -31,21 +31,21 @@ enum class RideTypeFilter(@StringRes val labelRes: Int) {
     MISC(R.string.ridetype_misc),
 }
 
-enum class DistanceFilter(@StringRes val labelRes: Int, val minKm: Double, val maxKm: Double) {
-    ALL(R.string.distance_all, 0.0, Double.MAX_VALUE),
+/**
+ * Distance buckets for the Tracks filter sheet. Ranges are half-open
+ * (`minKm` inclusive, `maxKm` exclusive) so every track falls into exactly one.
+ */
+enum class DistanceFilter(
+    @StringRes val labelRes: Int,
+    private val minKm: Double,
+    private val maxKm: Double,
+) {
+    ALL(R.string.distance_all, 0.0, Double.POSITIVE_INFINITY),
     SHORT(R.string.distance_short, 0.0, 10.0),
     MEDIUM(R.string.distance_medium, 10.0, 30.0),
-    LONG(R.string.distance_long, 30.0, Double.MAX_VALUE);
+    LONG(R.string.distance_long, 30.0, Double.POSITIVE_INFINITY);
 
-    companion object {
-        fun fromDistance(km: Double): DistanceFilter {
-            return when {
-                km < 10.0 -> SHORT
-                km < 30.0 -> MEDIUM
-                else -> LONG
-            }
-        }
-    }
+    fun matches(distanceKm: Double): Boolean = distanceKm >= minKm && distanceKm < maxKm
 }
 
 /**
@@ -67,11 +67,11 @@ internal fun List<Track>.applyTrackFilters(
     query: String,
     difficulty: DifficultyFilter,
     surface: SurfaceFilter,
+    distance: DistanceFilter,
     rideType: RideTypeFilter,
     region: String?,
     favoritesOnly: Boolean,
     favoriteIds: Set<String>,
-    distance: DistanceFilter,
 ): List<Track> {
     val q = query.trim()
     return asSequence()
@@ -91,6 +91,7 @@ internal fun List<Track>.applyTrackFilters(
                 SurfaceFilter.MIXED -> track.surface == Surface.mixed
             }
         }
+        .filter { track -> distance.matches(track.distanceKm) }
         .filter { track ->
             when (rideType) {
                 RideTypeFilter.ALL -> true
@@ -103,14 +104,6 @@ internal fun List<Track>.applyTrackFilters(
         }
         .filter { track -> region == null || track.region == region }
         .filter { track -> !favoritesOnly || track.uuid in favoriteIds }
-        .filter { track ->
-            when (distance) {
-                DistanceFilter.ALL -> true
-                DistanceFilter.SHORT -> track.distanceKm <= 10.0
-                DistanceFilter.MEDIUM -> track.distanceKm > 10.0 && track.distanceKm <= 30.0
-                DistanceFilter.LONG -> track.distanceKm > 30.0
-            }
-        }
         .filter { track ->
             q.isEmpty() ||
                 track.name.contains(q, ignoreCase = true) ||

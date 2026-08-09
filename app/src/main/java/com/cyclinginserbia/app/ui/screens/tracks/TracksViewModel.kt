@@ -23,6 +23,7 @@ data class TracksUiState(
     val query: String = "",
     val difficulty: DifficultyFilter = DifficultyFilter.ALL,
     val surface: SurfaceFilter = SurfaceFilter.ALL,
+    val distance: DistanceFilter = DistanceFilter.ALL,
     val rideType: RideTypeFilter = RideTypeFilter.ALL,
     val region: String? = null,
     val favoritesOnly: Boolean = false,
@@ -30,18 +31,17 @@ data class TracksUiState(
     val focusedIds: Set<String> = emptySet(),
     val shopsEnabled: Boolean = false,
     val shops: List<Shop> = emptyList(),
-    val distance: DistanceFilter = DistanceFilter.ALL,
 ) {
     val visible: List<Track>
         get() = tracks.applyTrackFilters(
             query = query,
             difficulty = difficulty,
             surface = surface,
+            distance = distance,
             rideType = rideType,
             region = region,
             favoritesOnly = favoritesOnly,
             favoriteIds = favoriteIds,
-            distance = distance,
         )
 
     val sheetTracks: List<Track>
@@ -54,10 +54,10 @@ data class TracksUiState(
         get() = query.isNotBlank() ||
             difficulty != DifficultyFilter.ALL ||
             surface != SurfaceFilter.ALL ||
+            distance != DistanceFilter.ALL ||
             rideType != RideTypeFilter.ALL ||
             region != null ||
-            favoritesOnly ||
-            distance != DistanceFilter.ALL
+            favoritesOnly
 }
 
 @HiltViewModel
@@ -111,7 +111,7 @@ class TracksViewModel @Inject constructor(
     }
 
     // Always re-fetch on Tracks-tab entry: Room delivers cached data instantly
-    // via observePublishedTracks(), so the UI never blocks; the  network call
+    // via observePublishedTracks(), so the UI never blocks; the network call
     // runs in parallel and Room emits fresh rows when it completes. The 6h
     // TTL on refreshIfStale was masking server-side data fixes for users who
     // came back within the same day.
@@ -143,6 +143,9 @@ class TracksViewModel @Inject constructor(
     fun onSurfaceChange(surface: SurfaceFilter) =
         _state.update { it.copy(surface = surface, focusedIds = emptySet()) }
 
+    fun onDistanceChange(distance: DistanceFilter) =
+        _state.update { it.copy(distance = distance, focusedIds = emptySet()) }
+
     fun onRideTypeChange(rideType: RideTypeFilter) =
         _state.update { it.copy(rideType = rideType, focusedIds = emptySet()) }
 
@@ -151,9 +154,6 @@ class TracksViewModel @Inject constructor(
 
     fun onToggleFavoritesOnly() =
         _state.update { it.copy(favoritesOnly = !it.favoritesOnly, focusedIds = emptySet()) }
-
-    fun onDistanceChange(distance: DistanceFilter) =
-        _state.update { it.copy(distance = distance, focusedIds = emptySet()) }
 
     fun onToggleFavorite(uuid: String) {
         viewModelScope.launch { preferences.toggleFavoriteTrack(uuid) }
@@ -170,11 +170,11 @@ class TracksViewModel @Inject constructor(
             query = "",
             difficulty = DifficultyFilter.ALL,
             surface = SurfaceFilter.ALL,
+            distance = DistanceFilter.ALL,
             rideType = RideTypeFilter.ALL,
             region = null,
             favoritesOnly = false,
             focusedIds = emptySet(),
-            distance = DistanceFilter.ALL,
         )
     }
 }

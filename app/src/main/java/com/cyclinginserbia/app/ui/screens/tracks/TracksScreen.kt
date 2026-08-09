@@ -253,17 +253,17 @@ fun TracksScreen(
                         FiltersModalSheet(
                             difficulty = state.difficulty,
                             surface = state.surface,
+                            distance = state.distance,
                             rideType = state.rideType,
                             region = state.region,
                             regions = regions,
                             favoritesOnly = state.favoritesOnly,
-                            distance = state.distance,
                             onDifficultyChange = viewModel::onDifficultyChange,
                             onSurfaceChange = viewModel::onSurfaceChange,
+                            onDistanceChange = viewModel::onDistanceChange,
                             onRideTypeChange = viewModel::onRideTypeChange,
                             onRegionChange = viewModel::onRegionChange,
                             onToggleFavoritesOnly = viewModel::onToggleFavoritesOnly,
-                            onDistanceChange = viewModel::onDistanceChange,
                             onReset = viewModel::clearFilters,
                             onDismiss = { showFilters = false },
                         )
@@ -278,10 +278,10 @@ private fun activeFilterCount(state: TracksUiState): Int {
     var n = 0
     if (state.difficulty != DifficultyFilter.ALL) n++
     if (state.surface != SurfaceFilter.ALL) n++
+    if (state.distance != DistanceFilter.ALL) n++
     if (state.rideType != RideTypeFilter.ALL) n++
     if (state.region != null) n++
     if (state.favoritesOnly) n++
-    if (state.distance != DistanceFilter.ALL) n++
     return n
 }
 
@@ -370,17 +370,17 @@ private fun FilterButton(activeCount: Int, onClick: () -> Unit) {
 private fun FiltersModalSheet(
     difficulty: DifficultyFilter,
     surface: SurfaceFilter,
+    distance: DistanceFilter,
     rideType: RideTypeFilter,
     region: String?,
     regions: List<String>,
     favoritesOnly: Boolean,
-    distance: DistanceFilter,
     onDifficultyChange: (DifficultyFilter) -> Unit,
     onSurfaceChange: (SurfaceFilter) -> Unit,
+    onDistanceChange: (DistanceFilter) -> Unit,
     onRideTypeChange: (RideTypeFilter) -> Unit,
     onRegionChange: (String?) -> Unit,
     onToggleFavoritesOnly: () -> Unit,
-    onDistanceChange: (DistanceFilter) -> Unit,
     onReset: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -419,6 +419,14 @@ private fun FiltersModalSheet(
                     onSelect = onSurfaceChange,
                 )
             }
+            FilterSection(title = stringResource(R.string.tracks_distance)) {
+                FilterChipRow(
+                    entries = DistanceFilter.entries,
+                    selected = distance,
+                    label = { stringResource(it.labelRes) },
+                    onSelect = onDistanceChange,
+                )
+            }
             FilterSection(title = stringResource(R.string.tracks_ride_type)) {
                 FilterChipRow(
                     entries = RideTypeFilter.entries,
@@ -436,15 +444,6 @@ private fun FiltersModalSheet(
                         onSelect = onRegionChange,
                     )
                 }
-            }
-
-            FilterSection(title = stringResource(R.string.tracks_distance)) {
-                FilterChipRow(
-                    entries = DistanceFilter.entries,
-                    selected = distance,
-                    label = { stringResource(it.labelRes) },
-                    onSelect = onDistanceChange,
-                )
             }
 
             Row(
