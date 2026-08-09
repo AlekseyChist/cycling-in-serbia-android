@@ -5,6 +5,8 @@ import com.cyclinginserbia.app.data.model.Event
 import com.cyclinginserbia.app.data.strava.StravaService
 import com.cyclinginserbia.app.data.strava.toEvents
 import com.cyclinginserbia.app.data.supabase.EventDto
+import com.cyclinginserbia.app.util.EventQuery
+import java.time.LocalDate
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Order
@@ -26,10 +28,12 @@ class EventRepository @Inject constructor(
     private val mutex = Mutex()
 
     suspend fun getEvents(): List<Event> {
-        cached?.let { return it }
-        return mutex.withLock {
+        val all = cached ?: mutex.withLock {
             cached ?: fetch().also { cached = it }
         }
+        // Hide events whose date has already passed. Re-evaluated on every call
+        // so the list self-cleans across midnight; the cache keeps the full set.
+        return EventQuery.upcoming(all, LocalDate.now())
     }
 
     suspend fun getEventById(id: String): Event? =

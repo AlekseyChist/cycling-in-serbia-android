@@ -18,6 +18,17 @@ val localProperties = Properties().apply {
 fun localProp(key: String, default: String = ""): String =
     (localProperties.getProperty(key) ?: System.getenv(key) ?: default)
 
+// Release signing. Secrets live in keystore.properties (gitignored) or env vars,
+// never in the repo. If neither is present the release build stays unsigned so
+// local/CI debug builds and R8 smoke-tests keep working without the keystore.
+val keystoreProps = Properties().apply {
+    val f = rootProject.file("keystore.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+fun signingProp(key: String, env: String): String? =
+    keystoreProps.getProperty(key) ?: System.getenv(env)
+val hasReleaseKeystore = signingProp("storeFile", "KEYSTORE_FILE") != null
+
 android {
     namespace = "com.cyclinginserbia.app"
     compileSdk = 35
@@ -26,13 +37,24 @@ android {
         applicationId = "com.cyclinginserbia.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 6
-        versionName = "0.4.2"
+        versionCode = 7
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "SUPABASE_URL", "\"${localProp("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProp("SUPABASE_ANON_KEY")}\"")
+    }
+
+    signingConfigs {
+        if (hasReleaseKeystore) {
+            create("release") {
+                storeFile = file(signingProp("storeFile", "KEYSTORE_FILE")!!)
+                storePassword = signingProp("storePassword", "KEYSTORE_PASSWORD")
+                keyAlias = signingProp("keyAlias", "KEY_ALIAS")
+                keyPassword = signingProp("keyPassword", "KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
@@ -42,6 +64,8 @@ android {
         release {
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // Attached only when a keystore is configured; otherwise stays unsigned.
+            if (hasReleaseKeystore) signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -131,4 +155,7 @@ dependencies {
 
     // osmdroid (OSM raster tiles, direct Leaflet analogue)
     implementation(libs.osmdroid.android)
+
+    // Unit tests (local JVM)
+    testImplementation("junit:junit:4.13.2")
 }

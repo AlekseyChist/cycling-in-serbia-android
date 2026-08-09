@@ -29,16 +29,24 @@ class TrackRepository @Inject constructor(
         trackDao.observeByLegacyId(legacyId).map { it?.toModel() }
 
     suspend fun refreshIfStale() {
-        if (isStale()) refresh()
+        if (isStale()) {
+            refresh()
+        }
     }
 
     suspend fun refresh() {
-        val rows = supabase.from("tracks").select {
-            filter { eq("is_published", true) }
-            order(column = "sort_order", order = Order.ASCENDING)
-        }.decodeList<TrackDto>()
-        trackDao.upsertAll(rows.map { it.toEntity() })
-        syncPreferences.setTracksLastSync(System.currentTimeMillis())
+        try {
+            val rows = supabase.from("tracks").select {
+                filter { eq("is_published", true) }
+                order(column = "sort_order", order = Order.ASCENDING)
+            }.decodeList<TrackDto>()
+            
+            trackDao.upsertAll(rows.map { it.toEntity() })
+            syncPreferences.setTracksLastSync(System.currentTimeMillis())
+        } catch (e: Exception) {
+            // Логирование ошибки может быть добавлено здесь
+            throw e
+        }
     }
 
     fun gpxPublicUrl(fileName: String): String =

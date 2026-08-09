@@ -23,6 +23,8 @@ data class TracksUiState(
     val query: String = "",
     val difficulty: DifficultyFilter = DifficultyFilter.ALL,
     val surface: SurfaceFilter = SurfaceFilter.ALL,
+    /** Selected distance window in km; null means the user hasn't narrowed it. */
+    val distanceKm: ClosedFloatingPointRange<Float>? = null,
     val rideType: RideTypeFilter = RideTypeFilter.ALL,
     val region: String? = null,
     val favoritesOnly: Boolean = false,
@@ -31,11 +33,16 @@ data class TracksUiState(
     val shopsEnabled: Boolean = false,
     val shops: List<Shop> = emptyList(),
 ) {
+    /** Slider bounds, derived from the loaded tracks. */
+    val distanceBoundsKm: ClosedFloatingPointRange<Float>
+        get() = distanceBoundsKm(tracks)
+
     val visible: List<Track>
         get() = tracks.applyTrackFilters(
             query = query,
             difficulty = difficulty,
             surface = surface,
+            distanceKm = distanceKm,
             rideType = rideType,
             region = region,
             favoritesOnly = favoritesOnly,
@@ -52,6 +59,7 @@ data class TracksUiState(
         get() = query.isNotBlank() ||
             difficulty != DifficultyFilter.ALL ||
             surface != SurfaceFilter.ALL ||
+            distanceKm != null ||
             rideType != RideTypeFilter.ALL ||
             region != null ||
             favoritesOnly
@@ -115,17 +123,19 @@ class TracksViewModel @Inject constructor(
     fun sync() {
         viewModelScope.launch {
             _state.update { it.copy(isSyncing = true, syncError = null) }
-            runCatching { repository.refresh() }
-                .onSuccess {
-                    _state.update {
-                        it.copy(isSyncing = false, isInitialLoading = false, syncError = null)
-                    }
+            runCatching { 
+                repository.refresh() 
+            }
+            .onSuccess {
+                _state.update {
+                    it.copy(isSyncing = false, isInitialLoading = false, syncError = null)
                 }
-                .onFailure { error ->
-                    _state.update {
-                        it.copy(isSyncing = false, isInitialLoading = false, syncError = error)
-                    }
+            }
+            .onFailure { error ->
+                _state.update {
+                    it.copy(isSyncing = false, isInitialLoading = false, syncError = error)
                 }
+            }
         }
     }
 
@@ -137,6 +147,21 @@ class TracksViewModel @Inject constructor(
 
     fun onSurfaceChange(surface: SurfaceFilter) =
         _state.update { it.copy(surface = surface, focusedIds = emptySet()) }
+
+    /**
+     * Stores null when the picked window still spans the whole slider, so that
+     * dragging a handle out and back reads as "no distance filter" rather than
+     * leaving a filter that happens to match everything.
+     */
+    fun onDistanceRangeChange(range: ClosedFloatingPointRange<Float>) = _state.update {
+        val bounds = it.distanceBoundsKm
+        val coversEverything = range.start <= bounds.start &&
+            range.endInclusive >= bounds.endInclusive
+        it.copy(
+            distanceKm = if (coversEverything) null else range,
+            focusedIds = emptySet(),
+        )
+    }
 
     fun onRideTypeChange(rideType: RideTypeFilter) =
         _state.update { it.copy(rideType = rideType, focusedIds = emptySet()) }
@@ -162,6 +187,7 @@ class TracksViewModel @Inject constructor(
             query = "",
             difficulty = DifficultyFilter.ALL,
             surface = SurfaceFilter.ALL,
+            distanceKm = null,
             rideType = RideTypeFilter.ALL,
             region = null,
             favoritesOnly = false,

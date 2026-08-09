@@ -1,0 +1,15 @@
+# Local coding model for aider (see .github or CLAUDE notes).
+#
+# Devstral Small 2 (24B, Mistral, Apache 2.0) - agentic coding model tuned for
+# tool use and multi-file edits. Replaced qwen3-coder:30b as the default after a
+# bake-off on 2026-08-09: devstral was the only model that consistently handled
+# a task requiring it to read a real 20-field data class and write both the
+# utility and its tests (qwen3-coder never finished a two-file task at all).
+#
+# 15 GB at Q4_K_M against ~14.2 GB of free VRAM on the 16 GB laptop 4090, so a
+# small CPU spill remains - still less than the 18 GB qwen3-coder needed.
+#
+#   ollama create devstral-8k -f Modelfile.devstral
+
+FROM devstral-small-2:24b
+PARAMETER num_ctx 8192

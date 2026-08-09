@@ -50,7 +50,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -94,6 +96,7 @@ import com.cyclinginserbia.app.data.model.Track
 import com.cyclinginserbia.app.ui.components.SearchField
 import com.cyclinginserbia.app.ui.theme.AppColors
 import com.cyclinginserbia.app.ui.theme.ChipColors
+import kotlin.math.roundToInt
 import com.cyclinginserbia.app.ui.theme.ChipPalette
 import kotlinx.coroutines.launch
 
@@ -253,12 +256,15 @@ fun TracksScreen(
                         FiltersModalSheet(
                             difficulty = state.difficulty,
                             surface = state.surface,
+                            distanceKm = state.distanceKm,
+                            distanceBoundsKm = state.distanceBoundsKm,
                             rideType = state.rideType,
                             region = state.region,
                             regions = regions,
                             favoritesOnly = state.favoritesOnly,
                             onDifficultyChange = viewModel::onDifficultyChange,
                             onSurfaceChange = viewModel::onSurfaceChange,
+                            onDistanceRangeChange = viewModel::onDistanceRangeChange,
                             onRideTypeChange = viewModel::onRideTypeChange,
                             onRegionChange = viewModel::onRegionChange,
                             onToggleFavoritesOnly = viewModel::onToggleFavoritesOnly,
@@ -276,6 +282,7 @@ private fun activeFilterCount(state: TracksUiState): Int {
     var n = 0
     if (state.difficulty != DifficultyFilter.ALL) n++
     if (state.surface != SurfaceFilter.ALL) n++
+    if (state.distanceKm != null) n++
     if (state.rideType != RideTypeFilter.ALL) n++
     if (state.region != null) n++
     if (state.favoritesOnly) n++
@@ -367,12 +374,15 @@ private fun FilterButton(activeCount: Int, onClick: () -> Unit) {
 private fun FiltersModalSheet(
     difficulty: DifficultyFilter,
     surface: SurfaceFilter,
+    distanceKm: ClosedFloatingPointRange<Float>?,
+    distanceBoundsKm: ClosedFloatingPointRange<Float>,
     rideType: RideTypeFilter,
     region: String?,
     regions: List<String>,
     favoritesOnly: Boolean,
     onDifficultyChange: (DifficultyFilter) -> Unit,
     onSurfaceChange: (SurfaceFilter) -> Unit,
+    onDistanceRangeChange: (ClosedFloatingPointRange<Float>) -> Unit,
     onRideTypeChange: (RideTypeFilter) -> Unit,
     onRegionChange: (String?) -> Unit,
     onToggleFavoritesOnly: () -> Unit,
@@ -414,6 +424,11 @@ private fun FiltersModalSheet(
                     onSelect = onSurfaceChange,
                 )
             }
+            DistanceRangeSection(
+                selected = distanceKm,
+                bounds = distanceBoundsKm,
+                onChange = onDistanceRangeChange,
+            )
             FilterSection(title = stringResource(R.string.tracks_ride_type)) {
                 FilterChipRow(
                     entries = RideTypeFilter.entries,
@@ -499,6 +514,44 @@ private fun FilterSection(title: String, content: @Composable () -> Unit) {
             fontWeight = FontWeight.SemiBold,
         )
         content()
+    }
+}
+
+/**
+ * Distance filter as a two-handle slider. When nothing is selected yet the
+ * handles sit on [bounds], so the control always shows the full span the data
+ * actually covers instead of an arbitrary hard-coded ceiling.
+ */
+@Composable
+private fun DistanceRangeSection(
+    selected: ClosedFloatingPointRange<Float>?,
+    bounds: ClosedFloatingPointRange<Float>,
+    onChange: (ClosedFloatingPointRange<Float>) -> Unit,
+) {
+    val current = selected ?: bounds
+    FilterSection(title = stringResource(R.string.tracks_distance)) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = stringResource(
+                    R.string.tracks_distance_range,
+                    current.start.roundToInt(),
+                    current.endInclusive.roundToInt(),
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = if (selected == null) AppColors.Gray600 else AppColors.Primary,
+            )
+            RangeSlider(
+                value = current,
+                onValueChange = onChange,
+                valueRange = bounds,
+                colors = SliderDefaults.colors(
+                    thumbColor = AppColors.Primary,
+                    activeTrackColor = AppColors.Primary,
+                    inactiveTrackColor = AppColors.Gray200,
+                ),
+            )
+        }
     }
 }
 

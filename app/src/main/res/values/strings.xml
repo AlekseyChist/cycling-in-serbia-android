@@ -43,6 +43,8 @@
     <string name="tracks_filters">Filters</string>
     <string name="tracks_difficulty">Difficulty</string>
     <string name="tracks_surface">Surface</string>
+    <string name="tracks_distance">Distance</string>
+    <string name="tracks_distance_range">%1$d–%2$d km</string>
     <string name="tracks_ride_type">Ride Type</string>
     <string name="tracks_region">Region</string>
     <string name="tracks_all_regions">All Regions</string>

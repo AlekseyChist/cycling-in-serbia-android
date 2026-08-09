@@ -5,6 +5,8 @@ import com.cyclinginserbia.app.R
 import com.cyclinginserbia.app.data.model.Difficulty
 import com.cyclinginserbia.app.data.model.Surface
 import com.cyclinginserbia.app.data.model.Track
+import com.cyclinginserbia.app.util.containsFolded
+import kotlin.math.ceil
 
 enum class DifficultyFilter(@StringRes val labelRes: Int) {
     ALL(R.string.difficulty_all),
@@ -31,6 +33,28 @@ enum class RideTypeFilter(@StringRes val labelRes: Int) {
     MISC(R.string.ridetype_misc),
 }
 
+/** Smallest distance window the slider may be squeezed to, in km. */
+const val MIN_DISTANCE_SPAN_KM = 1f
+
+/**
+ * Slider bounds for the distance filter: always starts at 0 and ends at the
+ * longest track, rounded up so that track stays selectable at the top end.
+ * Falls back to 0..[MIN_DISTANCE_SPAN_KM] while the list is still empty, since a
+ * RangeSlider cannot take an empty range.
+ */
+fun distanceBoundsKm(tracks: List<Track>): ClosedFloatingPointRange<Float> {
+    val longest = tracks.maxOfOrNull { it.distanceKm } ?: 0.0
+    return 0f..ceil(longest).toFloat().coerceAtLeast(MIN_DISTANCE_SPAN_KM)
+}
+
+/**
+ * True when [distanceKm] falls inside the selected window. Both ends are
+ * inclusive: the slider is a user-facing "from X to Y", so a track sitting
+ * exactly on a handle must stay visible.
+ */
+fun distanceInRange(distanceKm: Double, range: ClosedFloatingPointRange<Float>?): Boolean =
+    range == null || distanceKm.toFloat() in range
+
 /**
  * Derives a track's ride type from its name. Mirrors the web app's
  * `getRideType` heuristic in `src/app/screens/TracksScreen.tsx`.
@@ -50,6 +74,7 @@ internal fun List<Track>.applyTrackFilters(
     query: String,
     difficulty: DifficultyFilter,
     surface: SurfaceFilter,
+    distanceKm: ClosedFloatingPointRange<Float>?,
     rideType: RideTypeFilter,
     region: String?,
     favoritesOnly: Boolean,
@@ -73,6 +98,7 @@ internal fun List<Track>.applyTrackFilters(
                 SurfaceFilter.MIXED -> track.surface == Surface.mixed
             }
         }
+        .filter { track -> distanceInRange(track.distanceKm, distanceKm) }
         .filter { track ->
             when (rideType) {
                 RideTypeFilter.ALL -> true
@@ -87,8 +113,8 @@ internal fun List<Track>.applyTrackFilters(
         .filter { track -> !favoritesOnly || track.uuid in favoriteIds }
         .filter { track ->
             q.isEmpty() ||
-                track.name.contains(q, ignoreCase = true) ||
-                track.region.contains(q, ignoreCase = true)
+                track.name.containsFolded(q) ||
+                track.region.containsFolded(q)
         }
         .toList()
 }
